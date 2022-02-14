@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Financial\Payments;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Payment;
 use Livewire\WithPagination;
 
-class IndexPayment extends Component
+class IndexPayment extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     protected $queryString = ['status'];

@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Roles;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Role;
 
-class IndexRole extends Component
+class IndexRole extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     public $pagination = 10 , $search , $placeholder = 'عنوان';

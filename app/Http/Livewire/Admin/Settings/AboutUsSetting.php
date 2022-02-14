@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Settings;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Setting;
 
-class AboutUsSetting extends Component
+class AboutUsSetting extends BaseComponent
 {
     use AuthorizesRequests;
     public $aboutUsImages , $aboutUs , $header;

@@ -2,20 +2,19 @@
 
 namespace App\Http\Livewire\Admin\Tasks;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use App\Models\Task;
-use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 
-class StoreTask extends Component
+class StoreTask extends BaseComponent
 {
-    use AuthorizesRequests ;
+    use AuthorizesRequests;
     public $task , $name , $event = [] , $where , $value ,$data = [] , $header , $mode;
 
     public function mount($action , $id =null)
     {
-//        $this->authorize('tasks');
+        $this->authorize('show_tasks');
         if ($action == 'edit')
         {
             $this->task = Task::findOrFail($id);
@@ -35,6 +34,7 @@ class StoreTask extends Component
 
     public function store()
     {
+        $this->authorize('edit_tasks');
         if ($this->mode == 'edit')
             $this->saveInDateBase($this->task);
         else {
@@ -47,7 +47,7 @@ class StoreTask extends Component
     {
         $this->validate([
             'name' => ['required','string','max:250'],
-            'event' => ['required','in:sms,email,notification'],
+            'event' => ['required','in:'.implode(',',array_keys(Task::event()))],
             'where' => ['required','string','max:250'],
             'value' => ['required','string','max:3600']
         ],[],[
@@ -66,6 +66,7 @@ class StoreTask extends Component
 
     public function deleteItem()
     {
+        $this->authorize('delete_tasks');
         $this->task->delete();
         return redirect()->route('admin.task');
     }

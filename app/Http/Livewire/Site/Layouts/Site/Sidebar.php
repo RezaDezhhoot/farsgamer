@@ -2,10 +2,10 @@
 
 namespace App\Http\Livewire\Site\Layouts\Site;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
-use Livewire\Component;
 
-class Sidebar extends Component
+class Sidebar extends BaseComponent
 {
     public $data = [];
     public function render()

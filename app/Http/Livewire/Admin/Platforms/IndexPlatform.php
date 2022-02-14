@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Platforms;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Platform;
 use Livewire\WithPagination;
 
-class IndexPlatform extends Component
+class IndexPlatform extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     public $pagination = 10 , $search ,$placeholder = ' نام مستعار';

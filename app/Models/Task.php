@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(string $string, $task)
+ * @property mixed name
+ * @property array|mixed task
+ * @property mixed where
+ * @property mixed value
  */
 class Task extends Model
 {

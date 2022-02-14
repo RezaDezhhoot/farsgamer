@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Sends;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Send;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 
-class IndexSend extends Component
+class IndexSend extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
 

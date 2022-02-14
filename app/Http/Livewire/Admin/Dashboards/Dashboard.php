@@ -2,15 +2,15 @@
 
 namespace App\Http\Livewire\Admin\Dashboards;
 
+use App\Http\Livewire\BaseComponent;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use Livewire\Component;
 use App\Models\User , App\Models\Order , App\Models\OrderTransaction;
 use App\Models\Payment , App\Models\Request;
 use App\Models\Category , App\Models\Platform;
 use App\Models\Ticket , App\Models\Comment;
 
-class Dashboard extends Component
+class Dashboard extends BaseComponent
 {
     public $from_date , $to_date , $now , $box;
 

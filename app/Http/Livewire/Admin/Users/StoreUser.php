@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Livewire\Admin\Users;
+use App\Http\Livewire\BaseComponent;
 use App\Models\Card;
 use App\Models\Notification;
 use App\Models\Overtime;
@@ -16,11 +17,10 @@ use Bavix\Wallet\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Component;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
-class StoreUser extends Component
+class StoreUser extends BaseComponent
 {
     use AuthorizesRequests, Sends , TextBuilder , ChatList;
     public $user , $mode , $header ,$data = [] , $userRole = [] , $pass_word  , $code_id ,$score , $description , $profile_image , $auth_image;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Site\Users;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Comment;
 use App\Models\Order;
 use App\Models\Setting;
@@ -11,9 +12,8 @@ use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
-use Livewire\Component;
 
-class SingleUser extends Component
+class SingleUser extends BaseComponent
 {
     use ChatList;
     public $user , $orders , $comments , $tab;

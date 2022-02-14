@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Settings;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 
-class CreateChatLaw extends Component
+class CreateChatLaw extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $law , $title , $mode , $content , $order;

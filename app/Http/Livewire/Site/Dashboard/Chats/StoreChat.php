@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Chats;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class StoreChat extends Component
+class StoreChat extends BaseComponent
 {
     public function render()
     {

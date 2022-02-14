@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Categories;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Category;
 
-class IndexCategory extends Component
+class IndexCategory extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     protected $queryString = ['status' ,'type','is_available'];

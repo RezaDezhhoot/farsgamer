@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Orders;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Parameter;
@@ -11,10 +12,9 @@ use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class StoreOrder extends Component
+class StoreOrder extends BaseComponent
 {
     public $order , $header , $user , $mode;
     public $slug , $category_id , $content , $price , $image , $gallery , $province , $city ,$result;

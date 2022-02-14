@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Financial\Payments;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Payment;
 use App\Models\Setting;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 
-class StorePayment extends Component
+class StorePayment extends BaseComponent
 {
     use AuthorizesRequests;
     public $payment , $header , $mode , $data = [] , $json;

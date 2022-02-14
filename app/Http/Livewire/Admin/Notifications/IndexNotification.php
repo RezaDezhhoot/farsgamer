@@ -2,13 +2,13 @@
 
 namespace App\Http\Livewire\Admin\Notifications;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
-use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\WithPagination;
 
 
-class IndexNotification extends Component
+class IndexNotification extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     public $pagination = 10 , $search,$subject , $type, $data = [] , $placeholder = 'نام کاربری یا شماره همراه کاربری';

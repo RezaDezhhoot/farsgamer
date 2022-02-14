@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Admin\Users;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
 use App\Models\Role;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\User;
 use Livewire\WithPagination;
 
-class IndexUser extends Component
+class IndexUser extends BaseComponent
 {
     use WithPagination , AuthorizesRequests  , TextBuilder;
     public $pagination = 10 , $search , $roles , $data , $status , $placeholder = 'نام کاربری یا شماره همراه';

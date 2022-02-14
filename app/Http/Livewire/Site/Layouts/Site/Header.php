@@ -2,15 +2,14 @@
 
 namespace App\Http\Livewire\Site\Layouts\Site;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use App\Models\Setting;
 
 
-class Header extends Component
+class Header extends BaseComponent
 {
     public $data = [];
     public function render(Response $request)

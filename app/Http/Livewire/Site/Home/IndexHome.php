@@ -3,16 +3,16 @@
 namespace App\Http\Livewire\Site\Home;
 
 use App\Helper\Helper;
+use App\Http\Livewire\BaseComponent;
 use App\Models\Category;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
-use Livewire\Component;
 use App\Models\Setting;
 use App\Models\Order;
 
-class IndexHome extends Component
+class IndexHome extends BaseComponent
 {
     public $content  , $data , $q , $max , $min = 0 , $view , $category , $platform;
     protected $queryString = ['view','q','min','max' ,'category','platform'];

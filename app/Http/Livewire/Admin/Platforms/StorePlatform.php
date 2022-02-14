@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Platforms;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Platform;
 
-class StorePlatform extends Component
+class StorePlatform extends BaseComponent
 {
     use AuthorizesRequests;
     public $platform , $mode , $header;

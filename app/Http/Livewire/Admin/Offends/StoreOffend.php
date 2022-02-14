@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Admin\Offends;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class StoreOffend extends Component
+class StoreOffend extends BaseComponent
 {
     public function render()
     {

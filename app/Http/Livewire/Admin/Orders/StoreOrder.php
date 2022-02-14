@@ -2,8 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Orders;
 
-use App\Models\Chat;
-use App\Models\ChatGroup;
+use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
 use App\Models\OrderParameter;
 use App\Models\Setting;
@@ -12,13 +11,11 @@ use App\Traits\Admin\ChatList;
 use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use App\Models\Order;
 use App\Models\Category;
 use App\Models\Parameter;
 
-class StoreOrder extends Component
+class StoreOrder extends BaseComponent
 {
     use AuthorizesRequests , TextBuilder , Sends , ChatList;
     public $mode;

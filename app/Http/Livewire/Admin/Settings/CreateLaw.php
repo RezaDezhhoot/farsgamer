@@ -2,10 +2,10 @@
 
 namespace App\Http\Livewire\Admin\Settings;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
-use Livewire\Component;
 
-class CreateLaw extends Component
+class CreateLaw extends BaseComponent
 {
     public $header , $law , $title , $mode , $content , $order;
     public function mount($action , $id = null)

@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Admin\Cards;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
 use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
 use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Card;
 
-class StoreCard extends Component
+class StoreCard extends BaseComponent
 {
     use AuthorizesRequests , Sends , TextBuilder , ChatList;
     public $card , $header , $mode , $data = [];

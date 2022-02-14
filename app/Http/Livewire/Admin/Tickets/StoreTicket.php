@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Tickets;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
 use App\Models\Setting;
 use App\Models\Ticket;
@@ -12,9 +13,8 @@ use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 
-class StoreTicket extends Component
+class StoreTicket extends BaseComponent
 {
     use AuthorizesRequests , Sends , TextBuilder ,ChatList;
     public $ticket , $header , $mode , $data = [];

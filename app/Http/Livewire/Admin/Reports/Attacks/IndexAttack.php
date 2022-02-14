@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Admin\Reports\Attacks;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class IndexAttack extends Component
+class IndexAttack extends BaseComponent
 {
     public function render()
     {

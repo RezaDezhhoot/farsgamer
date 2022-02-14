@@ -2,15 +2,15 @@
 
 namespace App\Http\Livewire\Admin\Categories;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Parameter;
 use App\Models\Platform;
 use App\Models\Send;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Category;
 use App\Traits\Admin\FormBuilder;
 
-class StoreCategory extends Component
+class StoreCategory extends BaseComponent
 {
     use AuthorizesRequests , FormBuilder;
     public $category , $mode , $header , $data = [];

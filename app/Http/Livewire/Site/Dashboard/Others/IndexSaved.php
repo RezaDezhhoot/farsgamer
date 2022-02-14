@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Others;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class IndexSaved extends Component
+class IndexSaved extends BaseComponent
 {
     public function render()
     {

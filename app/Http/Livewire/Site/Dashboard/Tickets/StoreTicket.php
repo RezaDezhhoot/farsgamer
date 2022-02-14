@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Tickets;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use App\Models\Ticket;
 use App\Models\User;
@@ -13,11 +14,9 @@ use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Livewire\Component;
 use Livewire\WithFileUploads;
-use function Symfony\Component\Translation\t;
 
-class StoreTicket extends Component
+class StoreTicket extends BaseComponent
 {
     use WithFileUploads , Sends , TextBuilder;
     public $ticket , $user , $header , $mode , $disabled = false , $data = [];

@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\ArticlesCategories;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ArticleCategory;
 
-class IndexArticleCategory extends Component
+class IndexArticleCategory extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
 

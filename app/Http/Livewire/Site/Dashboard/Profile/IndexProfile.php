@@ -2,13 +2,13 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Profile;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class IndexProfile extends Component
+class IndexProfile extends BaseComponent
 {
     use WithFileUploads;
     public $user, $first_name , $last_name , $user_name , $profile_image ,$description ,$pass_word , $confirm_pass_word , $email,

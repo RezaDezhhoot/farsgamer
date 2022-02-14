@@ -2,14 +2,13 @@
 
 namespace App\Http\Livewire\Admin\Orders;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Order;
 use App\Models\Category;
-use App\Models\User;
 use Livewire\WithPagination;
 
-class IndexOrder extends Component
+class IndexOrder extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
 

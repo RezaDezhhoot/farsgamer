@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Orders;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\User;
@@ -10,9 +11,8 @@ use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 
-class IndexOrder extends Component
+class IndexOrder extends BaseComponent
 {
     public $status , $user , $data = [],$paginate = 10;
     protected $queryString = ['status'];

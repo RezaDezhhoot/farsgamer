@@ -3,11 +3,11 @@
 namespace App\Http\Livewire\Admin\Articles;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 use Livewire\WithPagination;
 use App\Models\Article;
 
-class IndexArticle extends Component
+class IndexArticle extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     protected $queryString = ['status'];

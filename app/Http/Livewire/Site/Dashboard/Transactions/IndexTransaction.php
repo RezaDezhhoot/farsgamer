@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Transactions;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\OrderTransaction;
-use Livewire\Component;
 use Livewire\WithPagination;
 
-class IndexTransaction extends Component
+class IndexTransaction extends BaseComponent
 {
     use WithPagination;
     protected $queryString = ['status'];

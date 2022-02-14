@@ -2,9 +2,8 @@
 
 namespace App\Http\Livewire\Admin\OrderTransactions;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Category;
-use App\Models\Chat;
-use App\Models\ChatGroup;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderTransactionPayment;
@@ -13,11 +12,10 @@ use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
 use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\OrderTransaction;
 use Illuminate\Support\Carbon;
 
-class StoreOrderTransaction extends Component
+class StoreOrderTransaction extends BaseComponent
 {
     use AuthorizesRequests , TextBuilder  , ChatList;
     public  $transaction , $mode , $header;

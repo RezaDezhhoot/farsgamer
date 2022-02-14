@@ -1,15 +1,15 @@
 <?php
 
 namespace App\Http\Livewire\Site\Dashboard\Chats;
+use App\Http\Livewire\BaseComponent;
 use App\Models\Chat;
 use App\Models\ChatGroup;
 use App\Models\Setting;
 use App\Models\User;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
-use Livewire\Component;
 
-class IndexChat extends Component
+class IndexChat extends BaseComponent
 {
     use TextBuilder;
     public $user , $chatLists , $law , $chats;

@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Comments;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Comment;
 use App\Traits\Admin\ChatList;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 
-class StoreComment extends Component
+class StoreComment extends BaseComponent
 {
     use AuthorizesRequests , ChatList;
     public $comment , $data = [] , $mode , $header , $content , $score , $status , $type , $case;

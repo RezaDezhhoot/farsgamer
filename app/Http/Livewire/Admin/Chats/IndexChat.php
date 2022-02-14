@@ -2,14 +2,13 @@
 
 namespace App\Http\Livewire\Admin\Chats;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Chat;
-use App\Traits\Admin\ChatList;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ChatGroup;
 
-class IndexChat extends Component
+class IndexChat extends BaseComponent
 {
     use AuthorizesRequests , WithPagination;
     public $placeholder = ' شماره همراه یا نام کاربری کاربر' , $pagination = 10 , $search , $data = [] , $chatList = [] , $chatText;

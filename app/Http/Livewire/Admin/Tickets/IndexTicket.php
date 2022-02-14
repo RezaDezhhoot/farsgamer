@@ -2,13 +2,13 @@
 
 namespace App\Http\Livewire\Admin\Tickets;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use App\Models\Ticket;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 
-class IndexTicket extends Component
+class IndexTicket extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     public $pagination = 10 , $search , $status , $priority , $subject , $data = [] , $placeholder = 'شماره یا نام کاربری کاربر';

@@ -2,27 +2,23 @@
 
 namespace App\Http\Livewire\Site\Orders;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Save;
 use App\Models\Setting;
-use App\Models\Task;
 use App\Models\OrderTransaction;
 use App\Models\OrderTransactionData;
 use App\Sends\SendMessages;
-use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Carbon\Carbon;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
-use Livewire\Component;
 use App\Models\Order;
 
 
-class SingleOrder extends Component
+class SingleOrder extends BaseComponent
 {
     use TextBuilder;
     public $order , $data = [] , $saved = false;

@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Financial\Requests;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Request;
 
-class IndexRequest extends Component
+class IndexRequest extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     protected $queryString = ['status'];

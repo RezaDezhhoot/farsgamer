@@ -2,14 +2,13 @@
 
 namespace App\Http\Livewire\Site\Auth;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use App\Models\User;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Livewire\Component;
 
-class Auth extends Component
+class Auth extends BaseComponent
 {
     const MODE_REGISTER = 'register';
     const MODE_LOGIN = 'login';

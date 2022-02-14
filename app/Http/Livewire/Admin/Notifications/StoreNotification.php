@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Notifications;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Notification;
 
-class StoreNotification extends Component
+class StoreNotification extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $mode , $content , $type , $subject , $user_id , $data = [];

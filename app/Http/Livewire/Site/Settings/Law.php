@@ -2,10 +2,10 @@
 
 namespace App\Http\Livewire\Site\Settings;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
-use Livewire\Component;
 
-class Law extends Component
+class Law extends BaseComponent
 {
     public $laws = [] , $header;
 

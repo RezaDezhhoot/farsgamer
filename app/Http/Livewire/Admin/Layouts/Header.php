@@ -2,10 +2,10 @@
 
 namespace App\Http\Livewire\Admin\Layouts;
 
+use App\Http\Livewire\BaseComponent;
 use App\Traits\Admin\ChatList;
-use Livewire\Component;
 
-class Header extends Component
+class Header extends BaseComponent
 {
     use ChatList ;
     public $saveMessage;

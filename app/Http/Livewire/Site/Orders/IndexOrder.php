@@ -2,9 +2,10 @@
 
 namespace App\Http\Livewire\Site\Orders;
 
+use App\Http\Livewire\BaseComponent;
 use Livewire\Component;
 
-class IndexOrder extends Component
+class IndexOrder extends BaseComponent
 {
     public function render()
     {

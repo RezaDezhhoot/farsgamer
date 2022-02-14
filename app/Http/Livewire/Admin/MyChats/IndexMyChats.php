@@ -2,11 +2,10 @@
 
 namespace App\Http\Livewire\Admin\MyChats;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Chat;
-use App\Models\ChatGroup;
-use Livewire\Component;
 
-class IndexMyChats extends Component
+class IndexMyChats extends BaseComponent
 {
     public $chatList = [] , $chatText;
     public function render()

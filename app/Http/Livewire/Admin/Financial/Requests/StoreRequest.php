@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Financial\Requests;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Card;
 use App\Models\Notification;
 use App\Sends\SendMessages;
@@ -11,11 +12,9 @@ use App\Traits\Admin\TextBuilder;
 use Bavix\Wallet\Exceptions\BalanceIsEmpty;
 use Bavix\Wallet\Exceptions\InsufficientFunds;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Request;
-use function Symfony\Component\Translation\t;
 
-class StoreRequest extends Component
+class StoreRequest extends BaseComponent
 {
     use AuthorizesRequests , Sends , TextBuilder , ChatList;
     public $request , $header , $mode , $data = [];

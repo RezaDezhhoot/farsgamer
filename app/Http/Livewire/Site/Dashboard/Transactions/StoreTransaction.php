@@ -2,19 +2,18 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Transactions;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\OrderTransaction;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
 use Carbon\Carbon;
-use Livewire\Component;
-use Morilog\Jalali\Jalalian;
 use Shetabit\Multipay\Exceptions\PurchaseFailedException;
 use Shetabit\Multipay\Invoice;
 use Shetabit\Payment\Facade\Payment as Pay;
 
-class StoreTransaction extends Component
+class StoreTransaction extends BaseComponent
 {
     use TextBuilder;
     public $transaction , $status ,$timer , $form = []  , $transactionData = [] , $transactionDataTransfer = [];

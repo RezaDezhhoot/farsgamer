@@ -2,18 +2,18 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Tickets;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use App\Models\Ticket;
 use App\Models\User;
 use Livewire\WithPagination;
 
-class IndexTicket extends Component
+class IndexTicket extends BaseComponent
 {
     use WithPagination;
     public $paginate = 10;

@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Profile;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\User;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class AuthComponent extends Component
+class AuthComponent extends BaseComponent
 {
     use WithFileUploads;
     public $user, $auth_image;

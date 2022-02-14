@@ -2,17 +2,14 @@
 
 namespace App\Http\Livewire\Admin\OrderTransactions;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Category;
-use App\Models\Order;
-use App\Models\Payment;
-use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\OrderTransaction;
 use Livewire\WithPagination;
 
 
-class IndexOrderTransaction extends Component
+class IndexOrderTransaction extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
 

@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Accountings;
 
+use App\Http\Livewire\BaseComponent;
 use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
-use Livewire\Component;
 use App\Models\Request;
 
-class StoreAccounting extends Component
+class StoreAccounting extends BaseComponent
 {
     use  Sends , TextBuilder;
     public $request , $price , $cart , $status , $result , $file , $link , $track_id , $backed , $mode , $header , $data = [];

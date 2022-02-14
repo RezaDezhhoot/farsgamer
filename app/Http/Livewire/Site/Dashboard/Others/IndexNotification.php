@@ -2,16 +2,16 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Others;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use App\Models\Notification;
 
-class IndexNotification extends Component
+class IndexNotification extends BaseComponent
 {
     public function mount()
     {

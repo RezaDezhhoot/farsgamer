@@ -2,10 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Securities;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Setting;
-class IndexSecurity extends Component
+
+class IndexSecurity extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $max_order_image_size , $data = [] , $boycott = [] , $google , $min_price_to_request,

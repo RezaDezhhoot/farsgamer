@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Comments;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Comment;
 use Livewire\WithPagination;
 
-class IndexComment extends Component
+class IndexComment extends BaseComponent
 {
     use AuthorizesRequests , WithPagination;
     protected $queryString = ['for','status'];

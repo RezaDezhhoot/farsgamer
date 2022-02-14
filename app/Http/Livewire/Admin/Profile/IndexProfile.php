@@ -2,15 +2,15 @@
 
 namespace App\Http\Livewire\Admin\Profile;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use App\Models\User;
 use App\Traits\Admin\ChatList;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class IndexProfile extends Component
+class IndexProfile extends BaseComponent
 {
     use WithFileUploads , ChatList;
     public $user , $header , $role , $description;

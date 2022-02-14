@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Settings;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 
-class BaseSetting extends Component
+class BaseSetting extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $name , $logo , $status , $title  , $copyRight , $subject = [] ,$logInImage , $contact = [];

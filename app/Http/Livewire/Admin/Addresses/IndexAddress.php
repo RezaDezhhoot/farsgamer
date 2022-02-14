@@ -6,12 +6,11 @@ use App\Models\Notification;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 use Livewire\WithPagination;
-use App\Models\Setting;
 use App\Models\Address;
 
-class IndexAddress extends Component
+class IndexAddress extends BaseComponent
 {
     use WithPagination , AuthorizesRequests , TextBuilder;
 

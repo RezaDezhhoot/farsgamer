@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Cards;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Card;
 use Livewire\WithPagination;
 
-class IndexCard extends Component
+class IndexCard extends BaseComponent
 {
     use WithPagination , AuthorizesRequests;
     protected $queryString = ['status'];

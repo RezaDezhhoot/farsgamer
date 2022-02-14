@@ -2,15 +2,15 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Dashboards;
 
+use App\Http\Livewire\BaseComponent;
 use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use App\Models\Comment;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\User;
 
-class IndexDashboard extends Component
+class IndexDashboard extends BaseComponent
 {
     public $user , $orders , $comments , $results , $data = [];
 

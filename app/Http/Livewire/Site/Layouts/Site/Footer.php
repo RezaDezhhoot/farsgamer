@@ -2,11 +2,10 @@
 
 namespace App\Http\Livewire\Site\Layouts\Site;
 
-use App\Models\Email;
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
 
-class Footer extends Component
+class Footer extends BaseComponent
 {
     public $data = [] , $email;
     public function render()

@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Sends;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Send;
 
-class StoreSend extends Component
+class StoreSend extends BaseComponent
 {
     use AuthorizesRequests;
     public $transfer , $mode , $header , $data = [];

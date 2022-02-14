@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Admin\Reports\Sms;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class IndexSms extends Component
+class IndexSms extends BaseComponent
 {
     public function render()
     {

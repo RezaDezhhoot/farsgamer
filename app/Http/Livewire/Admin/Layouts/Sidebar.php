@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Admin\Layouts;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class Sidebar extends Component
+class Sidebar extends BaseComponent
 {
     public function render()
     {

@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Cart;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class CallBack extends Component
+class CallBack extends BaseComponent
 {
     public function mount()
     {

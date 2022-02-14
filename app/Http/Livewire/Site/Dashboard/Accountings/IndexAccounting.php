@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Site\Dashboard\Accountings;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 use Livewire\WithPagination;
 use App\Models\Request;
 
-class IndexAccounting extends Component
+class IndexAccounting extends BaseComponent
 {
     use WithPagination;
     protected $queryString = ['status'];

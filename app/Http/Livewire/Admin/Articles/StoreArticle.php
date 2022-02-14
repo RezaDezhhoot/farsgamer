@@ -2,13 +2,13 @@
 
 namespace App\Http\Livewire\Admin\Articles;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use App\Models\ArticleCategory;
 use App\Models\Article;
 
-class StoreArticle extends Component
+class StoreArticle extends BaseComponent
 {
     use AuthorizesRequests;
     public $article , $mode , $header , $data = [] , $categories;

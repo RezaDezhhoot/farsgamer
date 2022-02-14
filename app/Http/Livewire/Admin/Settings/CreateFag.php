@@ -2,11 +2,11 @@
 
 namespace App\Http\Livewire\Admin\Settings;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use App\Models\Setting;
 
-class CreateFag extends Component
+class CreateFag extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $row , $question , $mode , $answer , $order , $category;

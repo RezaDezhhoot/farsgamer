@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Admin\Reports\Logs;
 
-use Livewire\Component;
+use App\Http\Livewire\BaseComponent;
 
-class StoreLog extends Component
+class StoreLog extends BaseComponent
 {
     public function render()
     {

@@ -2,12 +2,12 @@
 
 namespace App\Http\Livewire\Admin\Roles;
 
+use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class StoreRole extends Component
+class StoreRole extends BaseComponent
 {
     use AuthorizesRequests;
     public $role , $permission , $name  , $header , $mode , $permissionSelected = [];

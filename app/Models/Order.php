@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Admin\Searchable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Morilog\Jalali\Jalalian;
+
+/**
+ * @method static latest(string $string)
+ * @method static where(string $string, $status)
+ * @method static findOrFail($id)
+ * @method static count()
+ * @method static find($id)
+ * @method static whereBetween(string $string, string[] $array)
+ * @property mixed status
+ * @property mixed slug
+ * @property mixed content
+ * @property mixed category_id
+ * @property mixed price
+ * @property mixed image
+ * @property mixed gallery
+ * @property mixed province
+ * @property mixed city
+ */
+class Order extends Model
+{
+    use HasFactory;
+    use Searchable;
+
+    const IS_UNCONFIRMED = 'unconfirmed' , IS_CONFIRMED = 'confirmed' ,  IS_NEW = 'new';
+    const IS_REJECTED = 'rejected' , IS_REQUESTED = 'requested' , IS_FINISHED = 'finished';
+    /**
+     * @var mixed
+     */
+    private $created_at;
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getProvinceLabelAttribute()
+    {
+        return $this->province ? Setting::getProvince()[$this->province] : '';
+    }
+
+    public function getCityLabelAttribute()
+    {
+        return ($this->province && $this->city) ?  Setting::getCity()[$this->province][$this->city] : '';
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
+    }
+
+    public function platforms()
+    {
+        return $this->belongsToMany(Platform::class , 'orders_has_platforms' ,'order_id' ,'platform_id');
+    }
+
+    public function parameters()
+    {
+        return $this->belongsToMany(Parameter::class , 'orders_has_parameters' ,'order_id' ,'parameter_id');
+    }
+
+    public function saves()
+    {
+        return $this->hasMany(Save::class);
+    }
+
+    public static function getStatus()
+    {
+        return [
+            self::IS_NEW => '  جدید',
+            self::IS_UNCONFIRMED => 'تایید نشده',
+            self::IS_CONFIRMED => 'تایید شده',
+            self::IS_REJECTED => 'رد شده',
+            self::IS_REQUESTED => 'در حال معامله',
+            self::IS_FINISHED => 'معامله شده',
+        ];
+    }
+
+    public static function getNew()
+    {
+        return Order::where('status',self::IS_NEW)->count();
+    }
+
+    public function getDateAttribute()
+    {
+        return Jalalian::forge($this->created_at)->format('%A, %d %B %Y');
+    }
+}

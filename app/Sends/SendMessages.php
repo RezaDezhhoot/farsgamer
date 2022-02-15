@@ -105,4 +105,9 @@ class SendMessages
         $notification->type = Notification::PRIVATE;
         $notification->save();
     }
+
+    public function sendCode($code , $user)
+    {
+        //
+    }
 }

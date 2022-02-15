@@ -22,12 +22,12 @@ class CreateUsersTable extends Migration
             $table->string('province');
             $table->string('city');
             $table->string('phone',11)->unique();
-            $table->string('code_id',10)->unique();
+            $table->string('code_id',10)->unique()->nullable();
             $table->string('status')->default('new');
             $table->string('profile_image')->nullable();
             $table->string('auth_image')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('pass_word');
+            $table->string('pass_word')->nullable();
             $table->string('description')->nullable();
             $table->string('ip')->nullable();
             $table->integer('score')->default(0);

@@ -23,6 +23,8 @@ use Morilog\Jalali\Jalalian;
  * @property mixed intermediary
  * @property mixed id
  * @property mixed seller
+ * @property mixed order_id
+ * @property mixed|string status
  */
 class OrderTransaction extends Model
 {

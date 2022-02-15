@@ -180,6 +180,7 @@ return [
         Darryldecode\Cart\CartServiceProvider::class,
         Shetabit\Payment\Provider\PaymentServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        App\Providers\TestFacadesServiceProvider::class,
     ],
 
     /*
@@ -235,7 +236,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Helper' => App\Helper\Helper::class,
         'Image' => Intervention\Image\Facades\Image::class,
-        'Cart' => Darryldecode\Cart\Facades\CartFacade::class,
+        'cart'=>   App\Cart\Cart::class,
         'SEOMeta'       => Artesaos\SEOTools\Facades\SEOMeta::class,
         'OpenGraph'     => Artesaos\SEOTools\Facades\OpenGraph::class,
         'Twitter'       => Artesaos\SEOTools\Facades\TwitterCard::class,

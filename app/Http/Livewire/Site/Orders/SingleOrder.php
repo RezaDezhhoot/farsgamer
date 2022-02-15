@@ -2,7 +2,9 @@
 
 namespace App\Http\Livewire\Site\Orders;
 
+use App\Cart\Facades\Cart;
 use App\Http\Livewire\BaseComponent;
+use App\Models\Notification;
 use App\Models\Save;
 use App\Models\Setting;
 use App\Models\OrderTransaction;
@@ -21,7 +23,7 @@ use App\Models\Order;
 class SingleOrder extends BaseComponent
 {
     use TextBuilder;
-    public $order , $data = [] , $saved = false;
+    public $order , $data = [] , $confirmLaw = false , $law;
     public function mount($userID, $id , $slug)
     {
         $this->order = Order::where([
@@ -29,14 +31,7 @@ class SingleOrder extends BaseComponent
             ['user_id',$userID],
         ])->findOrFail($id);
 
-        \Cart::add(array(
-            'id' => $id, // inique row ID
-            'name' => 'last',
-            'price' => 0,
-            'quantity' => 1,
-            'attributes' => array()
-        ));
-
+        Cart::add(\App\Cart\Cart::LAST_VIEW,$this->order);
         $this->order->increment('view_count',1);
         $this->data['pageAddress'] = [
             Setting::getSingleRow('title') => route('home'),
@@ -59,27 +54,27 @@ class SingleOrder extends BaseComponent
 
     public function sendRequestToTransaction()
     {
-        if (Auth::check())
-        {
-            if ($this->order->status == Order::IS_CONFIRMED)
-            {
+        if (Auth::check()) {
+            if ($this->order->status == Order::IS_CONFIRMED && $this->order->user->id != \auth()->id()) {
                 $ban = Carbon::make(now())->diff(\auth()->user()->ban)->format('%r%i');
                 if ($ban <= 0) {
+                    $this->validate([
+                        'confirmLaw' => ['required'],
+                    ],[],[
+                        'confirmLaw' => 'تایید قوانین',
+                    ]);
                     $transaction = new OrderTransaction();
                     $transaction->customer_id = Auth::id();
                     $transaction->seller_id = $this->order->user_id;
                     $transaction->order_id = $this->order->id;
-                    $transaction->status = OrderTransaction::IS_CONFIRMED;
-                    $transaction->timer = Carbon::make(now())->addHours(Setting::getSingleRow('confirmedTimer'));
+                    $transaction->status = OrderTransaction::WAIT_FOR_CONFIRM;
+                    $transaction->timer = Carbon::make(now())->addHours(0);
                     $transaction->save();
-                    $data = new OrderTransactionData();
-                    $data->transaction_id = $transaction->id;
-                    $data->name = $transaction->id;
-                    $data->save();
-                    $texts = $this->createText('request_order',$transaction);
+                    OrderTransactionData::updateOrCreate(['transaction_id'=>$transaction->id],['name'=>uniqid()]);
+                    $texts = $this->createText('confirm_transaction',$transaction);
                     $send = new SendMessages();
-                    $send->sends($texts,$transaction->seller);
-                    redirect()->route('user.store.transaction',['edit',$transaction->id]);
+                    $send->sends($texts,$transaction->seller,Notification::TRANSACTION,$transaction->id);
+                    $this->emitNotify('درخواست معامله با موفیت ارسال شد.');
                 } else $this->addError('request','متاسفانه حساب کابری شما به دلیل نقض قوانین برای مدتی محدود شده است.مدتی بعد دوباره تلاش کنید');
             } else $this->addError('request','ین اگهی در دست رس نمی باشد');
         } else redirect()->route('auth');
@@ -88,24 +83,16 @@ class SingleOrder extends BaseComponent
 
     public function addToFavorite()
     {
-        $id = $this->order->id;
-        Save::create([
-            'order_id' => $id,
-            'user_id' => \auth()->id(),
-        ]);
-        $this->saved = true;
+        Cart::add(\App\Cart\Cart::SAVED,$this->order);
     }
 
     public function unSave()
     {
-        Save::where('user_id',\auth()->id())->where('order_id',$this->order->id)->first()->delete();
-        $this->saved = false;
+        Cart::delete(\App\Cart\Cart::SAVED,$this->order->id);
     }
 
     public function render()
     {
-        $save =  Save::where('user_id',\auth()->id())->where('order_id',$this->order->id)->first();
-        $this->saved = $save ? true : false;
         return view('livewire.site.orders.single-order');
     }
 

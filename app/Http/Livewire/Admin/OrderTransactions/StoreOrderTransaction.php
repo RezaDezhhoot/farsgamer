@@ -115,11 +115,14 @@ class StoreOrderTransaction extends BaseComponent
                     ['description' => $this->transaction->id.'بابت معامله با کد ', 'from_admin'=> true]);
             }
             $this->transaction->order->save();
-        } else {
+        } elseif ($this->status == OrderTransaction::IS_CANCELED) {
             $this->emitNotify('برای این معامله امکان تغییر وجود ندارد','warning');
             return (false);
         }
 
+        $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
+            'status' => OrderTransaction::IS_CANCELED,
+        ]);
 
         $carbon = Carbon::make(now());
         $timer = $carbon;

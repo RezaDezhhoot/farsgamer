@@ -88,6 +88,11 @@ class Order extends Model
         ];
     }
 
+    public function OrderTransactions()
+    {
+        return $this->hasMany(OrderTransaction::class);
+    }
+
     public static function getNew()
     {
         return Order::where('status',self::IS_NEW)->count();

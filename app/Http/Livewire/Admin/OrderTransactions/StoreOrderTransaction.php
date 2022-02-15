@@ -120,21 +120,14 @@ class StoreOrderTransaction extends BaseComponent
             return (false);
         }
 
-        $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
-            'status' => OrderTransaction::IS_CANCELED,
-        ]);
-
         $carbon = Carbon::make(now());
         $timer = $carbon;
         $data = $this->transaction->data;
-        if (is_null($data)) {
-            $data = new OrderTransactionData();
-            $data->order_transaction_id  = $this->transaction->id;
-            $data->name = uniqid();
-            $data->save();
-        }
         $this->resetErrorBag();
         if (!in_array($this->transaction->status,[OrderTransaction::IS_CANCELED,OrderTransaction::WAIT_FOR_COMPLETE])){
+            $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
+                'status' => OrderTransaction::IS_CANCELED,
+            ]);
         // data
             if (!in_array($this->transaction->status,[OrderTransaction::WAIT_FOR_COMPLETE,OrderTransaction::IS_REQUESTED,OrderTransaction::IS_CANCELED])) {
                 if (!is_null($this->transactionData))

@@ -85,7 +85,15 @@ class User extends Authenticatable implements Wallet, Confirmable
     protected $fillable = [
         'first_name',
         'last_name',
-        'email','phone','user_name','province','city','otp','ip'
+        'user_name',
+
+        'email',
+        'province',
+        'city',
+        'phone',
+        'status',
+        'pass_word',
+        'ip',
     ];
 
     /**

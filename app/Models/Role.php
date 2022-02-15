@@ -12,4 +12,8 @@ class Role extends \Spatie\Permission\Models\Role
     protected static $dontLogIfAttributesChangedOnly = ['updated_at'];
     protected static $logOnlyDirty = true;
     protected $searchAbleColumns = ['name'];
+    protected $fillable = ['name'];
+    protected $attributes = [
+        'guard_name' => 'web',
+    ];
 }

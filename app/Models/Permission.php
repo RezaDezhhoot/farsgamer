@@ -9,6 +9,11 @@ class Permission extends \Spatie\Permission\Models\Permission
     protected static $dontLogIfAttributesChangedOnly = ['updated_at'];
     protected static $logOnlyDirty = true;
 
+    protected $fillable = ['name','guard_name'];
+    protected $attributes = [
+        'guard_name' => 'web',
+    ];
+
     public function lang()
     {
         return [

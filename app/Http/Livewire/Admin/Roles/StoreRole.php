@@ -4,7 +4,7 @@ namespace App\Http\Livewire\Admin\Roles;
 
 use App\Http\Livewire\BaseComponent;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Spatie\Permission\Models\Permission;
+use App\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class StoreRole extends BaseComponent

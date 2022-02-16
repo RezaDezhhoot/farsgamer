@@ -58,6 +58,7 @@ class Auth extends BaseComponent
 
     public function login()
     {
+
         $rateKey = 'verify-attempt:' . $this->phone . '|' . request()->ip();
         if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count'))) {
             $this->resetInputs();
@@ -73,8 +74,11 @@ class Auth extends BaseComponent
             'phone' => 'شماره همراه',
             'password' => 'رمز عبور',
         ]);
+
         $user = User::where('phone', $this->phone)->first();
+
         if (!is_null($user)) {
+
             if ($user->status == User::NEW || $user->status == User::NOT_CONFIRMED) {
                 $this->sendSMS();
                 if (Hash::check($this->password, $user->otp) && $this->sms === true) {
@@ -95,6 +99,7 @@ class Auth extends BaseComponent
                     return $this->addError('password','کد تایید یا شماره همراه اشتباه می باشد.');
             } else {
                 if (Hash::check($this->password, $user->pass_word) || (Hash::check($this->password, $user->otp) && $this->sms === true)) {
+
                     \Illuminate\Support\Facades\Auth::login($user,true);
                     request()->session()->regenerate();
                     RateLimiter::clear($rateKey);

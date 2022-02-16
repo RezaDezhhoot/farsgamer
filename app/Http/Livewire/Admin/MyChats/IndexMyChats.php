@@ -26,7 +26,7 @@ class IndexMyChats extends BaseComponent
         if (!empty($this->chatList )  && !empty(preg_replace('/\s+/', '', $this->chatText)) && !is_null(trim($this->chatText))) {
             $chat = new Chat();
             $chat->sender_id = \auth()->id();
-            $chat->receiver_id = $this->chatList->user1;
+            $chat->receiver_id = $this->chatList->user1 == \auth()->id() ? $this->chatList->user2 : $this->chatList->user1;;
             $chat->content = $this->chatText;
             $chat->is_admin = auth()->user()->hasRole('admin');
             $chat->group_id = $this->chatList->id;

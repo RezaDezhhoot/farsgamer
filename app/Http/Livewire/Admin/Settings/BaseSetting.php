@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class BaseSetting extends BaseComponent
 {
     use AuthorizesRequests;
-    public $header , $name , $logo , $status , $title  , $copyRight , $subject = [] ,$logInImage , $contact = [];
+    public $header , $name , $logo , $status , $title  , $copyRight , $subject = [] ,$logInImage , $contact = [] , $waterMark;
     public  $data = [] , $i = 1 , $registerGift , $notification  , $tel , $email, $address, $seoDescription , $seoKeyword ,$categoryHomeCount;
 
     public function mount()
@@ -22,6 +22,7 @@ class BaseSetting extends BaseComponent
         $this->copyRight = Setting::getSingleRow('copyRight');
         $this->status = Setting::getSingleRow('status');
         $this->logo = Setting::getSingleRow('logo');
+        $this->waterMark = Setting::getSingleRow('waterMark');
         $this->title = Setting::getSingleRow('title');
         $this->name = Setting::getSingleRow('name');
         $this->registerGift = Setting::getSingleRow('registerGift');
@@ -55,6 +56,7 @@ class BaseSetting extends BaseComponent
                 'name' => ['required', 'string'],
                 'title' => ['required','string'],
                 'logo' => ['required','required'],
+                'waterMark' => ['required','required'],
                 'status' => ['required','string','in:1,0'],
                 'registerGift' => ['nullable','numeric','between:0,99999999999.999999'],
                 'notification' => ['nullable','string'],
@@ -70,6 +72,8 @@ class BaseSetting extends BaseComponent
             ] , [] , [
                 'name' => 'نام سایت',
                 'title' => 'عنوان سایت',
+                'logo' => 'لوکو سایت',
+                'waterMark' => 'تصویر واتر مارک',
                 'status' => 'وضعیت سایت',
                 'registerGift' => 'هدیه ثبت نام',
                 'notification' => 'اعلان بالا صفحه',
@@ -88,6 +92,7 @@ class BaseSetting extends BaseComponent
         Setting::updateOrCreate(['name' => 'copyRight'], ['value' => $this->copyRight]);
         Setting::updateOrCreate(['name' => 'status'], ['value' => $this->status]);
         Setting::updateOrCreate(['name' => 'logo'], ['value' => $this->logo]);
+        Setting::updateOrCreate(['name' => 'waterMark'], ['value' => $this->waterMark]);
         Setting::updateOrCreate(['name' => 'title'], ['value' => $this->title]);
         Setting::updateOrCreate(['name' => 'name'], ['value' => $this->name]);
         Setting::updateOrCreate(['name' => 'notification'], ['value' => $this->notification]);

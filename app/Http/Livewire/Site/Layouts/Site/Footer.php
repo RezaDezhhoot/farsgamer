@@ -20,17 +20,4 @@ class Footer extends BaseComponent
         ];
         return view('livewire.site.layouts.site.footer');
     }
-
-    public function registerEmail()
-    {
-        $this->validate([
-            'email' => ['required','unique:news,email','email']
-        ],[],[
-            'email' => 'ادرس ایمیل',
-        ]);
-        $news = new Email();
-        $news->email = $this->email;
-        $news->save();
-        $this->addError('email','ادرس ایمیل با موفیت ثبت شد.');
-    }
 }

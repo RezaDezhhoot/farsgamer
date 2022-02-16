@@ -8,17 +8,16 @@ use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
 use Artesaos\SEOTools\Facades\TwitterCard;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Ticket;
-use App\Models\User;
 use Livewire\WithPagination;
 
 class IndexTicket extends BaseComponent
 {
     use WithPagination;
-    public $paginate = 10;
+    public $paginate = 10 , $user , $tickets;
     public function mount()
     {
+        $this->user = \auth()->user();
+        $this->tickets = $this->user->tickets()->where('parent_id',null)->orderBy('id','desc')->paginate($this->paginate);
         SEOMeta::setTitle('پشتیبانی',false);
         SEOMeta::setDescription(Setting::getSingleRow('seoDescription'));
         SEOMeta::addKeyword(explode(',',Setting::getSingleRow('seoKeyword')));
@@ -34,8 +33,7 @@ class IndexTicket extends BaseComponent
 
     public function render()
     {
-        $user = User::findOrFail(Auth::id());
-        $tickets = $user->tickets()->where('parent_id',null)->orderBy('id','desc')->paginate($this->paginate);
-        return view('livewire.site.dashboard.tickets.index-ticket',['tickets' => $tickets]);
+
+        return view('livewire.site.dashboard.tickets.index-ticket');
     }
 }

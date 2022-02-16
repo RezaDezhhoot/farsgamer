@@ -4,7 +4,7 @@
             <form>
                 <h1>فرم ورود</h1>
                 <div>
-                    <input type="text" class="form-control" placeholder="نام کاربری" required="" wire:model.defer="username" />
+                    <input type="text" class="form-control" placeholder="نام کاربری" required="" wire:model.defer="phone" />
                 </div>
                 <div>
                     <input type="password" class="form-control" placeholder="رمز ورود" required="" wire:model.defer="password" />

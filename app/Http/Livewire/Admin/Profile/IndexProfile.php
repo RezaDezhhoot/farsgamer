@@ -62,9 +62,11 @@ class IndexProfile extends BaseComponent
         $this->uploadFile();
         if (!is_null($this->file)) {
             if (!is_null($this->user->profile_image))
-                unlink($this->user->profile_image);
+                @unlink($this->user->profile_image);
 
             $this->user->profile_image  = 'storage/'.$this->file->store('profiles', 'public');
+            $this->imageWatermark($this->user->profile_image);
+
             unset($this->file);
         }
 

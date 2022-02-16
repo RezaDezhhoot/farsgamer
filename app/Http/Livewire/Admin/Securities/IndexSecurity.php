@@ -332,6 +332,7 @@ class IndexSecurity extends BaseComponent
         Setting::updateOrCreate(['name' => 'valid_ticket_files'], ['value' => $this->valid_ticket_files]);
         Setting::updateOrCreate(['name' => 'ticket_per_day'], ['value' => $this->ticket_per_day]);
         Setting::updateOrCreate(['name' => 'auth_image_pattern'], ['value' => $this->auth_image_pattern]);
+        Setting::updateOrCreate(['name' => 'min_price_to_request'], ['value' => $this->min_price_to_request]);
         Setting::updateOrCreate(['name' => 'auth_note'], ['value' => $this->auth_note]);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }

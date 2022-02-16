@@ -181,6 +181,7 @@ return [
         Shetabit\Payment\Provider\PaymentServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         App\Providers\TestFacadesServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
     ],
 
     /*

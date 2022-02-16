@@ -3,10 +3,10 @@
 namespace App\Http\Livewire\Site\Dashboard\Tickets;
 
 use App\Http\Livewire\BaseComponent;
+use App\Models\Notification;
 use App\Models\Setting;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
@@ -15,13 +15,13 @@ use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\WithFileUploads;
+use App\Sends\SendMessages;
 
 class StoreTicket extends BaseComponent
 {
-    use WithFileUploads , Sends , TextBuilder;
+    use WithFileUploads , TextBuilder;
     public $ticket , $user , $header , $mode , $disabled = false , $data = [];
-    public $subject , $content , $file , $priority , $status , $newMessage  , $final_message;
-
+    public $subject , $content , $file = [] , $priority , $status , $newMessage  , $final_message , $newFile;
     public function mount($action,$id = null)
     {
         SEOMeta::setTitle('پشتیبانی',false);
@@ -57,33 +57,33 @@ class StoreTicket extends BaseComponent
 
     public function store()
     {
-
-        $rateKey = 'verify-attempt:' . Auth::user()->user_name . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, 5)) {
+        $rateKey = 'ticket:' . Auth::user()->user_name . '|' . request()->ip();
+        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('ticket_per_day'))) {
             $this->reset(['subject','content','file']);
             return $this->addError('error', 'زیادی تلاش کردید. لطفا پس از مدتی دوباره تلاش کنید.');
         }
 
-        RateLimiter::hit($rateKey, 3 * 60 * 60);
+        RateLimiter::hit($rateKey, 24 * 60 * 60);
         if ($this->mode == 'edit')
             $this->saveInDataBase($this->ticket);
         elseif ($this->mode == 'create')
         {
             $this->saveInDataBase(new Ticket());
             $this->reset(['subject','content','file','priority','final_message','newMessage']);
+
         } else abort(404);
     }
 
-
     public function saveInDataBase(Ticket $model)
     {
+        $this->resetErrorBag();
         if ($this->mode == 'create')
         {
             $this->validate([
                 'subject' => ['required','string','in:'.implode(',',$this->data['subject'])],
-                'content' => ['required','string','max:250'],
-                'file' => ['nullable','image','mimes:jpg,jpeg,png','max:2048'],
-                'priority' => ['required','in:'.Ticket::HIGH.','.Ticket::NORMAL.','.Ticket::HIGH],
+                'content' => ['required','string','max:18500'],
+                'file.*' => ['nullable','mimes:'.Setting::getSingleRow('valid_ticket_files'),'max:2048'],
+                'priority' => ['in:'.Ticket::HIGH.','.Ticket::NORMAL.','.Ticket::HIGH],
             ],[],[
                 'subject' => 'موضوع',
                 'content' => 'متن درخواست',
@@ -96,19 +96,27 @@ class StoreTicket extends BaseComponent
             $model->content = $this->content;
             $model->sender_id  = Auth::id();
             $model->priority  = $this->priority;
-            $model->status  = Ticket::OPEN;
-            if ($this->file <> null)
-                $model->file  = 'storage/'.$this->file->store('files/ticket', 'public');
+            $model->status = Ticket::PENDING;
+
+            if (!is_null($this->file) && !empty($this->file)){
+                foreach ($this->file as $item){
+                    $save = 'storage/'.$item->store('ticket', 'public');
+                    $model->file = $save.',';
+                }
+            }
+            $model->file = rtrim($model->file,',');
             $model->save();
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
             redirect()->route('user.store.ticket',['edit',$model->id]);
 
         } elseif ($this->mode == 'edit') {
-            if ($model->status == Ticket::OPEN) {
+            if ($model->status == Ticket::ANSWERED) {
                 $this->validate([
                     'newMessage' => ['required','string','max:250'],
+                    'newFile' => ['nullable','image','mimes:jpg,jpeg,png,gif','max:2048'],
                 ],[],[
                     'newMessage' => 'متن درخواست',
+                    'newFile' =>  'فایل',
                 ]);
                 $ticket = new Ticket();
                 $ticket->subject = $model->subject;
@@ -118,12 +126,17 @@ class StoreTicket extends BaseComponent
                 $ticket->sender_id = Auth::id();
                 $ticket->priority = $model->priority;
                 $ticket->status = $model->status;
+                if ($this->newFile <> null)
+                    $ticket->file  = 'storage/'.$this->newFile->store('ticket', 'public');
+
                 $ticket->save();
                 $this->emitNotify('اطلاعات با موفقیت ثبت شد');
                 $this->ticket->child->push($ticket);
-                $this->reset(['newMessage']);
+                $model->status  = Ticket::USER_ANSWERED;
+                $model->save();
+                $this->reset(['newMessage','newFile']);
             } else {
-                $this->addError('error','این درخواست بسته شده است');
+                $this->addError('error','لطفا تا ارسال پاسخ توسط مدیریت منتظر بمانید');
                 return;
             }
 
@@ -135,9 +148,9 @@ class StoreTicket extends BaseComponent
         // upon form submit, this function till fill your progress bar
     }
 
-
     public function render()
     {
-        return view('livewire.site.dashboard.tickets.store-ticket');
+        return view('livewire.site.dashboard.tickets.store-ticket')
+            ->extends('livewire.site.layouts.site.site');
     }
 }

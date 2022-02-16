@@ -3,18 +3,22 @@
 namespace App\Http\Livewire\Site\Dashboard\Profile;
 
 use App\Http\Livewire\BaseComponent;
+use App\Models\Setting;
 use App\Models\User;
 use Livewire\WithFileUploads;
 
 class AuthComponent extends BaseComponent
 {
     use WithFileUploads;
-    public $user, $auth_image;
+    public $user, $auth_image , $auth_note , $auth_image_pattern;
     public function mount()
     {
         $this->user = auth()->user();
         if ($this->user->status == User::CONFIRMED)
             abort(404);
+
+        $this->auth_image_pattern = Setting::getSingleRow('auth_image_pattern');
+        $this->auth_note = Setting::getSingleRow('auth_note');
         $this->auth_image = $this->user->auth_image;
     }
 
@@ -22,7 +26,7 @@ class AuthComponent extends BaseComponent
     {
         if ($this->user->status == User::NOT_CONFIRMED) {
             $this->validate([
-                'auth_image' => ['required','image','mimes:jpg,jpeg,png','max:2048'],
+                'auth_image' => ['required','image','mimes:jpg,jpeg,png,PNG,JPG,JPEG','max:'.Setting::getSingleRow('max_profile_image_size')],
             ],[],[
                 'auth_image' => 'تصویر',
             ]);

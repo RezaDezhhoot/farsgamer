@@ -11,7 +11,7 @@ use Livewire\WithFileUploads;
 class IndexProfile extends BaseComponent
 {
     use WithFileUploads;
-    public $user, $first_name , $last_name , $user_name , $profile_image ,$description ,$pass_word , $confirm_pass_word , $email,
+    public $user, $first_name , $last_name , $user_name , $profile_image ,$description ,$pass_word , $password_confirmation , $email,
     $phone , $province , $city , $data = [];
 
     public function mount()
@@ -38,11 +38,11 @@ class IndexProfile extends BaseComponent
     {
         $location = false;
         $fields = [
-            'first_name' => ['required', 'string','max:50'],
-            'last_name' => ['required','string','max:50'],
+            'first_name' => ['required', 'string','max:70'],
+            'last_name' => ['required','string','max:70'],
             'user_name' => ['required', 'string' ,'max:80', 'unique:users,user_name,'. ($this->user->id ?? 0)],
             'email' => ['required','email','max:250','unique:users,email,'. ($this->user->id ?? 0)],
-            'profile_image' => ['nullable','image','mimes:jpg,jpeg,png,svg,gif','max:2048'],
+            'profile_image' => ['nullable','image','mimes:jpg,jpeg,png,svg,gif','max:'.Setting::getSingleRow('max_profile_image_size')],
             'description' => ['nullable','string','max:250'],
         ];
         $message = [
@@ -51,19 +51,24 @@ class IndexProfile extends BaseComponent
             'user_name' => 'نام کربری',
             'email' => 'ایمیل',
             'profile_image' => 'تصویر پروفایل',
-            'description' => 'بیوگرافی',
+            'description' => 'بایوگرافی',
         ];
-        $open_transactions = $this->user->transactions()->where([
-            ['status','!=',OrderTransaction::IS_COMPLETED],
-            ['status','!=',OrderTransaction::IS_CANCELED],
-        ])->count();
+        $open_transactions = OrderTransaction::where(function ($query){
+            $query->where('seller_id',$this->user->id)->orWhere('customer_id',$this->user);
+        })->where(function ($query){
+            $query->where([
+                ['status','!=',OrderTransaction::WAIT_FOR_COMPLETE],
+                ['status','!=',OrderTransaction::IS_CANCELED],
+            ]);
+        })->count();
+
         if (isset($this->pass_word)) {
-            $fields['pass_word'] = ['required','min:'.Setting::getSingleRow('password_length'),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'];
+            $fields['pass_word'] = ['required','min:'.Setting::getSingleRow('password_length'),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/','confirmed'];
             $message['pass_word'] = 'گذرواژه';
         }
+
         if ($open_transactions > 0 && ($this->city <> $this->user->city || $this->province <> $this->user->province)) {
-            $this->addError('error','ویرایش استان و شهر به دلیل داشتن معاملات باز امکان پذیر نمی باشد');
-            return;
+            return $this->addError('error','ویرایش استان و شهر به دلیل داشتن معاملات باز امکان پذیر نمی باشد');
         } else {
             $fields['province'] = ['required','max:150','in:'.implode(',',$this->data['province'])];
             $fields['city'] = ['required','max:150','in:'.implode(',',$this->data['city'])];
@@ -73,13 +78,10 @@ class IndexProfile extends BaseComponent
         }
         $this->validate($fields,[],$message);
 
-        if (isset($this->pass_word) && $this->pass_word == $this->confirm_pass_word)
+        if (isset($this->pass_word))
             $this->user->pass_word = Hash::make($this->pass_word);
-        elseif (isset($this->pass_word) && $this->pass_word <> $this->confirm_pass_word){
-            $this->addError('pass_word','تایید گذرواژه نامعتبر');
-            return;
-        }
-        if ($location === true){
+
+        if ($location){
             $this->user->province = $this->province;
             $this->user->city = $this->city;
         }

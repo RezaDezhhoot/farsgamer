@@ -20,6 +20,6 @@ class UserAuth
         if (auth()->user()->status == User::CONFIRMED)
             return $next($request);
         else
-            return redirect()->route('user.auth');
+            return redirect()->intended(route('user.auth'));
     }
 }

@@ -9,6 +9,7 @@
             <x-admin.forms.input type="text" id="name" label="نام سایت*" wire:model.defer="name"/>
             <x-admin.forms.input type="text" id="title" label="عنوان سایت*" wire:model.defer="title"/>
             <x-admin.forms.lfm-standalone id="logo" label="لوگو سایت*" :file="$logo" required="true" wire:model="logo"/>
+            <x-admin.forms.lfm-standalone id="waterMark" label="تصویر واتر مارک*" :file="$waterMark" required="true" wire:model="waterMark"/>
             <x-admin.forms.dropdown id="status" :data="$data['status']" label="وضعیت سایت*" wire:model.defer="status"/>
             <x-admin.forms.input type="text" id="registerGift" label="هدیه ثبت نام(تومان)" wire:model.defer="registerGift"/>
             <x-admin.forms.lfm-standalone id="logInImage" label="تصویر صفحه ورود*" :file="$logInImage" type="image" required="true" wire:model="logInImage"/>

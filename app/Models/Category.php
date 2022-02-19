@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static withCount(string $string)
+ * @method static find(int[] $array)
  * @property mixed title
  * @property mixed slug
  * @property mixed logo

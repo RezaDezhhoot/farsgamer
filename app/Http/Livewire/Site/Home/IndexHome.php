@@ -31,7 +31,25 @@ class IndexHome extends BaseComponent
         JsonLd::addImage(Setting::getSingleRow('logo'));
         $this->data['categories'] = Category::where('status',Category::AVAILABLE)->withCount('orders')
             ->take(Setting::getSingleRow('categoryHomeCount') ?? 10)->get()->sortByDesc('order_count');
-    }
+
+        $categories = Category::with(['childrenRecursive'])->where([
+            ['status',Category::AVAILABLE],
+            ['is_available',Category::YES],
+        ])->get()->toArray();
+
+        $original_categories = [];
+        $i = 0;
+        foreach ($categories as $category){
+            $sub_categories_id = Helper::array_value_recursive('id',$category['children_recursive']);
+            $sub_categories =  Category::find($sub_categories_id);
+            $original_categories[$i] = $category;
+            $original_categories[$i]['sub_categories'] = $sub_categories;
+            $i++;
+        }
+        $this->data['logo'] = Setting::getSingleRow('logo');
+        $this->data['contact'] = Setting::getSingleRow('contact');
+        $this->data['categories'] = $original_categories;
+            }
     public function render()
     {
         $orders = Order::where('status',Order::IS_CONFIRMED);

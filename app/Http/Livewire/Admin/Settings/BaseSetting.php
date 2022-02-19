@@ -85,7 +85,7 @@ class BaseSetting extends BaseComponent
                 'seoKeyword' => 'کلمات سئو',
                 'logInImage' => 'تصویر صفحه ورود',
                 'contact' => 'لینک های ارتباطی',
-                'categoryHomeCount' => 'تعداد دسته بندی های قابل نمایش صفحه اصلی'
+                'categoryHomeCount' => 'تعداد دسته بندی های قابل نمایش صفحه اصلی',
             ]
         );
         Setting::updateOrCreate(['name' => 'subject'], ['value' => json_encode($this->subject)]);

@@ -4,23 +4,23 @@ namespace App\Http\Livewire\Site\Dashboard\Orders;
 
 use App\Http\Livewire\BaseComponent;
 use App\Models\Category;
+use App\Models\Notification;
 use App\Models\Order;
+use App\Models\OrderParameter;
 use App\Models\Parameter;
 use App\Models\Setting;
-use App\Models\User;
-use App\Traits\Admin\Sends;
+use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Livewire\WithFileUploads;
 
 class StoreOrder extends BaseComponent
 {
     public $order , $header , $user , $mode;
-    public $slug , $category_id , $content , $price , $image , $gallery , $province , $city ,$result;
-    public $parameters , $parameter = [] , $platforms , $platform = [];
+    public $slug , $category_id , $content , $price , $image , $mainImage , $gallery = [] , $galleries = [] , $province , $city ,$result;
+    public $parameters , $parameter = [] , $platforms , $platform = [] , $message;
     public $data = [];
-    use WithFileUploads , Sends , TextBuilder;
+    use WithFileUploads , TextBuilder;
     public function mount($action , $id = null)
     {
         $ban = Carbon::make(now())->diff(\auth()->user()->ban)->format('%r%i');
@@ -29,42 +29,48 @@ class StoreOrder extends BaseComponent
             return;
         }
         if ($action == 'edit') {
-            $this->user = User::findOrFail(Auth::id());
+            $this->user = auth()->user();
             $this->order = $this->user->orders()->findOrFail($id);
             $this->slug = $this->order->slug;
-            $this->category_id = $this->order->category_id;
             $this->content = $this->order->content;
             $this->price = $this->order->price;
-            $this->image = $this->order->image;
-            $this->gallery = $this->order->gallery;
+            $this->mainImage = $this->order->image;
+            $this->gallery = explode(',',$this->order->gallery);
             $this->province = $this->order->province;
             $this->city = $this->order->city;
             $this->result = $this->order->reslut;
-            if ($this->order->category->status == Category::AVAILABLE && $this->order->category->is_available == 1)
-            {
-            $this->category_id = $this->order->category_id;
-            $this->parameter = $this->order->parameter->pluck('value','parameter_id');
-            $this->platform = $this->order->platform->pluck('slug','id');
-        }
-        else
-            $this->category_id = '';
-
-            $this->data['status'] = Order::getOrdersStatus();
+            if ($this->order->category->status == Category::AVAILABLE && $this->order->category->is_available == Category::YES) {
+                $this->category_id = $this->order->category_id;
+                $this->parameter = $this->order->parameters()->pluck('value','parameter_id')->toArray();
+                $this->platform = $this->order->platform->pluck('slug', 'id');
+            } else
+                $this->category_id = '';
+            $this->message = $this->order->user->alerts()->where([
+                ['subject',Notification::ORDER],
+                ['model_id',$this->order->id],
+            ])->get();
         } elseif($action == 'create')
             $this->header = 'اگهی جدید';
+
         else abort(404);
 
+        $this->data['province'] = Setting::getProvince();
+        $this->data['status'] = Order::getStatus();
+        $this->data['subject'] = Notification::getSubject();
+        $this->data['category'] = Category::where([
+            ['status',Category::AVAILABLE],
+            ['is_available',Category::YES]
+        ])->pluck('title','id');
         $this->mode = $action;
-
     }
     public function render()
     {
-        $this->data['province'] = Setting::getProvince();
         $this->data['city'] = Setting::getCity()[$this->province];
-        $this->data['category'] = Category::where('status',Category::AVAILABLE)->where('is_available',1)->pluck('title','id');
-        $this->parameters = Parameter::where('category_id',$this->category_id)->where('status','available')->get();
+        $this->parameters = Parameter::where('category_id',$this->category_id)->where([
+            ['status','available']
+        ])->get();
         $category = Category::findOrFail($this->category_id);
-        $this->platforms = $category->platform;
+        $this->platforms = $category->platforms;
         return view('livewire.site.dashboard.orders.store-order');
     }
 
@@ -72,11 +78,11 @@ class StoreOrder extends BaseComponent
     {
         if ($this->mode == 'edit')
             $this->saveInDB($this->order);
-        else {
+        else
             $this->saveInDB(new Order());
-            $this->reset(['']);
-        }
     }
+
+
 
     public function saveInDB(Order $order)
     {
@@ -85,12 +91,13 @@ class StoreOrder extends BaseComponent
                 [
                     'slug' => ['required', 'string','max:100'],
                     'category_id' => ['required','exists:categories,id'],
-                    'content' => ['nullable','string','max:255'],
-                    'price' => ['required','numeric', 'between:0,99999999999.99999'],
+                    'content' => ['nullable','string','max:1200'],
+                    'price' => ['required','numeric', 'between:0,999999999999.99999'],
                     'province' => ['required','string','in:'.implode(',',array_keys($this->data['province']))],
                     'city' => ['required','string','in:'.implode(',',array_keys($this->data['city']))],
-                    'image' => ['required','image','mimes:jpg,jpeg,png,svg,gif','max:2048'],
-                    'gallery.*' => ['required','image','mimes:jpg,jpeg,png,svg,gif','max:2048'],
+                    'image' => ['nullable','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
+                    'gallery'=>['array','min:1','max:'.Setting::getSingleRow('order_images_count')],
+                    'gallery.*' => ['nullable','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
                 ] , [] , [
                     'slug' => 'عنوان',
                     'category_id' => 'دست بندی',
@@ -102,56 +109,73 @@ class StoreOrder extends BaseComponent
                     'gallery' => 'گالری',
                 ]
             );
-            $gallery = '';
-            foreach ($this->gallery as $image)
-                $gallery.= 'storage/'.$image->store('files/orders', 'public').',';
 
+            if (!is_null($this->image)) {
+                @unlink($this->mainImage->image);
+                $this->image = 'storage/'.$this->image->store('files/orders', 'public');
+                $this->imageWatermark($this->image);
+                $order->image = $this->image;
+            }
+            $i = 0;
+            if (!is_null($this->galleries)) {
+                foreach ($this->galleries as $image) {
+                    $pic = 'storage/'.$image->store('files/orders', 'public').',';
+                    $this->imageWatermark($pic,'center');
+                    array_push($this->gallery,$image);
+                }
+                $order->gallery = implode(',',$this->gallery);
+            }
             $order->slug = $this->slug;
             $order->content = $this->content;
             $order->category_id = $this->category_id;
             $order->price = $this->price;
-            $order->image = 'storage/'.$this->image->store('files/orders', 'public');
-            $order->gallery = rtrim($gallery,',');
             $order->province = $this->province;
             $order->city = $this->city;
-            $text = $this->createText('new_order',$order);
-            $this->sends($text,$order->user);
+            $order->status = Order::IS_NEW;
             $selectedParameter = [];
             if (!$this->parameters->isEmpty()) {
-                if ($this->parameter->isEmpty())
-                    return $this->addError('parameters',"ورودی پارامتر ها نامعتبر");
-                foreach ($this->parameter as $key => $value) {
-                    $parameter = Parameter::find($key);
-                    if ($parameter->category_id == $this->category_id) {
-                        if (!$parameter->isEmpty()) {
-                            if (!empty($value)) {
-                                if ($parameter->type == 'number' && is_numeric($value)) {
-                                    if (!empty($parameter->max) && $parameter->max < $value)
-                                        return $this->addError('parameters',"مقدار ورودی پارامتر $parameter->name بیش ار حد مجاز");
-                                    elseif (!empty($parameter->max) && $parameter->min > $value)
-                                        return $this->addError('parameters',"مقدار ورودی پارامتر $parameter->name کمتر ار حد مجاز");
-                                    else $selectedParameter[] = ['parameter_id'=>$key,'value'=>$value];
-                                } elseif($parameter->type == 'text') {
-                                    if (!empty($parameter->max) && $parameter->max < strlen($value))
-                                        return $this->addError('parameters',"مقدار ورودی پارامتر $parameter->name بیش ار حد مجاز");
-                                    elseif (!empty($parameter->max) && $parameter->min > strlen($value))
-                                        return $this->addError('parameters',"مقدار ورودی پارامتر $parameter->name کمتر ار حد مجاز");
-                                    else $selectedParameter[] = ['parameter_id' => $key , 'value' => $value];
-                                }
-                            } else return $this->addError('parameters',"ورودی پارامتر $parameter->name نامعتبر");
-                        } else return $this->addError('parameters',"ورودی پارامتر ها نامعتبر");
+                foreach ($this->parameters as $key => $value) {
+                    if ($value->category_id == $this->category_id) {
+                        if (isset($this->parameter[$value->id]) && !empty($this->parameter[$value->id])){
+                            if ($value->type == 'number' && is_numeric($this->parameter[$value->id])){
+                                if (!empty($value->max) && $value->max < $this->parameter[$value->id])
+                                    return $this->addError('parameters',"مقدار ورودی پارامتر $value->name بیش ار حد مجاز");
+                                elseif (!empty($value->max) && $value->min > $this->parameter[$value->id])
+                                    return $this->addError('parameters',"مقدار ورودی پارامتر $value->name کمتر ار حد مجاز");
+                                else $selectedParameter[] = ['parameter_id'=>$value->id,'value'=>$this->parameter[$value->id]];
+                            } elseif($value->type == 'text') {
+                                if (!empty($value->max) && $value->max < strlen($this->parameter[$value->id]))
+                                    return $this->addError('parameters',"مقدار ورودی پارامتر $value->name بیش ار حد مجاز");
+                                elseif (!empty($value->max) && $value->min > strlen($this->parameter[$value->id]))
+                                    return $this->addError('parameters',"مقدار ورودی پارامتر $value->name کمتر ار حد مجاز");
+                                else $selectedParameter[] = ['parameter_id' => $value->id , 'value' => $this->parameter[$value->id]];
+                            }
+                        } else
+                            return $this->addError('parameters',"  پارامتر $value->name الزامی ");
                     }
                 }
             }
-            $order->parameters()->sync($selectedParameter);
-            $selectedPlatform = array_keys(array_filter($this->platform->toArray()));
-            $order->platform()->sync($selectedPlatform);
+            OrderParameter::where('order_id',$this->order->id)->delete();
+            $order->parameters()->attach($selectedParameter);
+            if (!is_null($this->platform)) {
+                $selectedPlatform = array_keys(array_filter($this->platform->toArray()));
+                $order->platforms()->sync($selectedPlatform);
+            }
             $order->save();
+            $text = $this->createText('new_order',$order);
+            $send = new SendMessages();
+            $send->sends($text,$order,Notification::ORDER,$order->id);
+            $this->emitNotify('اطلاعات با موفقیت ثبت شد');
             $this->resetErrorBag();
-            // send success message
-        } else {
-            // send failed message
-        }
+
+            if ($this->mode == 'create')
+                return redirect()->route('user.store.order',['edit',$order->id]);
+        } else
+            $this->emitNotify('برای این اگهی  امکان ویرایش وجود ندارد','warning');
     }
 
+    public function deleteImage($key){
+        @unlink($this->gallery[$key]);
+        unset($this->gallery[$key]);
+    }
 }

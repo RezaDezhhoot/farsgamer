@@ -11,7 +11,7 @@ use App\Models\Setting;
 class Header extends BaseComponent
 {
     public $data = [];
-    public function render(Response $request)
+    public function mount()
     {
         if (Setting::getSingleRow('status') == 0)
             abort(503);
@@ -25,6 +25,9 @@ class Header extends BaseComponent
                     auth()->check() ? auth()->user()->alerts()->where('is_read',0)->orderBy('id','desc')->take(10) : 0,
             ],
         ];
+    }
+    public function render(Response $request)
+    {
         return view('livewire.site.layouts.site.header');
     }
 }

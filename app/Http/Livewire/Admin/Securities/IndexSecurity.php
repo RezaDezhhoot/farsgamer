@@ -10,7 +10,7 @@ class IndexSecurity extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $max_order_image_size , $data = [] , $boycott = [] , $google , $min_price_to_request,
-        $password_length , $dos_count , $max_profile_image_size , $valid_ticket_files , $valid_order_images , $ticket_per_day,
+        $password_length , $dos_count , $max_profile_image_size , $order_images_count , $valid_ticket_files , $valid_order_images , $ticket_per_day,
         $auth_image_pattern , $auth_note;
     public function mount()
     {
@@ -286,6 +286,7 @@ class IndexSecurity extends BaseComponent
         $this->min_price_to_request = Setting::getSingleRow('min_price_to_request');
         $this->auth_image_pattern = Setting::getSingleRow('auth_image_pattern');
         $this->auth_note = Setting::getSingleRow('auth_note');
+        $this->order_images_count = Setting::getSingleRow('order_images_count');
     }
     public function render()
     {
@@ -307,7 +308,8 @@ class IndexSecurity extends BaseComponent
             'ticket_per_day' => ['required','integer','min:1'],
             'min_price_to_request' => ['required','integer','min:1'],
             'auth_image_pattern' => ['nullable','string','max:300'],
-            'auth_note' => ['nullable','string','max:250']
+            'auth_note' => ['nullable','string','max:250'],
+            'order_images_count' => ['required','integer','integer','between:1,40'],
         ], [], [
             'boycott' => 'تحریم ها',
             'google' => 'شناسه گوگل',
@@ -321,6 +323,7 @@ class IndexSecurity extends BaseComponent
             'min_price_to_request' => 'حداقل موجودی لازم برای برداشت',
             'auth_image_pattern' => 'تصویر نمونه برای احراز هویت',
             'auth_note' => 'متن توضیح برای احراز هویت',
+            'order_images_count' => 'تعداد تصاویر مجاز برای اپلود',
         ]);
         Setting::updateOrCreate(['name' => 'boycott'], ['value' => json_encode($this->boycott)]);
         Setting::updateOrCreate(['name' => 'google'], ['value' => $this->google]);
@@ -334,6 +337,7 @@ class IndexSecurity extends BaseComponent
         Setting::updateOrCreate(['name' => 'auth_image_pattern'], ['value' => $this->auth_image_pattern]);
         Setting::updateOrCreate(['name' => 'min_price_to_request'], ['value' => $this->min_price_to_request]);
         Setting::updateOrCreate(['name' => 'auth_note'], ['value' => $this->auth_note]);
+        Setting::updateOrCreate(['name' => 'order_images_count'], ['value' => $this->order_images_count]);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 }

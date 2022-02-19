@@ -8,7 +8,7 @@ use App\Models\Setting;
 class Footer extends BaseComponent
 {
     public $data = [] , $email;
-    public function render()
+    public function mount()
     {
         $this->data = [
             'copyRight' => Setting::getSingleRow('copyRight'),
@@ -18,6 +18,9 @@ class Footer extends BaseComponent
             'address' => Setting::getSingleRow('address'),
             'contact' => Setting::getSingleRow('contact'),
         ];
+    }
+    public function render()
+    {
         return view('livewire.site.layouts.site.footer');
     }
 }

@@ -23,6 +23,7 @@ use Morilog\Jalali\Jalalian;
  * @property mixed gallery
  * @property mixed province
  * @property mixed city
+ * @property mixed id
  */
 class Order extends Model
 {

@@ -12,6 +12,7 @@
                 <x-admin.forms.input type="number" id="dos_count" label="حداکثر امکان برای درخواست های پیوسته سمت سرور*" wire:model.defer="dos_count"/>
                 <x-admin.forms.input type="number" help="بر حسب کیلوبایت" id="max_profile_image_size" label="حداکثر حجم تصاویر پروفایل*" wire:model.defer="max_profile_image_size"/>
                 <x-admin.forms.input type="number" help="بر حسب کیلوبایت" id="max_order_image_size" label="حداکثر حجم تصاویر اگهی ها*" wire:model.defer="max_order_image_size"/>
+                <x-admin.forms.input type="number" id="order_images_count" label="تعداد تصاویر مجاز برای اپلود*" wire:model.defer="order_images_count"/>
                 <x-admin.forms.input type="text" help="فرمت هارا با کاما از هم جدا کنید" id="valid_order_images" label="فرمت های مجاز تصاویر اگهی ها*" wire:model.defer="valid_order_images"/>
                 <x-admin.forms.input type="text" help="فرمت هارا با کاما از هم جدا کنید" id="valid_ticket_files" label="فرمت های مجاز فایل های تیکت*" wire:model.defer="valid_ticket_files"/>
                 <x-admin.forms.input type="number" id="ticket_per_day" label="حداکثر دفعات ارسال تیکت در روز*" wire:model.defer="ticket_per_day"/>

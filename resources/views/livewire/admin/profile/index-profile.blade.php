@@ -31,7 +31,9 @@
                     <small class="text-info">حداقل حجم مجاز : {{\App\Models\Setting::getSingleRow('max_profile_image_size')}} کیلوبایت</small>
                 </div>
                 <br>
-                @if($user->profile_image)
+                @if(!is_null($file))
+                    <img style="max-width: 150px;border-radius: 5px" src="{{ $file->temporaryUrl() }}">
+                @elseif($user->profile_image)
                     <img style="max-width: 150px;border-radius: 5px" src="{{asset($user->profile_image)}}" alt="">
                 @endif
             </div>

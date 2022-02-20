@@ -17,6 +17,9 @@ use App\Traits\Admin\Searchable;
  * @property bool|mixed backed
  * @property mixed user
  * @property mixed price
+ * @property int|mixed|string|null user_id
+ * @property mixed card_id
+ * @property mixed id
  * @method static latest(string $string)
  * @method static where(string $string, string $NEW)
  * @method static findOrFail($id)

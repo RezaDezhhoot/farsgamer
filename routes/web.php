@@ -85,8 +85,8 @@ Route::middleware(['auth'])->namespace('App\Http\Livewire\Site')->prefix('/user'
     Route::get('/chats', Dashboard\Chats\IndexChat::class)->name('user.chat')->middleware('userAuth');
     Route::get('/orders', Dashboard\Orders\IndexOrder::class)->name('user.order')->middleware('userAuth');
     Route::get('/orders/{action}/{id?}', Dashboard\Orders\StoreOrder::class)->name('user.store.order')->middleware('userAuth');
-    Route::get('/requests', Dashboard\Accountings\IndexAccounting::class)->name('user.accounting')->middleware('userAuth');
-    Route::get('/requests/{action}/{id?}', Dashboard\Accountings\StoreAccounting::class)->name('user.store.accounting')->middleware('userAuth');
+    Route::get('/requests', Dashboard\Accounting\IndexAccounting::class)->name('user.accounting')->middleware('userAuth');
+    Route::get('/requests/{action}/{id?}', Dashboard\Accounting\StoreAccounting::class)->name('user.store.accounting')->middleware('userAuth');
     Route::get('/order-transactions', Dashboard\Transactions\IndexTransaction::class)->name('user.transaction')->middleware('userAuth');
     Route::get('/order-transactions/{action}/{id?}', Dashboard\Transactions\StoreTransaction::class)->name('user.store.transaction')->middleware('userAuth');
 });
@@ -94,14 +94,16 @@ Route::middleware(['auth'])->namespace('App\Http\Livewire\Site')->prefix('/user'
 Route::middleware('guest')->group(function () {
     Route::get('/auth', \App\Http\Livewire\Site\Auth\Auth::class)->name('auth');
 });
+// logout
 Route::get('/logout', function (){
     Auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
     return redirect()->route('auth');
 })->name('logout');
-
 // file manager
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth','role:admin','schedule']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
 });
+// checkout
+Route::middleware(['auth'])->get('/verify/{gateway}',\App\Http\Livewire\Cart\CallBack::class);

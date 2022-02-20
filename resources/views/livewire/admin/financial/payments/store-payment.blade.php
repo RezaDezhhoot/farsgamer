@@ -74,7 +74,13 @@
                     <p>
                         <b> وضعیت :</b>
                         <span>
-                        {{ $payment::getStatus()[$payment->status_code] }}
+                        {{ $payment->status_code }}
+                    </span>
+                    </p>
+                    <p>
+                        <b> پیام :</b>
+                        <span>
+                        {{ $payment->status_message }}
                     </span>
                     </p>
                     <p>

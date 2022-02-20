@@ -13,16 +13,22 @@ use Morilog\Jalali\Jalalian;
  * @method static create(array $array)
  * @method static whereBetween(string $string, string[] $array)
  * @method static whereNotNull(string $string)
+ * @method static where(string $string, string $string1)
+ * @method static find($code)
  * @property mixed created_at
  */
 class Payment extends Model
 {
     use HasFactory , Searchable;
 
+    protected $guarded = [];
+
     public static function getStatus()
     {
         return [
             '100' => 'موق',
+            '8' => 'به درگاه پرداخت منتقل شد',
+            '10' => 'در انتظار تایید پرداخت',
         ];
     }
 

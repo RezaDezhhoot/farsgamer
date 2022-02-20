@@ -17,7 +17,7 @@ class CreateOrderTransactionsPaymentsTable extends Migration
             $table->id();
             $table->foreignId('orders_transactions_id')->constrained('orders_transactions')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->decimal('price',75);
+            $table->decimal('price',60);
             $table->string('status');
             $table->string('gateway');
             $table->timestamps();

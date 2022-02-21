@@ -9,12 +9,13 @@ use Morilog\Jalali\Jalalian;
 /**
  * @property mixed status
  * @property mixed created_at
+ * @method static create(array $array)
  */
 class OrderTransactionPayment extends Model
 {
     use HasFactory;
     protected $table = 'order_transactions_payments';
-
+    protected $guarded = [];
     const SUCCESS = 'success' , FAILED = 'failed';
 
     public static function getStatus()

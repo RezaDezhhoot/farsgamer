@@ -63,12 +63,15 @@ class SingleOrder extends BaseComponent
                     ],[],[
                         'confirmLaw' => 'تایید قوانین',
                     ]);
+                    $commission = $this->calculateCommission($this->order->price,$this->order->category);
                     $transaction = new OrderTransaction();
                     $transaction->customer_id = Auth::id();
                     $transaction->seller_id = $this->order->user_id;
                     $transaction->order_id = $this->order->id;
                     $transaction->status = OrderTransaction::WAIT_FOR_CONFIRM;
                     $transaction->timer = Carbon::make(now())->addHours(0);
+                    $transaction->commission = $commission['commission'];
+                    $transaction->intermediary = $commission['intermediary'];
                     $transaction->save();
                     OrderTransactionData::updateOrCreate(['transaction_id'=>$transaction->id],['name'=>uniqid()]);
                     $texts = $this->createText('confirm_transaction',$transaction);

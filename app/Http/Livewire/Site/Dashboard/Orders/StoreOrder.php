@@ -18,7 +18,7 @@ class StoreOrder extends BaseComponent
 {
     public $order , $header , $user , $mode;
     public $slug , $category_id , $content , $price , $image , $mainImage , $gallery = [] , $galleries = [] , $province , $city ,$result;
-    public $parameters , $parameter = [] , $platforms , $platform = [] , $message;
+    public $parameters , $parameter = [] , $platforms , $platform = [] , $message , $commission , $intermediary;
     public $data = [];
     use WithFileUploads , TextBuilder;
     public function mount($action , $id = null)
@@ -110,18 +110,25 @@ class StoreOrder extends BaseComponent
                 ]
             );
 
+            $baseAmount = 1000;
+
+            if ($this->price < $baseAmount){
+                $baseAmount = number_format($baseAmount);
+                return $this->addError('price',"حداقل هزیته برای این اگهی $baseAmount تومان می باشد ");
+            }
+
             if (!is_null($this->image)) {
                 @unlink($this->mainImage->image);
                 $this->image = 'storage/'.$this->image->store('files/orders', 'public');
                 $this->imageWatermark($this->image);
                 $order->image = $this->image;
             }
-            $i = 0;
+
             if (!is_null($this->galleries)) {
                 foreach ($this->galleries as $image) {
                     $pic = 'storage/'.$image->store('files/orders', 'public').',';
                     $this->imageWatermark($pic,'center');
-                    array_push($this->gallery,$image);
+                    array_push($this->gallery,$pic);
                 }
                 $order->gallery = implode(',',$this->gallery);
             }
@@ -178,4 +185,6 @@ class StoreOrder extends BaseComponent
         @unlink($this->gallery[$key]);
         unset($this->gallery[$key]);
     }
+
+
 }

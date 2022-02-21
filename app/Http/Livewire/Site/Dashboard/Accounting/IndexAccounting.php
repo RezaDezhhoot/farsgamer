@@ -67,6 +67,7 @@ class IndexAccounting extends BaseComponent
                     'model_id' => auth()->id(),
                     'status_code' => 8,
                     'user_id' => auth()->id(),
+                    'call_back_url' => url()->current(),
                 ]);
                 return $pay->id;
             }

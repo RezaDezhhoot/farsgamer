@@ -97,8 +97,8 @@ class StoreCategory extends BaseComponent
             'is_available' => ['required','in:'.Category::YES.','.Category::NO],
             'type' => ['required','in:'.Category::DIGITAL.','.Category::PHYSICAL],
             'form' => ['nullable','array'],
-            'commission' => ['required','numeric','between:0,999999999.9999'],
-            'intermediary' => ['required','numeric','between:0,999999999.9999'],
+            'commission' => ['required','numeric','between:0,20'],
+            'intermediary' => ['required','numeric','between:0,20'],
             'control' => ['nullable'],
         ];
         $messages = [
@@ -125,6 +125,8 @@ class StoreCategory extends BaseComponent
             'intermediary' => 'حق واسطه گری',
             'control' => 'نیاز به واسط',
         ];
+        if ($this->commission + $this->intermediary > 20)
+            return $this->addError('error','مجموع کارمزد و حق واسه گری نباید از 20٪ بیشتر باشد.');
         $this->validate($fields,[],$messages);
         $model->slug = $this->slug;
         $model->title = $this->title;
@@ -143,6 +145,7 @@ class StoreCategory extends BaseComponent
         $model->parent_id = $this->parent_id;
         $model->status = $this->status;
         $model->commission = $this->commission;
+        $model->intermediary = $this->intermediary;
         $model->is_available = $this->is_available;
         $model->type = $this->type;
         $model->control = $this->control ?? 0;

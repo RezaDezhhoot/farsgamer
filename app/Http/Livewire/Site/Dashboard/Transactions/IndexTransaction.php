@@ -9,14 +9,21 @@ use Livewire\WithPagination;
 class IndexTransaction extends BaseComponent
 {
     use WithPagination;
-    protected $queryString = ['status'];
-    public $paginate = 15 , $status , $category;
+    protected $queryString = ['target'];
+    public $paginate = 15 , $target , $category , $data = [];
+    public function mount()
+    {
+        $this->data['status'] = ['seller','customer'];
+    }
     public function render()
     {
-        $transactions = OrderTransaction::with(['order'])->when($this->status,function ($query) {
-            return $this->status == 'seller' ? $query->where('seller_id',auth()->id()) :
+        $transactions = OrderTransaction::with(['order'])->where(function ($query){
+            return $query->where('seller_id',auth()->id())->orWhere('customer_id',auth()->id());
+        })->when($this->target,function ($query) {
+            return $this->target == 'seller' ? $query->where('seller_id',auth()->id()) :
                 $query->where('customer_id',auth()->id());
         })->paginate($this->paginate);
-        return view('livewire.site.dashboard.order-transactions.index-transaction',['order-transactions'=>$transactions]);
+
+        return view('livewire.site.dashboard.order-transactions.index-transaction',['transactions'=>$transactions]);
     }
 }

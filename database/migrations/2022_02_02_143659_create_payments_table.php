@@ -24,6 +24,7 @@ class CreatePaymentsTable extends Migration
             $table->text('json')->nullable();
             $table->string('status_message')->nullable();
             $table->foreignId('user_id')->constrained();
+            $table->string('call_back_url');
             $table->timestamps();
         });
     }

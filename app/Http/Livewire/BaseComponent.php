@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Category;
 use App\Models\Setting;
 use Intervention\Image\Facades\Image;
 use Livewire\Component;
@@ -85,4 +86,12 @@ class BaseComponent extends Component
         return $dst;
     }
 
+
+    public function calculateCommission($price ,Category $category)
+    {
+        $data = [];
+        $data['commission'] =  $price*($category->commission/100);
+        $data['intermediary'] = $price*($category->intermediary/100);
+        return $data;
+    }
 }

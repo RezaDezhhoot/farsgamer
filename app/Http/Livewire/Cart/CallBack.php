@@ -43,10 +43,10 @@ class CallBack extends BaseComponent
                     ]);
                 }
                 $this->isSuccessful = false;
-                return redirect()->route('user.request',['code' => (isset($pay->id) ?  $pay->id : 0)]);
+                return redirect()->to($pay->call_back_url.'?code='.(isset($pay->id) ?  $pay->id : 0));
             }
         } else
-            return redirect()->route('user.request');
+            return redirect()->to('user.request');
     }
 
     private function success($payment = null)
@@ -70,7 +70,7 @@ class CallBack extends BaseComponent
             }
         }
         $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
-        return redirect()->route('user.request',['code' => (isset($pay->id) ?  $pay->id : 0)]);
+        return redirect()->to($pay->call_back_url.'?code='.(isset($pay->id) ?  $pay->id : 0));
     }
 
 

@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|mixed sending_data_time
  * @property int|mixed pay_time
  * @property int|mixed no_receive_time
+ * @property mixed intermediary
  */
 class Category extends Model
 {

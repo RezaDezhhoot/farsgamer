@@ -20,7 +20,7 @@
             <x-admin.forms.input type="number" id="no_receive_time" label="زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="no_receive_time"/>
             <x-admin.forms.input type="number" id="guarantee_time" label="زمان تست*" help="بر حسب دقیقه" wire:model.defer="guarantee_time"/>
             <x-admin.forms.input type="number" id="commission" label="کارمزد شبکه *" help="بر حسب درصد" wire:model.defer="commission"/>
-            <x-admin.forms.input type="number" id="intermediary" label="حق واسطه گری*" help="مقدار ثابت(تومان)" wire:model.defer="intermediary"/>
+            <x-admin.forms.input type="number" id="intermediary" label="حق واسطه گری*" help="بر حسب درصد" wire:model.defer="intermediary"/>
             <x-admin.forms.checkbox id="control" label="نیاز به واسط" wire:model.defer="control" />
             <x-admin.forms.dropdown id="status" :data="$data['status']" label="وضعیت*" wire:model.defer="status"/>
             <x-admin.forms.dropdown id="parent_id" :data="$data['category']" label="دسته مادر" wire:model.defer="parent_id"/>

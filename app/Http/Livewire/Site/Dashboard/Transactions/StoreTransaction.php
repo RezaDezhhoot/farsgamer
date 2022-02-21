@@ -3,25 +3,28 @@
 namespace App\Http\Livewire\Site\Dashboard\Transactions;
 
 use App\Http\Livewire\BaseComponent;
+use App\Models\Category;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\OrderTransactionPayment;
-use App\Models\Payment;
+use App\Models\Payment as Pay;
 use App\Models\OrderTransaction;
+use App\Models\Setting;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
 use Bavix\Wallet\Exceptions\BalanceIsEmpty;
 use Bavix\Wallet\Exceptions\InsufficientFunds;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Shetabit\Multipay\Exceptions\PurchaseFailedException;
 use Shetabit\Multipay\Invoice;
-use Shetabit\Payment\Facade\Payment as Pay;
+use Shetabit\Payment\Facade\Payment;
 
 class StoreTransaction extends BaseComponent
 {
     use TextBuilder;
     public $transaction , $status ,$timer , $form = []  , $transactionData = [] , $transactionDataTransfer = [];
-    public  $data = [] , $return , $chat , $message  , $received_result , $finalPrice , $send_id , $transfer_result;
+    public  $data = [] , $return , $chat , $message  , $received_result , $price , $gateway , $send_id , $transfer_result;
     public $return_cause , $return_images , $nowStatus , $mode;
 
     public function mount($action , $id){
@@ -171,17 +174,39 @@ class StoreTransaction extends BaseComponent
                                 return $this->addError('transactionData.' . $item['name'] . '.error', __('validation.required', ['attribute' => 'اطلاعات']));
                         }
                         $data->value = json_encode($this->transactionData);
+                        if ($this->transaction->order->category->type == Category::PHYSICAL) {
+                            $this->validate([
+                                'send_id' => ['required','exists:sends,id'],
+                                'transfer_result' => ['required','string','max:250']
+                            ],[],[
+                                'send_id' => 'روش ارسال',
+                                'transfer_result' => 'کد رهگیری'
+                            ]);
+                            $data->send_id = $this->send_id;
+                            $data->transfer_result = $this->transfer_result;
+                        }
                         $data->save();
-
+                        $timer = '';
                         if ($this->transaction->order->category->control){
                             $this->transaction->status = OrderTransaction::WAIT_FOR_CONTROL;
                             $this->transaction->timer = '';
                             $this->emit('timer',['data' => '']);
                         } else {
                             $this->transaction->status = OrderTransaction::WAIT_FOR_RECEIVE;
-                            $timer = Carbon::make(now())->addMinutes(
-                                (float)$this->transaction->order->category->receive_time
-                            );
+                            if ($this->transaction->order->category->type == Category::DIGITAL)
+                                $timer = Carbon::make(now())->addMinutes(
+                                    (float)$this->transaction->order->category->receive_time
+                                );
+                            elseif ($this->transaction->order->category->type == Category::PHYSICAL) {
+                                if ($this->transaction->order->city == $this->transaction->customer->city && $this->transaction->order->province == $this->transaction->customer->province)
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_inner_city
+                                    );
+                                else
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_outer_city
+                                    );
+                            }
                             $this->transaction->timer = $timer;
                             $sms->sends(
                                 $this->createText('receive_transaction',$this->transaction),
@@ -208,6 +233,14 @@ class StoreTransaction extends BaseComponent
                             Notification::TRANSACTION,
                             $this->transaction->id
                         );
+                        if (auth()->id() == $this->transaction->seller_id){
+                            $sms->sends(
+                                $this->createText('skip_step',$this->transaction),
+                                $this->transaction->customer,
+                                Notification::TRANSACTION,
+                                $this->transaction->id
+                            );
+                        }
                         $this->emit('timer',['data' => $timer->toDateTimeString()]);
                         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
                     } else
@@ -222,6 +255,14 @@ class StoreTransaction extends BaseComponent
                         $this->transaction->order->save();
                         $sms->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
                         $sms->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                        if (auth()->id() == $this->transaction->seller_id){
+                            $sms->sends(
+                                $this->createText('skip_step',$this->transaction),
+                                $this->transaction->customer,
+                                Notification::TRANSACTION,
+                                $this->transaction->id
+                            );
+                        }
                         if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
                             $price = $this->transaction->order->price;
                             $commission = $this->transaction->commission;
@@ -297,36 +338,113 @@ class StoreTransaction extends BaseComponent
 
     public function payMore()
     {
-        if ($this->finalPrice >= 1000)
-        {
-            try {
-                $payment = Pay::callbackUrl(env('APP_URL') . '/call-back')
-                    ->purchase((new Invoice)
-                        ->amount(($this->finalPrice)), function ($driver,$transactionId) {
+        $this->validate([
+            'price' => ['required','numeric','between:1000,40000000'],
+            'gateway' => ['requred','in:payir,zarinpal'],
+        ],[],[
+            'price'=> 'مبلغ',
+            'gateway' => 'درگاه',
+        ]);
+        try {
+            $payment = Payment::via($this->gateway)->callbackUrl(env('APP_URL') . '/verify/'. $this->gateway)
+                ->purchase((new Invoice)
+                    ->amount(($this->price)), function ($driver,$transactionId) {
+                    $this->storePay($this->gateway ,$transactionId);
+                })->pay()->toJson();
+            $payment = json_decode($payment);
+            return redirect($payment->action);
+        } catch (PurchaseFailedException $exception) {
+            $this->addError('payment', $exception->getMessage());
+        }
+    }
 
-                    })->pay()->toJson();
-                $payment = json_decode($payment);
-                return redirect($payment->action);
-            } catch (PurchaseFailedException $exception) {
-                $this->addError('payment', $exception->getMessage());
+    public function storePay($gateway , $transactionId)
+    {
+        return  DB::transaction(function () use ($gateway, $transactionId) {
+            if (!is_null($gateway)) {
+                $pay = Pay::create([
+                    'amount' => $this->price,
+                    'payment_gateway' => $gateway,
+                    'payment_token' => $transactionId,
+                    'model_type' => 'user',
+                    'model_id' => auth()->id(),
+                    'status_code' => 8,
+                    'user_id' => auth()->id(),
+                    'call_back_url' => url()->current(),
+                ]);
+                return $pay->id;
             }
+        });
+    }
+
+    public function no_receive()
+    {
+        if ($this->transaction->status == OrderTransaction::WAIT_FOR_RECEIVE){
+            if ($this->transaction->customer_id == auth()->id()) {
+                $this->validate([
+                    'received_result' => ['required','string','max:2000']
+                ],[],[
+                    'received_result' => 'متن توضیحات',
+                ]);
+                $sms = new SendMessages();
+                $this->transaction->received_status = true;
+                $this->transaction->received_result = $this->received_result;
+                $this->transaction->status = OrderTransaction::WAIT_FOR_NO_RECEIVE;
+                $this->transaction->save();
+                $target = $this->transaction->is_returned ? $this->transaction->customer : $this->transaction->seller;
+                $sms->sends(
+                    $this->createText('no_receive_transaction',$this->transaction),
+                    $target,
+                    Notification::TRANSACTION,
+                    $this->transaction->id
+                );
+                $this->reset(['received_result']);
+                return $this->emitNotify('اطلاعات با موفقیت ثبت شد لطفا تا اطلاع مدیریت منتظر بمانید');
+            } else
+                return $this->addError('error','شما اجازه این کار را ندارید');
         } else
-            $this->addError('payment', 'حداقل مبلغ برای پرداخت 1000 تومان می باشد');
-    }
-
-    public function no_receive_customer()
-    {
-
-    }
-
-    public function no_receive_seller()
-    {
-
+            return $this->addError('error','شما اجازه این کار را ندارید');
     }
 
     public function requestToReturn()
     {
-
+        if (!$this->transaction->is_returned && $this->transaction->status == OrderTransaction::WAIT_FOR_TESTING){
+            if ($this->transaction->customer_id == auth()->id()){
+                $sms = new SendMessages();
+                $this->validate([
+                    'return_cause' => ['required','string','max:2000'],
+                    'return_images' => ['array','min:1','max:3'],
+                    'return_images.*' => ['required','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
+                ],[],
+                [
+                    'return_cause' => 'متن توضیحات',
+                    'return_images' => 'تصاویر',
+                ]);
+                if (!is_null($this->return_images)) {
+                    $gallery = [];
+                    foreach ($this->return_images as $image) {
+                        $pic = 'storage/'.$image->store('files/returns', 'public').',';
+                        array_push($gallery,$pic);
+                    }
+                    $gallery = implode(',',$gallery);
+                } else
+                    return false;
+                $this->transaction->status = OrderTransaction::IS_RETURNED;
+                $this->transaction->return_cause = $this->return_cause;
+                $this->transaction->return_images = $gallery;
+                $this->transaction->save();
+                $sms->sends(
+                    $this->createText('request_to_return_transaction',$this->transaction),
+                    $this->transaction->seller,
+                    Notification::TRANSACTION,
+                    $this->transaction->id
+                );
+                $this->reset(['return_cause','return_images']);
+                return $this->emitNotify('اطلاعات با موفقیت ثبت شد لطفا تا اطلاع مدیریت منتظر بمانید');
+            } else
+                return $this->addError('error','شما اجازه این کار را ندارید');
+        } else
+            return $this->addError('error','شما اجازه این کار را ندارید');
     }
 
 

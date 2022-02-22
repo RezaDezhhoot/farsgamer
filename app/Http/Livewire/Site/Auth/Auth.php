@@ -58,7 +58,6 @@ class Auth extends BaseComponent
 
     public function login()
     {
-
         $rateKey = 'verify-attempt:' . $this->phone . '|' . request()->ip();
         if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count'))) {
             $this->resetInputs();
@@ -68,14 +67,14 @@ class Auth extends BaseComponent
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $this->resetErrorBag();
         $this->validate([
-            'phone' => ['required','string','size:11'],
+            'phone' => ['required','string'],
             'password' => ['required']
         ],[],[
-            'phone' => 'شماره همراه',
+            'phone' => 'شماره همراه یا نام کاربری',
             'password' => 'رمز عبور',
         ]);
 
-        $user = User::where('phone', $this->phone)->first();
+        $user = User::where('phone', $this->phone)->orWhere('user_name',$this->user_name)->first();
 
         if (!is_null($user)) {
 
@@ -173,14 +172,14 @@ class Auth extends BaseComponent
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $this->validate([
-            'phone' => ['required','string','size:11'],
+            'phone' => ['required','string'],
         ],[],[
-            'phone' => 'شماره همراه',
+            'phone' => 'شماره همراه یا نام کاربری',
         ]);
         $this->sms = true;
-        $rand = rand(1234,9879);
+        $rand = rand(12345,999998);
         $this->otp = Hash::make($rand);
-        $user = User::where('phone', $this->phone)->first();
+        $user = User::where('phone', $this->phone)->orWhere('user_name',$this->phone)->first();
         if (!is_null($user)) {
             $user->otp = $this->otp;
             $this->passwordLabel = 'رمز ارسال شده را وارد نماید';

@@ -113,7 +113,7 @@ class StoreTicket extends BaseComponent
             if ($model->status == Ticket::ANSWERED) {
                 $this->validate([
                     'newMessage' => ['required','string','max:250'],
-                    'newFile' => ['nullable','image','mimes:jpg,jpeg,png,gif','max:2048'],
+                    'newFile' => ['nullable','image','mimes:'.Setting::getSingleRow('valid_ticket_files'),'max:2048'],
                 ],[],[
                     'newMessage' => 'متن درخواست',
                     'newFile' =>  'فایل',
@@ -126,9 +126,12 @@ class StoreTicket extends BaseComponent
                 $ticket->sender_id = Auth::id();
                 $ticket->priority = $model->priority;
                 $ticket->status = $model->status;
-                if ($this->newFile <> null)
-                    $ticket->file  = 'storage/'.$this->newFile->store('ticket', 'public');
-
+                if (!is_null($this->newFile) && !empty($this->newFile)){
+                    foreach ($this->newFile as $item){
+                        $save = 'storage/'.$item->store('ticket', 'public');
+                        $model->file = $save.',';
+                    }
+                }
                 $ticket->save();
                 $this->emitNotify('اطلاعات با موفقیت ثبت شد');
                 $this->ticket->child->push($ticket);

@@ -19,6 +19,8 @@ class OrderTransactionData extends Model
 
     protected $fillable = ['updated_at','order_transaction_id','name'];
 
+    protected $guarded = [];
+
     public function send()
     {
         return $this->belongsTo(Send::class);

@@ -54,7 +54,8 @@ class Task extends Model
             'returned_receive_transaction' => 'در انتظار دریافت توسط فروشنده(مرجوعی)',#ok
             'return_no_receive_transaction' => 'عدم دریافت محصول مورد نظر توسط فروشنده(مرجوعی)',#ok
             'cancel_transaction' => 'لفو معامله',#ok
-            'skip_step' => 'رد شدن از مراحل توسط طرف معامله',
+            'control_data' => 'کنترل توسط واسطه',#ok
+            'skip_step' => 'رد شدن از مراحل توسط طرف معامله بابت دیر کرد',
             'confirm_address' => 'تایید ادرس',#ok
             'reject_address' => 'رد ادرس',#ok
             'confirm_card' => 'تایید حساب بانکی',#ok

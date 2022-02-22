@@ -6,6 +6,7 @@ use App\Http\Livewire\BaseComponent;
 use App\Models\Category;
 use App\Models\Notification;
 use App\Models\Order;
+use App\Models\OrderTransactionData;
 use App\Models\OrderTransactionPayment;
 use App\Models\Payment as Pay;
 use App\Models\OrderTransaction;
@@ -117,6 +118,9 @@ class StoreTransaction extends BaseComponent
                             Notification::TRANSACTION,
                             $this->transaction->id
                         );
+                        $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
+                            'status' => OrderTransaction::IS_CANCELED,
+                        ]);
                         $this->emit('timer',['data' => $timer->toDateTimeString()]);
                         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
                     }
@@ -190,7 +194,8 @@ class StoreTransaction extends BaseComponent
                         if ($this->transaction->order->category->control){
                             $this->transaction->status = OrderTransaction::WAIT_FOR_CONTROL;
                             $this->transaction->timer = '';
-                            $this->emit('timer',['data' => '']);
+                            $sms->sends($this->createText('control_data',$this->transaction)
+                                ,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
                         } else {
                             $this->transaction->status = OrderTransaction::WAIT_FOR_RECEIVE;
                             if ($this->transaction->order->category->type == Category::DIGITAL)
@@ -247,6 +252,70 @@ class StoreTransaction extends BaseComponent
                         $this->addError('transaction','شما اجازه برای این عملیات را ندارید.');
                     break;
                 }
+                case OrderTransaction::WAIT_FOR_NO_RECEIVE:{
+                    if ((auth()->id() == $this->transaction->seller_id)) {
+                        foreach ($this->form as $key => $item) {
+                            if ($item['required'] == 1 && $item['for'] == 'seller' && $item['status'] == 'normal' && empty($this->transactionData[$item['name']]))
+                                return $this->addError('transactionData.' . $item['name'] . '.error', __('validation.required', ['attribute' => 'اطلاعات']));
+                        }
+                        $data->value = json_encode($this->transactionData);
+                        if ($this->transaction->order->category->type == Category::PHYSICAL) {
+                            $this->validate([
+                                'send_id' => ['required','exists:sends,id'],
+                                'transfer_result' => ['required','string','max:250']
+                            ],[],[
+                                'send_id' => 'روش ارسال',
+                                'transfer_result' => 'کد رهگیری'
+                            ]);
+                            $data->send_id = $this->send_id;
+                            $data->transfer_result = $this->transfer_result;
+                        }
+                        $data->save();
+                        $timer = '';
+                        if ($this->transaction->order->category->control){
+                            $this->transaction->status = OrderTransaction::WAIT_FOR_CONTROL;
+                            $this->transaction->timer = '';
+                            $sms->sends($this->createText('control_data',$this->transaction)
+                                ,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                        } else {
+                            $this->transaction->status = OrderTransaction::WAIT_FOR_RECEIVE;
+                            if ($this->transaction->order->category->type == Category::DIGITAL)
+                                $timer = Carbon::make(now())->addMinutes(
+                                    (float)$this->transaction->order->category->receive_time
+                                );
+                            elseif ($this->transaction->order->category->type == Category::PHYSICAL) {
+                                if ($this->transaction->order->city == $this->transaction->customer->city && $this->transaction->order->province == $this->transaction->customer->province)
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_inner_city
+                                    );
+                                else
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_outer_city
+                                    );
+                            }
+                            $this->transaction->timer = $timer;
+                            $sms->sends(
+                                $this->createText('receive_transaction',$this->transaction),
+                                $this->transaction->customer,
+                                Notification::TRANSACTION,
+                                $this->transaction->id
+                            );
+                        }
+                        $this->emitNotify('اطلاعات با موفقیت ثبت شد');
+                    } elseif ((auth()->id() == $this->transaction->customer_id && $timerStatus < 0)){
+                        $this->backMoney();
+                        OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                            'value'=> null
+                        ]);
+                        $texts = $this->createText('cancel_transaction',$this->transaction);
+                        $sms->sends($texts,$this->transaction->seller);
+                        $sms->sends($texts,$this->transaction->customer);
+                        $this->emitNotify('معامله با موفقیت کنسل شد.');
+                        $this->transaction->status = OrderTransaction::IS_CANCELED;
+                        $this->transaction->order->status = Order::IS_CONFIRMED;
+                        $this->transaction->order->save();
+                    }
+                }
                 case OrderTransaction::WAIT_FOR_TESTING:{
                     if ((auth()->id() == $this->transaction->customer_id) || (auth()->id() == $this->transaction->seller_id && $timerStatus < 0)) {
                         $this->transaction->status = OrderTransaction::WAIT_FOR_COMPLETE;
@@ -264,12 +333,12 @@ class StoreTransaction extends BaseComponent
                             );
                         }
                         if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
-                            $price = $this->transaction->order->price;
+                            $price = $this->transaction->payment->price;
                             $commission = $this->transaction->commission;
                             $intermediary = $this->transaction->intermediary;
-                            $final_price = ($price - ($commission/2) - ($intermediary/2));
+                            $final_price = ($price - ($commission) - ($intermediary));
                             $this->transaction->seller->deposit($final_price,
-                                ['description' => $this->transaction->code.'بابت معامله به کد ', 'from_admin'=> true]);
+                                ['description' => $this->transaction->code.'واریز هزینه بابت معامله به کد ', 'from_admin'=> true]);
                         }
                         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
                     } else
@@ -281,7 +350,196 @@ class StoreTransaction extends BaseComponent
             switch ($this->transaction->status)
             {
                 case OrderTransaction::WAIT_FOR_SENDING_DATA:{
+                    if ((auth()->id() == $this->transaction->seller_id)) {
+                        foreach ($this->form as $key => $item) {
+                            if ($item['required'] == 1 && $item['for'] == 'seller' && $item['status'] == 'return' && empty($this->transactionData[$item['name']]))
+                                return $this->addError('transactionData.' . $item['name'] . '.error', __('validation.required', ['attribute' => 'اطلاعات']));
+                        }
+                        $data->value = json_encode($this->transactionData);
+                        $data->save();
+                        $this->transaction->status = OrderTransaction::WAIT_FOR_SEND;
+                        $text = $this->createText('returned_send_transaction',$this->transaction);
+                        $model = $this->transaction->customer;
+                        $sms->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                    } elseif ((auth()->id() == $this->transaction->customer_id && $timerStatus < 0)){
+                        $this->backMoney();
+                        OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                            'value'=> null
+                        ]);
+                        $texts = $this->createText('cancel_transaction',$this->transaction);
+                        $sms->sends($texts,$this->transaction->seller);
+                        $sms->sends($texts,$this->transaction->customer);
+                        $this->emitNotify('معامله با موفقیت کنسل شد.');
+                        $this->transaction->status = OrderTransaction::IS_CANCELED;
+                        $this->transaction->order->status = Order::IS_FINISHED;
+                        $this->transaction->order->save();
+                        $sms->sends($this->createText('skip_step',$this->transaction)
+                            ,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                    }
                     break;
+                }
+                case OrderTransaction::WAIT_FOR_SEND:{
+                    if ((auth()->id() == $this->transaction->customer_id)) {
+                        foreach ($this->form as $key => $item) {
+                            if ($item['required'] == 1 && $item['for'] == 'customer' && $item['status'] == 'return' && empty($this->transactionData[$item['name']]))
+                                return $this->addError('transactionData.' . $item['name'] . '.error', __('validation.required', ['attribute' => 'اطلاعات']));
+                        }
+                        $data->value = json_encode($this->transactionData);
+                        if ($this->transaction->order->category->type == Category::PHYSICAL) {
+                            $this->validate([
+                                'send_id' => ['required','exists:sends,id'],
+                                'transfer_result' => ['required','string','max:250']
+                            ],[],[
+                                'send_id' => 'روش ارسال',
+                                'transfer_result' => 'کد رهگیری'
+                            ]);
+                            $data->send_id = $this->send_id;
+                            $data->transfer_result = $this->transfer_result;
+                        }
+                        $data->save();
+                        $timer = '';
+                        if ($this->transaction->order->category->control){
+                            $this->transaction->status = OrderTransaction::WAIT_FOR_CONTROL;
+                            $this->transaction->timer = '';
+                            $sms->sends($this->createText('control_data',$this->transaction)
+                                ,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                        } else {
+                            $this->transaction->status = OrderTransaction::WAIT_FOR_RECEIVE;
+                            if ($this->transaction->order->category->type == Category::DIGITAL)
+                                $timer = Carbon::make(now())->addMinutes(
+                                    (float)$this->transaction->order->category->receive_time
+                                );
+                            elseif ($this->transaction->order->category->type == Category::PHYSICAL) {
+                                if ($this->transaction->order->city == $this->transaction->customer->city && $this->transaction->order->province == $this->transaction->customer->province)
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_inner_city
+                                    );
+                                else
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_outer_city
+                                    );
+                            }
+                            $this->transaction->timer = $timer;
+                            $sms->sends(
+                                $this->createText('returned_receive_transaction',$this->transaction),
+                                $this->transaction->seller,
+                                Notification::TRANSACTION,
+                                $this->transaction->id
+                            );
+                        }
+                    } elseif ((auth()->id() == $this->transaction->seller_id && $timerStatus < 0)){
+                        $this->transaction->status = OrderTransaction::WAIT_FOR_COMPLETE;
+                        $this->transaction->is_returned = 0;
+                        $text = $this->createText('complete_transaction',$this->transaction);
+                        $this->transaction->order->status = Order::IS_FINISHED;
+                        $this->transaction->order->save();
+                        $sms->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                        $sms->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                        if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
+                            $price = $this->transaction->payment->price;
+                            $commission = $this->transaction->commission;
+                            $intermediary = $this->transaction->intermediary;
+                            $final_price = ($price - ($commission) - ($intermediary));
+                            $this->transaction->seller->deposit($final_price,
+                                ['description' => $this->transaction->code.'واریز هزینه بابت معامله به کد ', 'from_admin'=> true]);
+                        }
+                        $sms->sends($this->createText('skip_step',$this->transaction)
+                            ,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                    }
+                    break;
+                }
+                case OrderTransaction::WAIT_FOR_RECEIVE:{
+                    if ((auth()->id() == $this->transaction->seller_id) || (auth()->id() == $this->transaction->customer_id && $timerStatus < 0) ) {
+                        $this->transaction->status = OrderTransaction::IS_CANCELED;
+                        $text = $this->createText('cancel_transaction',$this->transaction);
+                        $model = $this->transaction->customer;
+                        $sms->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                        if (auth()->id() == $this->transaction->customer_id){
+                            $sms->sends(
+                                $this->createText('skip_step',$this->transaction),
+                                $this->transaction->seller,
+                                Notification::TRANSACTION,
+                                $this->transaction->id
+                            );
+                        }
+                        $this->transaction->order->status = Order::IS_CONFIRMED;
+                        $this->transaction->order->save();
+                        $this->backMoney();
+                        OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                            'value'=> null
+                        ]);
+                    }
+                    break;
+                }
+                case OrderTransaction::WAIT_FOR_NO_RECEIVE:{
+                    if ((auth()->id() == $this->transaction->customer_id)) {
+                        foreach ($this->form as $key => $item) {
+                            if ($item['required'] == 1 && $item['for'] == 'customer' && $item['status'] == 'return' && empty($this->transactionData[$item['name']]))
+                                return $this->addError('transactionData.' . $item['name'] . '.error', __('validation.required', ['attribute' => 'اطلاعات']));
+                        }
+                        $data->value = json_encode($this->transactionData);
+                        if ($this->transaction->order->category->type == Category::PHYSICAL) {
+                            $this->validate([
+                                'send_id' => ['required','exists:sends,id'],
+                                'transfer_result' => ['required','string','max:250']
+                            ],[],[
+                                'send_id' => 'روش ارسال',
+                                'transfer_result' => 'کد رهگیری'
+                            ]);
+                            $data->send_id = $this->send_id;
+                            $data->transfer_result = $this->transfer_result;
+                        }
+                        $data->save();
+                        $timer = '';
+                        if ($this->transaction->order->category->control){
+                            $this->transaction->status = OrderTransaction::WAIT_FOR_CONTROL;
+                            $this->transaction->timer = '';
+                            $sms->sends($this->createText('control_data',$this->transaction)
+                                ,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                        } else {
+                            $this->transaction->status = OrderTransaction::WAIT_FOR_RECEIVE;
+                            if ($this->transaction->order->category->type == Category::DIGITAL)
+                                $timer = Carbon::make(now())->addMinutes(
+                                    (float)$this->transaction->order->category->receive_time
+                                );
+                            elseif ($this->transaction->order->category->type == Category::PHYSICAL) {
+                                if ($this->transaction->order->city == $this->transaction->customer->city && $this->transaction->order->province == $this->transaction->customer->province)
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_inner_city
+                                    );
+                                else
+                                    $timer = Carbon::make(now())->addMinutes(
+                                        (float)$this->transaction->data->send->send_time_outer_city
+                                    );
+                            }
+                            $this->transaction->timer = $timer;
+                            $sms->sends(
+                                $this->createText('receive_transaction',$this->transaction),
+                                $this->transaction->customer,
+                                Notification::TRANSACTION,
+                                $this->transaction->id
+                            );
+                        }
+                        $this->emitNotify('اطلاعات با موفقیت ثبت شد');
+                    } elseif ((auth()->id() == $this->transaction->seller_id && $timerStatus < 0)){
+                        $this->transaction->status = OrderTransaction::WAIT_FOR_COMPLETE;
+                        $this->transaction->is_returned = 0;
+                        $text = $this->createText('complete_transaction',$this->transaction);
+                        $this->transaction->order->status = Order::IS_FINISHED;
+                        $this->transaction->order->save();
+                        $sms->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                        $sms->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                        if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
+                            $price = $this->transaction->payment->price;
+                            $commission = $this->transaction->commission;
+                            $intermediary = $this->transaction->intermediary;
+                            $final_price = ($price - ($commission) - ($intermediary));
+                            $this->transaction->seller->deposit($final_price,
+                                ['description' => $this->transaction->code.'واریز هزینه بابت معامله به کد ', 'from_admin'=> true]);
+                        }
+                        $sms->sends($this->createText('skip_step',$this->transaction)
+                            ,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                    }
                 }
             }
         }
@@ -294,44 +552,51 @@ class StoreTransaction extends BaseComponent
         $timerStatus = Carbon::make(now())->diff($this->transaction->timer)->format('%r%s');
         $data = $this->transaction->data;
         $sms = new SendMessages();
-        if (in_array($this->transaction->status,[OrderTransaction::IS_CONFIRMED,OrderTransaction::IS_SENT])) {
-            if ((auth()->id() == $this->transaction->seller_id) || (auth()->id() == $this->transaction->customer_id && $timerStatus < 0)) {
+        switch ($this->transaction->status)
+        {
+            case OrderTransaction::WAIT_FOR_CONFIRM:{
                 $this->transaction->status = OrderTransaction::IS_CANCELED;
                 $texts = $this->createText('cancel_transaction',$this->transaction);
                 $sms->sends($texts,$this->transaction->seller);
                 $sms->sends($texts,$this->transaction->customer);
                 $this->backMoney();
                 $this->emitNotify('معامله با موفقیت کنسل شد.');
-            }
-        } elseif (in_array($this->transaction->status,[OrderTransaction::IS_PAID])) {
-            if ((auth()->id() == $this->transaction->customer_id) || (auth()->id() == $this->transaction->seller_id && $timerStatus < 0)) {
-                $this->transaction->status = OrderTransaction::IS_CANCELED;
-                $texts = $this->createText('cancel_transaction',$this->transaction);
-                $sms->sends($texts,$this->transaction->seller);
-                $sms->sends($texts,$this->transaction->customer);
-                $this->backMoney();
-                $this->emitNotify('معامله با موفقیت کنسل شد.');
-            }
-        } elseif (in_array($this->transaction->status , [OrderTransaction::IS_TESTING,OrderTransaction::IS_RECEIVED]) && auth()->id() == $this->transaction->customer_id) {
-            if ((is_null($data) || is_null($data->value)) && $timerStatus < 0) {
-                $this->transaction->status = OrderTransaction::IS_CANCELED;
-                $texts = $this->createText('cancel_transaction',$this->transaction);
-                $sms->sends($texts,$this->transaction->seller);
-                $sms->sends($texts,$this->transaction->customer);
-                $this->backMoney();
-                $this->emitNotify('معامله با موفقیت کنسل شد.');
-            } elseif($timerStatus < 0 && (!is_null($data) || !is_null($data->value))) {
-                $this->validate([
-                    'received_result' => ['required','string','max:250']
-                ],[],[
-                    'received_result' => 'توضیحات'
+                OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                    'value'=> null
                 ]);
-                $this->transaction->received_result = $this->received_result;
-                $this->transaction->received_status = true;
-                $this->transaction->status = OrderTransaction::CONTROL;
-                $this->emitNotify('در انتظار کنترل');
+                break;
+            }
+            case OrderTransaction::WAIT_FOR_PAY:{
+                if ((auth()->id() == $this->transaction->customer_id) || (auth()->id() == $this->transaction->seller_id && $timerStatus < 0)) {
+                    $this->transaction->status = OrderTransaction::IS_CANCELED;
+                    $texts = $this->createText('cancel_transaction',$this->transaction);
+                    $sms->sends($texts,$this->transaction->seller);
+                    $sms->sends($texts,$this->transaction->customer);
+                    $this->backMoney();
+                    $this->emitNotify('معامله با موفقیت کنسل شد.');
+                    OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                        'value'=> null
+                    ]);
+                    break;
+                }
+            }
+            case OrderTransaction::WAIT_FOR_SEND:{
+                if ((auth()->id() == $this->transaction->seller_id) || (auth()->id() == $this->transaction->customer_id && $timerStatus < 0)) {
+                    $this->transaction->status = OrderTransaction::IS_CANCELED;
+                    $texts = $this->createText('cancel_transaction',$this->transaction);
+                    $sms->sends($texts,$this->transaction->seller);
+                    $sms->sends($texts,$this->transaction->customer);
+                    $this->backMoney();
+                    $this->emitNotify('معامله با موفقیت کنسل شد.');
+                    OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                        'value'=> null
+                    ]);
+                    break;
+                }
             }
         }
+        $this->transaction->order->status = Order::IS_CONFIRMED;
+        $this->transaction->order->save();
         $this->transaction->save();
         return(false);
     }
@@ -356,6 +621,7 @@ class StoreTransaction extends BaseComponent
         } catch (PurchaseFailedException $exception) {
             $this->addError('payment', $exception->getMessage());
         }
+        return(false);
     }
 
     public function storePay($gateway , $transactionId)
@@ -374,6 +640,7 @@ class StoreTransaction extends BaseComponent
                 ]);
                 return $pay->id;
             }
+            return false;
         });
     }
 
@@ -387,8 +654,10 @@ class StoreTransaction extends BaseComponent
                     'received_result' => 'متن توضیحات',
                 ]);
                 $sms = new SendMessages();
+                $timer = (float)$this->transaction->order->category->no_receive_time;
                 $this->transaction->received_status = true;
                 $this->transaction->received_result = $this->received_result;
+                $this->transaction->timer = Carbon::make(now())->addMinutes($timer);
                 $this->transaction->status = OrderTransaction::WAIT_FOR_NO_RECEIVE;
                 $this->transaction->save();
                 $target = $this->transaction->is_returned ? $this->transaction->customer : $this->transaction->seller;
@@ -447,5 +716,12 @@ class StoreTransaction extends BaseComponent
             return $this->addError('error','شما اجازه این کار را ندارید');
     }
 
-
+    public function backMoney()
+    {
+        if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
+            $price = $this->transaction->payment->price;
+            $this->transaction->customer->deposit($price,
+                ['description' => $this->transaction->code.'بازگشت هزینه بابت معامله به کد ', 'from_admin'=> true]);
+        }
+    }
 }

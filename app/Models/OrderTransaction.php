@@ -194,22 +194,6 @@ class OrderTransaction extends Model
         return $this->order()->first()->category();
     }
 
-    public function getFinalPriceCustomerAttribute()
-    {
-        $price = $this->order->price;
-        $commission = $this->commission;
-        $intermediary = $this->intermediary;
-        return ($price + $commission + $intermediary) > 0 ? $price + $commission + $intermediary : 0;
-    }
-
-    public function getFinalPriceSellerAttribute()
-    {
-        $price = $this->order->price;
-        $commission = $this->commission;
-        $intermediary = $this->intermediary;
-        return ($price - $commission - $intermediary) > 0 ? $price - $commission - $intermediary : 0;
-    }
-
     public function getDateAttribute()
     {
         return Jalalian::forge($this->created_at)->format('%A, %d %B %Y');

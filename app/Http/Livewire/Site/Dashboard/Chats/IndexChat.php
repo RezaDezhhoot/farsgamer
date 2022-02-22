@@ -11,7 +11,7 @@ use App\Traits\Admin\TextBuilder;
 class IndexChat extends BaseComponent
 {
     use TextBuilder;
-    public $chatList = [] , $chatText;
+    public $chatList = [] , $chatText , $search;
     public function openChatList($id)
     {
         $group = auth()->user()->contacts()->findOrFail($id);
@@ -39,7 +39,15 @@ class IndexChat extends BaseComponent
 
     public function render()
     {
-        $groups = auth()->user()->contacts()->get();
+        $groups = auth()->user()->contacts()->when($this->search,function ($query){
+            return $query->whereHas('user_one',function ($query){
+                return is_numeric($this->search)
+                    ? $query->where('phone',$this->search) : $query->where('user_name',$this->search);
+            })->orWhereHas('user_two',function ($query){
+                return is_numeric($this->search)
+                    ? $query->where('phone',$this->search) : $query->where('user_name',$this->search);
+            })->orWhere('slug',$this->search);
+        })->get();
         return view('livewire.site.dashboard.chats.index-chat',['groups'=>$groups]);
     }
 }

@@ -100,7 +100,7 @@ class StoreOrderTransaction extends BaseComponent
     public function store()
     {
         $this->authorize('edit_transactions');
-
+        // cancel
         if ($this->status == OrderTransaction::IS_CANCELED && !in_array($this->transaction->status,[OrderTransaction::WAIT_FOR_COMPLETE,
                 OrderTransaction::WAIT_FOR_TESTING,OrderTransaction::IS_RETURNED,OrderTransaction::IS_CANCELED,OrderTransaction::WAIT_FOR_RECEIVE
             ])) {
@@ -109,27 +109,35 @@ class StoreOrderTransaction extends BaseComponent
                 return (false);
             }
             $this->transaction->order->status = Order::IS_CONFIRMED;
-            OrderTransactionData::where('transaction_id',$this->transaction->id)->delete();
+            OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
+                'value'=> null
+            ]);
             if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
-                $this->transaction->customer->deposit($this->transaction->finalPriceCustomer,
-                    ['description' => $this->transaction->id.'بابت معامله با کد ', 'from_admin'=> true]);
+                $price = $this->transaction->payment->price;
+                $this->transaction->customer->deposit($price,
+                    ['description' => $this->transaction->code.'بازگشت هزینه بابت معامله با کد ' , 'from_admin'=> true]);
             }
             $this->transaction->order->save();
+            $this->transaction->status = $this->status;
+            $this->nowStatus = $this->status;
+            $this->transaction->save();
+            return $this->emitNotify('اطلاعات با موفقیت ثبت شد');
         } elseif ($this->status == OrderTransaction::IS_CANCELED) {
             $this->emitNotify('برای این معامله امکان تغییر وجود ندارد','warning');
             return (false);
         }
+        // end cancel
 
         $carbon = Carbon::make(now());
         $timer = $carbon;
         $data = $this->transaction->data;
         $this->resetErrorBag();
         if (!in_array($this->transaction->status,[OrderTransaction::IS_CANCELED,OrderTransaction::WAIT_FOR_COMPLETE])){
-            $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
-                'status' => OrderTransaction::IS_CANCELED,
-            ]);
-        // data
-            if (!in_array($this->transaction->status,[OrderTransaction::WAIT_FOR_COMPLETE,OrderTransaction::IS_REQUESTED,OrderTransaction::IS_CANCELED])) {
+            if ($this->transaction->status <> $this->status) {
+                $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
+                    'status' => OrderTransaction::IS_CANCELED,
+                ]);
+                // data
                 if (!is_null($this->transactionData))
                     $data->value = json_encode($this->transactionData) ?? '';
 
@@ -145,32 +153,27 @@ class StoreOrderTransaction extends BaseComponent
                     $data->transfer_result = $this->transfer_result;
                 }
                 $data->save();
-            }
-            if ($this->transaction->status <> $this->status) {
+                // end data
 
-                if ($this->status == OrderTransaction::WAIT_FOR_CONFIRM)
-                    $this->transaction->order->status = Order::IS_CONFIRMED;
-                elseif($this->status <> OrderTransaction::IS_CANCELED)
-                    $this->transaction->order->status = Order::IS_REQUESTED;
-
-                if ($this->transaction->is_returned == 0 ) {
+                if ($this->transaction->is_returned == 0) {
                     $this->validate([
                         'status' => ['required','in:'.OrderTransaction::WAIT_FOR_RECEIVE.','.OrderTransaction::WAIT_FOR_PAY.','
                             .OrderTransaction::WAIT_FOR_CONFIRM. ','.OrderTransaction::WAIT_FOR_SEND.','. OrderTransaction::WAIT_FOR_TESTING.','
-                            .OrderTransaction::WAIT_FOR_CONTROL.','.OrderTransaction::IS_CANCELED.','.OrderTransaction::WAIT_FOR_COMPLETE.','
+                            .OrderTransaction::WAIT_FOR_CONTROL.','.OrderTransaction::WAIT_FOR_COMPLETE.','
                             .OrderTransaction::IS_RETURNED.','.OrderTransaction::WAIT_FOR_NO_RECEIVE
                         ],
                     ],[],[
                         'status' => 'وضعیت',
                     ]);
-                    if ($this->transaction->status == OrderTransaction::IS_RETURNED && $this->status == OrderTransaction::WAIT_FOR_COMPLETE ){
+                    if ($this->status == OrderTransaction::WAIT_FOR_CONFIRM)
+                        $this->transaction->order->status = Order::IS_CONFIRMED;
+                    elseif ($this->transaction->status == OrderTransaction::IS_RETURNED){
                         $send = new SendMessages();
                         $text = $this->createText('reject_returned_transaction',$this->transaction);
                         $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
                         $send->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
                     }
-                    // transfer
-                    if ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::DIGITAL)
+                    elseif ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::DIGITAL)
                         $timer = (float)$this->transaction->order->category->receive_time;
                     elseif ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::PHYSICAL) {
                         if ($this->transaction->order->city == $this->transaction->customer->city && $this->transaction->order->province == $this->transaction->customer->province)
@@ -178,12 +181,14 @@ class StoreOrderTransaction extends BaseComponent
                         else
                             $timer = (float)$this->transaction->data->send->send_time_outer_city;
                     }
-                    // end transfer
-                    if ($this->status == OrderTransaction::WAIT_FOR_COMPLETE){
+                    elseif ($this->status == OrderTransaction::WAIT_FOR_COMPLETE){
                         $this->transaction->order->status = Order::IS_FINISHED;
                         if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
-                            $this->transaction->seller->deposit($this->transaction->finalPriceSeller,
-                                ['description' => $this->transaction->code.'بابت معامله به کد ', 'from_admin'=> true]);
+                            $commission = $this->transaction->commission;
+                            $intermediary = $this->transaction->intermediary;
+                            $price = $this->transaction->payment->price - $commission - $intermediary;
+                            $this->transaction->seller->deposit($price,
+                                ['description' => $this->transaction->code.'واربز هزینه بابت معامله به کد ', 'from_admin'=> true]);
                         }
                     }
                 } elseif ($this->transaction->is_returned == 1){
@@ -195,7 +200,6 @@ class StoreOrderTransaction extends BaseComponent
                     ],[],[
                         'status' => 'وضعیت',
                     ]);
-                    // transfer
                     if ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::DIGITAL)
                         $timer = (float)$this->transaction->order->category->receive_time;
                     elseif ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::PHYSICAL) {
@@ -204,7 +208,6 @@ class StoreOrderTransaction extends BaseComponent
                         else
                             $timer = (float)$this->transaction->data->send->send_time_outer_city;
                     }
-                    // end transfer
                 }
                 if ($this->status == OrderTransaction::WAIT_FOR_TESTING)
                     $timer = (float)$this->transaction->order->category->guarantee_time;
@@ -294,12 +297,10 @@ class StoreOrderTransaction extends BaseComponent
             $this->transaction->status = OrderTransaction::WAIT_FOR_SENDING_DATA;
             $this->status = OrderTransaction::WAIT_FOR_SENDING_DATA;
             $data = $this->transaction->data;
-            if (!empty($data)) {
-                $data->value = json_encode(['']);
-                $data->send_id  = null;
-                $data->transfer_result = null;
-                $data->save();
-            }
+            $data->send_id  = null;
+            $data->transfer_result = null;
+            $data->save();
+
             $this->transaction->save();
             $this->return = true;
             $this->data['status'] = OrderTransaction::returnedStatus();

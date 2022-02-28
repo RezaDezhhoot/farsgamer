@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Articles;
 
+use App\Models\Comment;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Livewire\BaseComponent;
 use Livewire\WithPagination;
@@ -26,6 +27,7 @@ class IndexArticle extends BaseComponent
     public function delete($id)
     {
         $this->authorize('delete_articles');
+        Comment::where('case_id',$id)->delete();
         Article::findOrFail($id)->delete();
     }
 }

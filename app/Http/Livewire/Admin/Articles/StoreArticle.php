@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Admin\Articles;
 
 use App\Http\Livewire\BaseComponent;
+use App\Models\Comment;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ArticleCategory;
@@ -43,6 +44,7 @@ class StoreArticle extends BaseComponent
     public function deleteItem()
     {
         $this->authorize('delete_articles');
+        Comment::where('case_id',$this->article->id)->delete();
         $this->article->delete();
         return redirect()->route('admin.article');
     }

@@ -18,7 +18,7 @@
                 <x-admin.forms.input type="number" id="ticket_per_day" label="حداکثر دفعات ارسال تیکت در روز*" wire:model.defer="ticket_per_day"/>
                 <x-admin.forms.input type="number" id="min_price_to_request" label="حداقل موجودی لازم برای برداشت(تومان)*" wire:model.defer="min_price_to_request"/>
                 <x-admin.forms.text-area id="auth_note" label="متن توضیح برای احراز هویت" wire:model.defer="auth_note"/>
-                <x-admin.forms.lfm-standalone id="auth_image_pattern" label="تصویر نمونه برای احراز هویت*" :file="$auth_image_pattern" type="image" required="true" wire:model="auth_image_pattern"/>
+                <x-admin.forms.lfm-standalone id="auth_image_pattern" label="تصویر نمونه برای احراز هویت" :file="$auth_image_pattern" type="image" required="true" wire:model="auth_image_pattern"/>
             </x-admin.form-section>
             <x-admin.form-section label=" تحریم ها">
                 @foreach($data['boycott'] as $key => $value)

@@ -18,7 +18,7 @@
             <x-admin.forms.input type="text" id="notification" label="اعلان بالای صفحه" wire:model.defer="notification"/>
             <x-admin.forms.input type="text" id="tel" label="تلفن*" wire:model.defer="tel"/>
             <x-admin.forms.input type="email" id="email" label="ایمیل*" wire:model.defer="email"/>
-            <x-admin.forms.input type="text" id="address" label="ادرس" wire:model.defer="address"/>
+            <x-admin.forms.input type="text" id="address" label="ادرس*" wire:model.defer="address"/>
             <x-admin.forms.input type="number" id="categoryHomeCount" label="تعداد دسته بندی های قابل نمایش صفحه اصلی" wire:model.defer="categoryHomeCount"/>
             <x-admin.button class="primary" content="افزودن لینک ارتباطی" wire:click="addLink()" />
             @foreach($contact as $key => $item)

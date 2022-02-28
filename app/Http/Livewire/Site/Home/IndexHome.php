@@ -15,7 +15,7 @@ use App\Models\Order;
 class IndexHome extends BaseComponent
 {
     public $content  , $data , $q , $max , $min = 0 , $view , $category , $platform;
-    protected $queryString = ['view','q','min','max' ,'category','platform'];
+    protected $queryString = ['view','q' ,'category','platform'];
     public function mount()
     {
         SEOMeta::setTitle(Setting::getSingleRow('title'),false);
@@ -75,6 +75,7 @@ class IndexHome extends BaseComponent
             });
         $orders = $orders->orderBy($this->view == 1 ? 'view_count' : 'id','desc');
         $this->data['orders'] = $orders->get();
-        return view('livewire.site.home.index-home');
+        return view('livewire.site.home.index-home')
+            ->extends('livewire.site.layouts.site.site');
     }
 }

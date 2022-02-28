@@ -6,8 +6,8 @@
         </div>
         <x-admin.forms.validation-errors/>
         <div class="card-body">
-            <x-admin.forms.text-area id="aboutUs" label="درباره ما*" wire:model.defer="aboutUs"/>
-            <x-admin.forms.lfm-standalone id="aboutUsImages" label="اسلایدر درباره ما*" :file="$aboutUsImages" required="true" wire:model="aboutUsImages"/>
+            <x-admin.forms.text-area id="aboutUs" label="درباره ما" wire:model.defer="aboutUs"/>
+            <x-admin.forms.lfm-standalone id="aboutUsImages" label="اسلایدر درباره ما" :file="$aboutUsImages" required="true" wire:model="aboutUsImages"/>
         </div>
     </div>
 </div>

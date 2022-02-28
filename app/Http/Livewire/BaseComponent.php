@@ -28,15 +28,18 @@ class BaseComponent extends Component
 
     public function imageWatermark($image , $position = 'bottom-right')
     {
-        $img = Image::make(public_path($image));
-        $logo = $this->resize_image(public_path(Setting::getSingleRow('waterMark')),250,200);
-        $img->insert($logo, $position, 20, 20);
+        if (!is_null(Setting::getSingleRow('waterMark')) && !empty(Setting::getSingleRow('waterMark')))
+        {
+            $img = Image::make(public_path($image));
+            $logo = $this->resize_image(public_path(Setting::getSingleRow('waterMark')),250,200);
+            $img->insert($logo, $position, 20, 20);
 
-        $img->save(public_path($image));
+            $img->save(public_path($image));
 
-        $img->encode('png');
-        $type = 'png';
-        $new_image = 'data:image/' . $type . ';base64,' . base64_encode($img);
+            $img->encode('png');
+            $type = 'png';
+            $new_image = 'data:image/' . $type . ';base64,' . base64_encode($img);
+        }
     }
 
     public function resize_image($file, $w, $h, $crop = FALSE) {

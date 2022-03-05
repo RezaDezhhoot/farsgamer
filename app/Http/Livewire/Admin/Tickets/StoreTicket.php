@@ -122,7 +122,8 @@ class StoreTicket extends BaseComponent
         $new->sender_id = Auth::id();
         $new->sender_type = Ticket::ADMIN;
         $new->priority = $this->priority;
-        $new->status = Ticket::ANSWERED;
+        $this->ticket->status = Ticket::ANSWERED;
+        $this->ticket->save();
         $text = $this->createText('ticket_answer',$new);
         $send = new SendMessages();
         $send->sends($text,$this->ticket->user,Notification::TICKET,$this->ticket->id);

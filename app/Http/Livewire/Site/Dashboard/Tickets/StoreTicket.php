@@ -99,12 +99,13 @@ class StoreTicket extends BaseComponent
             $model->status = Ticket::PENDING;
 
             if (!is_null($this->file) && !empty($this->file)){
+                $files = [];
                 foreach ($this->file as $item){
                     $save = 'storage/'.$item->store('ticket', 'public');
-                    $model->file = $save.',';
+                    array_push($files,$save);
                 }
+                $model->file = implode(',',$files);
             }
-            $model->file = rtrim($model->file,',');
             $model->save();
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
             redirect()->route('user.store.ticket',['edit',$model->id]);

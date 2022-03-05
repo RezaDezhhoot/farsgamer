@@ -29,7 +29,7 @@
                <div class="row">
                    @foreach($data['role'] as  $value)
                        <div class="col-2">
-                           <x-admin.forms.checkbox label="{{$value['name']}}" id="permissions-{{$value['id']}}" value="{{$value['name']}}" wire:model.defer="roles" wire:model.defer="userRole" />
+                           <x-admin.forms.checkbox label="{{$value['name']}}" id="permissions-{{$value['id']}}" value="{{$value['id']}}" wire:model.defer="roles" wire:model.defer="userRole.{{$value['id']}}" />
                        </div>
                    @endforeach
                </div>

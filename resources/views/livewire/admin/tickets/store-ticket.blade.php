@@ -24,10 +24,14 @@
                                 {!! $item->content !!}
                                 {{ $item->date }}
                             </p>
+                            @if(!is_null($item->file))
                             <p>
                                 <label for="">فایل</label>
-                                <a class="btn btn-link" href="{{ $item->file }}">{{ $item->file }}</a>
+                                @foreach(explode(',',$item->file) as $value)
+                                    <a class="btn btn-link" href="{{ asset($value) }}">مشاهده</a>
+                                @endforeach
                             </p>
+                            @endif
                             <button class="btn btn-danger" wire:click="delete({{$key}})">حذف</button>
                         </div>
                     @endforeach

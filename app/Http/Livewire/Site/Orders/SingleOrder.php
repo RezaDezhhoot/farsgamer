@@ -59,7 +59,7 @@ class SingleOrder extends BaseComponent
                 $ban = Carbon::make(now())->diff(\auth()->user()->ban)->format('%r%i');
                 if ($ban <= 0) {
                     $this->validate([
-                        'confirmLaw' => ['required'],
+                        'confirmLaw' => ['required','boolean'],
                     ],[],[
                         'confirmLaw' => 'تایید قوانین',
                     ]);

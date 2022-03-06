@@ -40,7 +40,7 @@ class CreateChatLaw extends BaseComponent
         $this->validate([
             'content' => ['required','string','max:35000'],
             'title' => ['required','string','max:250'],
-            'order' => ['required','numeric']
+            'order' => ['required','integer','between:0,1000000000']
         ],[],[
             'content' => 'قانون',
             'title' => 'عنوان',

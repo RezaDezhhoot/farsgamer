@@ -99,7 +99,7 @@ class StoreCategory extends BaseComponent
             'form' => ['nullable','array'],
             'commission' => ['required','numeric','between:0,20'],
             'intermediary' => ['required','numeric','between:0,20'],
-            'control' => ['nullable'],
+            'control' => ['required','boolean'],
         ];
         $messages = [
             'slug' => 'نام مستعار',
@@ -216,13 +216,13 @@ class StoreCategory extends BaseComponent
     public function storeParameter()
     {
         $fields = [
-            'paraLogo' => ['required','string'],
-            'paraName' => ['required','string'],
+            'paraLogo' => ['required','string','max:250'],
+            'paraName' => ['required','string','max:40'],
             'paraType' => ['required','in:number,text'],
-            'paraField' => ['required','string'],
+            'paraField' => ['required','string','max:250'],
             'paraStatus' => ['required','in:available,unavailable'],
-            'paraMax' => ['nullable','numeric'],
-            'paraMin' => ['nullable','numeric'],
+            'paraMax' => ['nullable','numeric','max:250'],
+            'paraMin' => ['nullable','numeric','max:100'],
         ];
         $messages = [
             'paraLogo' => 'ایکون',

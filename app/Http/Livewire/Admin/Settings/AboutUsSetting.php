@@ -25,7 +25,7 @@ class AboutUsSetting extends BaseComponent
         $this->validate(
             [
                 'aboutUs' => ['nullable', 'string','max:600000'],
-                'aboutUsImages' => ['nullable','string'],
+                'aboutUsImages' => ['nullable','string','max:600000'],
             ] , [] , [
                 'aboutUs' => 'درباره ما',
                 'aboutUsImages' => 'اسلایدر درباره ما',

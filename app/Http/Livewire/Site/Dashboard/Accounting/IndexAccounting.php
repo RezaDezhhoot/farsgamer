@@ -14,7 +14,7 @@ class IndexAccounting extends BaseComponent
 {
     use WithPagination;
     protected $queryString = ['status','code','payStatus'];
-    public $status , $pagination = 10 , $data = [] , $price , $gateway = 'pay' , $code  , $message;
+    public $status , $pagination = 10 , $data = [] , $price , $gateway = 'zarinpal' , $code  , $message;
 
     public function mount()
     {

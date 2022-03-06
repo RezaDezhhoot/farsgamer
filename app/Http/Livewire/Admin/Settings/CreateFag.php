@@ -42,7 +42,7 @@ class CreateFag extends BaseComponent
             'question' => ['required','string','max:1000'],
             'answer' => ['required','string','max:1000'],
             'category' => ['required','string','max:250'],
-            'order' => ['required','numeric']
+            'order' => ['required','integer','between:0,10000000000']
         ],[],[
             'question' => 'سوال',
             'answer' => 'جواب',

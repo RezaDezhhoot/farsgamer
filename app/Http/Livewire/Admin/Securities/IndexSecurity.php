@@ -298,7 +298,7 @@ class IndexSecurity extends BaseComponent
         $this->authorize('edit_securities');
         $this->validate([
             'boycott' => ['nullable','array'],
-            'google' => ['required','string'],
+            'google' => ['required','string','max:3000'],
             'password_length' => ['required','integer','min:5'],
             'dos_count' => ['required','integer','min:3'],
             'max_profile_image_size' => ['required','integer','min:1024'],

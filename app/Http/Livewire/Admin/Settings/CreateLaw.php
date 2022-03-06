@@ -36,7 +36,7 @@ class CreateLaw extends BaseComponent
         $this->validate([
             'content' => ['required','string','max:25000'],
             'title' => ['required','string','max:250'],
-            'order' => ['required','numeric']
+            'order' => ['required','integer','between:0,100000000']
         ],[],[
             'content' => 'قانون',
             'title' => 'عنوان',

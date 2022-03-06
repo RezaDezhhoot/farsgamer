@@ -16,7 +16,7 @@ use Livewire\WithFileUploads;
 
 class StoreOrder extends BaseComponent
 {
-    public $order , $header , $user , $mode;
+    public $order , $header , $user , $mode , $i , $file = [];
     public $slug , $category_id , $content , $price , $image , $mainImage , $gallery = [] , $galleries = [] , $province , $city ,$result;
     public $parameters , $parameter = [] , $platforms , $platform = [] , $message , $commission , $intermediary;
     public $data = [];
@@ -82,8 +82,6 @@ class StoreOrder extends BaseComponent
             $this->saveInDB(new Order());
     }
 
-
-
     public function saveInDB(Order $order)
     {
         if (!in_array($this->order->status,[Order::IS_REQUESTED,Order::IS_FINISHED])) {
@@ -91,13 +89,13 @@ class StoreOrder extends BaseComponent
                 [
                     'slug' => ['required', 'string','max:100'],
                     'category_id' => ['required','exists:categories,id'],
-                    'content' => ['nullable','string','max:1200'],
+                    'content' => ['required','string','max:1200'],
                     'price' => ['required','numeric', 'between:0,999999999999.99999'],
                     'province' => ['required','string','in:'.implode(',',array_keys($this->data['province']))],
                     'city' => ['required','string','in:'.implode(',',array_keys($this->data['city']))],
-                    'image' => ['nullable','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
+                    'image' => ['required','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
                     'gallery'=>['array','min:1','max:'.Setting::getSingleRow('order_images_count')],
-                    'gallery.*' => ['nullable','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
+                    'gallery.*' => ['required','image','mimes:'.Setting::getSingleRow('valid_order_images'),'max:'.Setting::getSingleRow('max_order_image_size')],
                 ] , [] , [
                     'slug' => 'عنوان',
                     'category_id' => 'دست بندی',
@@ -124,14 +122,15 @@ class StoreOrder extends BaseComponent
                 $order->image = $this->image;
             }
 
-            if (!is_null($this->galleries)) {
-                foreach ($this->galleries as $image) {
+            if (!is_null($this->file)) {
+                foreach ($this->file as $image) {
                     $pic = 'storage/'.$image->store('files/orders', 'public').',';
                     $this->imageWatermark($pic,'center');
                     array_push($this->gallery,$pic);
                 }
                 $order->gallery = implode(',',$this->gallery);
             }
+
             $order->slug = $this->slug;
             $order->content = $this->content;
             $order->category_id = $this->category_id;
@@ -186,5 +185,15 @@ class StoreOrder extends BaseComponent
         unset($this->gallery[$key]);
     }
 
+    public function deleteImageBeforeSave($key)
+    {
+        unset($this->file[$key]);
+    }
+
+    public function addFile()
+    {
+        $this->i = $this->i + 1;
+        array_push($this->file,$this->i);
+    }
 
 }

@@ -53,7 +53,7 @@ class StoreSend extends BaseComponent
             'send_time_inner_city' => ['required','numeric','between:0,99999.99999'],
             'send_time_outer_city' => ['required','numeric','between:0,99999.99999'],
             'note' => ['nullable','string','max:255'],
-            'pursuit' => ['nullable'],
+            'pursuit' => ['required','boolean'],
             'status' => ['required','in:'.Send::UNAVAILABLE.','.Send::AVAILABLE],
             'pursuit_web_site' => ['nullable','url','max:250']
         ];

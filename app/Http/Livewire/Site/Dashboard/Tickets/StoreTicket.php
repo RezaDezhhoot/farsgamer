@@ -20,7 +20,7 @@ use App\Sends\SendMessages;
 class StoreTicket extends BaseComponent
 {
     use WithFileUploads , TextBuilder;
-    public $ticket , $user , $header , $mode , $disabled = false , $data = [];
+    public $ticket , $user , $header , $mode , $disabled = false , $data = [] , $i;
     public $subject , $content , $file = [] , $priority , $status , $newMessage  , $final_message , $newFile;
     public function mount($action,$id = null)
     {
@@ -82,6 +82,7 @@ class StoreTicket extends BaseComponent
             $this->validate([
                 'subject' => ['required','string','in:'.implode(',',$this->data['subject'])],
                 'content' => ['required','string','max:18500'],
+                'file' => ['array','min:0','max:4'],
                 'file.*' => ['nullable','mimes:'.Setting::getSingleRow('valid_ticket_files'),'max:2048'],
                 'priority' => ['in:'.Ticket::HIGH.','.Ticket::NORMAL.','.Ticket::HIGH],
             ],[],[
@@ -114,10 +115,11 @@ class StoreTicket extends BaseComponent
             if ($model->status == Ticket::ANSWERED) {
                 $this->validate([
                     'newMessage' => ['required','string','max:250'],
-                    'newFile' => ['nullable','image','mimes:'.Setting::getSingleRow('valid_ticket_files'),'max:2048'],
+                    'file' => ['array','min:0','max:4'],
+                    'file.*' => ['nullable','mimes:'.Setting::getSingleRow('valid_ticket_files'),'max:2048'],
                 ],[],[
                     'newMessage' => 'متن درخواست',
-                    'newFile' =>  'فایل',
+                    'file' =>  'فایل',
                 ]);
                 $ticket = new Ticket();
                 $ticket->subject = $model->subject;
@@ -127,11 +129,13 @@ class StoreTicket extends BaseComponent
                 $ticket->sender_id = Auth::id();
                 $ticket->priority = $model->priority;
                 $ticket->status = $model->status;
-                if (!is_null($this->newFile) && !empty($this->newFile)){
-                    foreach ($this->newFile as $item){
+                if (!is_null($this->file) && !empty($this->file)){
+                    $files = [];
+                    foreach ($this->file as $item){
                         $save = 'storage/'.$item->store('ticket', 'public');
-                        $model->file = $save.',';
+                        array_push($files,$save);
                     }
+                    $ticket->file = implode(',',$files);
                 }
                 $ticket->save();
                 $this->emitNotify('اطلاعات با موفقیت ثبت شد');
@@ -145,6 +149,17 @@ class StoreTicket extends BaseComponent
             }
 
         }
+    }
+
+    public function addFileInput()
+    {
+        $this->i = $this->i + 1;
+        array_push($this->file,$this->i);
+    }
+
+    public function deleteImage($key)
+    {
+        unset($this->file[$key]);
     }
 
     public function uploadFile()

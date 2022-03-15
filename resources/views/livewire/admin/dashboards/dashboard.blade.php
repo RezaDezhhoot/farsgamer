@@ -359,7 +359,7 @@
                                             <!--end::Info-->
                                             <!--begin::Label-->
                                             <span class="label label-lg label-light-primary label-inline font-weight-bold py-4">
-                                                {{ $item->for }}
+                                                {{ $item->commentable->title ??  $item->commentable->fullName }}
                                             </span>
                                             <span class="label label-lg label-light-primary label-inline font-weight-bold py-4">
                                                 {{ $item->statusLabel }}

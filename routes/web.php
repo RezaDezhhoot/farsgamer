@@ -18,7 +18,7 @@ Route::get('/',\App\Http\Livewire\Site\Home\IndexHome::class)->name('home');
 Route::get('/saved',\App\Http\Livewire\Site\Dashboard\Others\IndexSaved::class)->name('save');
 Route::get('/orders/{userID}/{id}/{slug}',\App\Http\Livewire\Site\Orders\SingleOrder::class)->name('order');
 Route::get('/users/{user}',\App\Http\Livewire\Site\Users\SingleUser::class)->name('user');
-
+// admin
 Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
 {
     // public
@@ -75,7 +75,6 @@ Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewir
     Route::get('/settings/fag', Settings\QuestionSetting::class)->name('admin.setting.fag');
     Route::get('/settings/fag/{action}/{id?}', Settings\CreateFag::class)->name('admin.setting.fag.create');
 });
-
 // user
 Route::middleware(['auth'])->namespace('App\Http\Livewire\Site')->prefix('/user')->group(function (){
     Route::get('/dashboard', Dashboard\Dashboards\IndexDashboard::class)->name('user.dashboard')->middleware('userAuth');

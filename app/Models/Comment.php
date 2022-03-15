@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static where(string $string, string $CONFIRMED)
  * @property mixed type
  * @property mixed status
+ * @property mixed commentable_type
  */
 class Comment extends Model
 {
@@ -18,18 +19,11 @@ class Comment extends Model
 
     const CONFIRMED = 'confirmed' , UNCONFIRMED = 'unconfirmed' , NEW = 'new';
 
-    const ARTICLE = 'article' , USER = 'user';
-
+//    const ARTICLE = 'article' , USER = 'user';
+    const ARTICLE = 'App\Models\Article' , USER = 'App\Models\User';
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function getTargetAttribute()
-    {
-        return $this->type == 'article' ?
-            $this->belongsTo(Article::class,'case_id')->first()->slug ?? '-':
-            $this->belongsTo(User::class,'case_id')->first()->user_name ?? '-';
     }
 
     public static function getStatus()
@@ -49,10 +43,6 @@ class Comment extends Model
         ];
     }
 
-    public function getForAttribute()
-    {
-        return self::getFor()[$this->type];
-    }
     public function getStatusLabelAttribute()
     {
         return self::getStatus()[$this->status];
@@ -61,6 +51,20 @@ class Comment extends Model
     public static function getNew()
     {
         return Comment::where('status',self::NEW)->count();
+    }
+
+    public function commentable()
+    {
+        return $this->morphTo(__FUNCTION__, 'commentable_type', 'commentable_id');
+    }
+
+    public function getCommentableTypeLabelAttribute()
+    {
+        if ($this->commentable_type == self::ARTICLE) {
+            return self::ARTICLE;
+        } elseif ($this->commentable_type == self::USER) {
+            return self::USER;
+        }
     }
 
 }

@@ -14,13 +14,12 @@ class IndexProfile extends BaseComponent
 {
     use WithFileUploads , ChatList;
     public $user , $header , $role , $description;
-    public $first_name , $last_name , $user_name , $email , $phone  , $pass_word , $file;
+    public $full_name , $last_name , $user_name , $email , $phone  , $pass_word , $file;
     public function mount()
     {
         $this->user = User::findOrFail(Auth::id());
         $this->header = $this->user->fullName;
-        $this->first_name = $this->user->first_name;
-        $this->last_name = $this->user->last_name;
+        $this->full_name = $this->user->name;
         $this->user_name = $this->user->user_name;
         $this->email = $this->user->email;
         $this->phone = $this->user->phone;
@@ -36,8 +35,7 @@ class IndexProfile extends BaseComponent
     public function store()
     {
         $fields = [
-            'first_name' => ['required', 'string','max:150'],
-            'last_name' => ['required','string','max:150'],
+            'full_name' => ['required', 'string','max:150'],
             'description' => ['nullable','string','max:250'],
             'user_name' => ['required', 'string' ,'max:150' ,'unique:users,user_name,'. ($this->user->id ?? 0)],
             'phone' => ['required','size:11' , 'unique:users,phone,'. ($this->user->id ?? 0)],
@@ -45,8 +43,7 @@ class IndexProfile extends BaseComponent
             'file' => ['nullable','image','mimes:jpg,jpeg,png,PNG,JPG,JPEG','max:'.Setting::getSingleRow('max_profile_image_size')],
         ];
         $messages = [
-            'first_name' => 'نام ',
-            'last_name' => 'نام خانوادگی',
+            'full_name' => 'نام ',
             'description' => 'بایوگرافی',
             'user_name' => 'نام کربری',
             'phone' => 'شماره همراه',
@@ -70,7 +67,7 @@ class IndexProfile extends BaseComponent
             unset($this->file);
         }
 
-        $this->user->first_name = $this->first_name;
+        $this->user->name = $this->full_name;
         $this->user->last_name = $this->last_name;
         $this->user->description = $this->description;
         $this->user->user_name = $this->user_name;

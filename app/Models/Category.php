@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Traits\Admin\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @method static where(string $string, string $string1)
@@ -12,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static findOrFail($id)
  * @method static withCount(string $string)
  * @method static find(int[] $array)
+ * @method static fineMany(array $sub_categories_id)
+ * @method static findMany(array $sub_categories_id)
  * @property mixed title
  * @property mixed slug
  * @property mixed logo
@@ -38,7 +42,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Category extends Model
 {
-    use HasFactory , Searchable;
+    use HasFactory , Searchable , SoftDeletes;
 
     protected $searchAbleColumns = ['title','slug'];
 
@@ -47,6 +51,27 @@ class Category extends Model
     const YES = 'yes' , NO = 'no';
 
     const DIGITAL = 'digital' , PHYSICAL = 'physical';
+
+
+    public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = Str::slug($value);
+    }
+
+    public function setLogoAttribute($value)
+    {
+        $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function setSliderAttribute($value)
+    {
+        $this->attributes['slider'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function setDefaultImageAttribute($value)
+    {
+        $this->attributes['default_image'] = str_replace(env('APP_URL'), '', $value);
+    }
 
     public function parent()
     {

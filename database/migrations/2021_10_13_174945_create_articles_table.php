@@ -27,6 +27,7 @@ class CreateArticlesTable extends Migration
             $table->string('status')->default('new');
             $table->tinyInteger('commentable')->default(1);
             $table->tinyInteger('google_indexing')->default(1);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

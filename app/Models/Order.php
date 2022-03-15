@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Traits\Admin\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Morilog\Jalali\Jalalian;
 
 /**
@@ -24,18 +26,42 @@ use Morilog\Jalali\Jalalian;
  * @property mixed province
  * @property mixed city
  * @property mixed id
+ * @property mixed created_at
  */
 class Order extends Model
 {
     use HasFactory;
-    use Searchable;
+    use Searchable , SoftDeletes;
 
     const IS_UNCONFIRMED = 'unconfirmed' , IS_CONFIRMED = 'confirmed' ,  IS_NEW = 'new';
     const IS_REJECTED = 'rejected' , IS_REQUESTED = 'requested' , IS_FINISHED = 'finished';
     /**
      * @var mixed
      */
-    private $created_at;
+
+    protected $guarded = [];
+
+
+    public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = Str::slug($value);
+    }
+
+    public function setImageAttribute($value)
+    {
+        $this->attributes['image'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+
+    public function setGalleryAttribute($value)
+    {
+        $gallery = [];
+        foreach (explode(',',$value) as $item)
+            $gallery[] = str_replace(env('APP_URL'), '', $item);
+
+        $this->attributes['gallery'] = implode(',',$gallery);
+    }
+
 
     public function user()
     {

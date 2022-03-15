@@ -13,7 +13,6 @@
                             <tr>
                                 <th>شماره</th>
                                 <th> نام</th>
-                                <th>نام خانوادگی</th>
                                 <th>شماره همراه</th>
                                 <th>موجودی کیف پول(تومان)</th>
                                 <th>اگهی ها</th>
@@ -26,11 +25,10 @@
                             @forelse($users as $item)
                                 <tr>
                                     <td>{{ $item->id }}</td>
-                                    <td>{{ $item->first_name }}</td>
-                                    <td>{{ $item->last_name }}</td>
+                                    <td>{{ $item->name }}</td>
                                     <td>{{ $item->phone }}</td>
                                     <td>{{ number_format( $item->balance)  }}</td>
-                                    <td>{{ $item->orders }}</td>
+                                    <td>{{ $item->orders()->count() }}</td>
                                     <td>{{ $item->user_name }}</td>
                                     <td>{{ $item::getStatus()[$item->status] }}</td>
                                     <td>

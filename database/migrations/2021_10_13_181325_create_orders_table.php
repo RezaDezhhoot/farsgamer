@@ -27,6 +27,7 @@ class CreateOrdersTable extends Migration
             $table->string('city')->nullable();
             $table->integer('view_count')->default(0);
             $table->tinyInteger('is_new')->default(1);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

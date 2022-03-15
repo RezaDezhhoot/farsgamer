@@ -96,6 +96,14 @@ class Ticket extends Model
         return self::getSenderType()[$this->sender_type];
     }
 
+    public function setFileAttribute($value)
+    {
+        $file = [];
+        foreach (explode(',',$value) as $item)
+            $file[] = str_replace(env('APP_URL'), '', $item);
+
+        $this->attributes['file'] = implode(',',$file);
+    }
 
     public function getPriorityLabelAttribute()
     {

@@ -22,4 +22,10 @@ use Illuminate\Database\Eloquent\Model;
 class Parameter extends Model
 {
     use HasFactory;
+
+    public function setLogoAttribute($value)
+    {
+        $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
+    }
+
 }

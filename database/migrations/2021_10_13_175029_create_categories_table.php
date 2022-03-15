@@ -37,6 +37,7 @@ class CreateCategoriesTable extends Migration
             $table->longText('forms')->nullable();
             $table->decimal('commission',22,2)->default(0);
             $table->decimal('intermediary',22,2)->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

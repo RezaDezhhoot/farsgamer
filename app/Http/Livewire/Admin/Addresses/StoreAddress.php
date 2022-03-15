@@ -42,7 +42,7 @@ class StoreAddress extends BaseComponent
             $this->city = $this->address->city;
             $this->addressText = $this->address->address;
             $this->postal_code = $this->address->postal_code;
-            $this->first_name = $this->address->first_name;
+            $this->first_name = $this->address->name;
             $this->last_name = $this->address->last_name;
             $this->phone = $this->address->phone;
             $this->email = $this->address->email;

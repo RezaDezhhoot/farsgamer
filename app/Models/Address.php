@@ -21,6 +21,8 @@ class Address extends Model
 
     const CONFIRMED = 'confirmed' , NOT_CONFIRMED  = 'not_confirmed' , NEW = 'new';
 
+    protected $guarded = [];
+
     public  function getFullAddressAttribute()
     {
         return $this->country.' - '.$this->province.' - '.$this->city.' - '.$this->address;

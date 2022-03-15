@@ -8,8 +8,7 @@
         <x-admin.forms.validation-errors/>
         <div class="card-body">
             <x-admin.forms.input type="text" id="ban" disabled label="وضعیت داخلی حساب " wire:model.defer="ban"/>
-            <x-admin.forms.input type="text" id="first_name" label="نام *" wire:model.defer="first_name"/>
-            <x-admin.forms.input type="text" id="last_name" label="نام خانوادگی*" wire:model.defer="last_name"/>
+            <x-admin.forms.input type="text" id="first_name" label="نام*" wire:model.defer="full_name"/>
             <x-admin.forms.input type="text" id="user_name" label="نام کاربری*" wire:model.defer="user_name"/>
             <x-admin.forms.input type="text" id="phone" label="شماره همراه*" wire:model.defer="phone"/>
             <x-admin.forms.input type="text" id="id_code" label="شماره ملی*" wire:model.defer="code_id"/>

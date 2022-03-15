@@ -14,9 +14,9 @@
             <x-admin.forms.full-text-editor id="description" label="توضیحات*" wire:model.defer="description"/>
             <x-admin.forms.text-area label="کلمات کلیدی*" help="کلمات را با کاما از هم جدا کنید" wire:model.defer="seo_keywords" id="seo_keywords" />
             <x-admin.forms.text-area label="توضیحات سئو*" wire:model.defer="seo_description" id="seo_description" />
-            <x-admin.forms.input type="number" id="send_time" label="زمان لازم برای ارسال توسط فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="send_time"/>
             <x-admin.forms.input type="number" id="pay_time" label="زمان لازم برای پرداخت*" help="بر حسب دقیقه" wire:model.defer="pay_time"/>
-            <x-admin.forms.input type="number" id="receive_time" label="زمان ارسال فروشنده یا خریدار(محصولات دیجیتالی)*" help="بر حسب دقیقه" wire:model.defer="receive_time"/>
+            <x-admin.forms.input type="number" id="send_time" label="زمان لازم برای ارسال توسط فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="send_time"/>
+            <x-admin.forms.input type="number" id="receive_time" label="زمان لازم برای دریافت توسط فروشنده یا خریدار(محصولات دیجیتالی)*" help="بر حسب دقیقه" wire:model.defer="receive_time"/>
             <x-admin.forms.input type="number" id="no_receive_time" label="زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="no_receive_time"/>
             <x-admin.forms.input type="number" id="guarantee_time" label="زمان تست*" help="بر حسب دقیقه" wire:model.defer="guarantee_time"/>
             <x-admin.forms.input type="number" id="commission" label="کارمزد شبکه *" help="بر حسب درصد" wire:model.defer="commission"/>

@@ -24,7 +24,7 @@ class StoreUser extends BaseComponent
 {
     use AuthorizesRequests, Sends , TextBuilder , ChatList;
     public $user , $mode , $header ,$data = [] , $userRole = [] , $pass_word  , $code_id ,$score , $description , $profile_image , $auth_image;
-    public $first_name , $last_name , $user_name , $phone , $province , $city  , $status , $email , $actionWallet , $editWallet , $sendMessage , $subjectMessage,
+    public $full_name  , $user_name , $phone , $province , $city  , $status , $email , $actionWallet , $editWallet , $sendMessage , $subjectMessage,
     $statusMessage , $result , $walletMessage , $banDescription , $banTime , $ban , $cards  = [] , $userWallet;
     // schedules
     public $saturday , $sunday , $monday , $tuesday , $wednesday, $thursday, $friday;
@@ -38,8 +38,7 @@ class StoreUser extends BaseComponent
         {
             $this->header = 'کاربر شماره '.$id;
             $this->user = User::findOrFail($id);
-            $this->first_name = $this->user->first_name;
-            $this->last_name = $this->user->last_name;
+            $this->full_name = $this->user->name;
             $this->user_name = $this->user->user_name;
             $this->phone = $this->user->phone;
             $this->province = $this->user->province;
@@ -88,7 +87,7 @@ class StoreUser extends BaseComponent
         else {
             $this->saveInDataBase(new User());
             $this->reset([
-                'first_name','last_name','user_name','pass_word','phone','province',
+                'full_name','user_name','pass_word','phone','province',
                 'city','status','email','userRole','code_id','score','description','auth_image','profile_image',
             ]);
         }
@@ -97,8 +96,7 @@ class StoreUser extends BaseComponent
     public function saveInDataBase(User $model)
     {
         $fields = [
-            'first_name' => ['required', 'string','max:255'],
-            'last_name' => ['required','string','max:255'],
+            'full_name' => ['required', 'string','max:65'],
             'user_name' => ['required', 'string','max:255' , 'unique:users,user_name,'. ($this->user->id ?? 0)],
             'phone' => ['required', 'size:11' , 'unique:users,phone,'. ($this->user->id ?? 0)],
             'province' => ['required','string','in:'.implode(',',array_keys($this->data['province']))],
@@ -112,8 +110,7 @@ class StoreUser extends BaseComponent
             'profile_image' => ['nullable','string','max:255'],
         ];
         $messages = [
-            'first_name' => 'نام ',
-            'last_name' => 'نام خانوادگی',
+            'full_name' => 'نام ',
             'user_name' => 'نام کربری',
             'phone' => 'شماره همراه',
             'province' => 'استان',
@@ -143,8 +140,7 @@ class StoreUser extends BaseComponent
         if ($this->mode == 'edit' && $this->status <> $this->user->status)
             $this->notify();
 
-        $model->first_name = $this->first_name;
-        $model->last_name = $this->last_name;
+        $model->name = $this->full_name;
         $model->user_name = $this->user_name;
         $model->phone = $this->phone;
         $model->province = $this->province;

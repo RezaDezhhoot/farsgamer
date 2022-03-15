@@ -71,7 +71,7 @@ class StoreCategory extends BaseComponent
         else{
             $this->saveInDataBase(new Category());
             $this->reset(['slug','title','logo','default_image','slider','description','seo_keywords','seo_description','guarantee_time',
-                'send_time','parent_id','status','is_available','is_physical','parameters','transfer','platforms','form','control']);
+                'send_time','parent_id','status','is_available','parameters','transfer','platforms','form','control']);
         }
     }
 
@@ -99,7 +99,7 @@ class StoreCategory extends BaseComponent
             'form' => ['nullable','array'],
             'commission' => ['required','numeric','between:0,20'],
             'intermediary' => ['required','numeric','between:0,20'],
-            'control' => ['required','boolean'],
+            'control' => ['nullable','boolean'],
         ];
         $messages = [
             'slug' => 'نام مستعار',

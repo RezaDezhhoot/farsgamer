@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Traits\Admin\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @method static findOrFail($id)
@@ -23,7 +25,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Article extends Model
 {
-    use HasFactory , Searchable;
+    use HasFactory , Searchable , SoftDeletes;
+
+    protected $guarded = [];
 
     protected $searchAbleColumns = ['title','slug'];
 
@@ -38,9 +42,25 @@ class Article extends Model
         ];
     }
 
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+
     public function author()
     {
         return $this->belongsTo(User::class,'user_id');
+    }
+
+    public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = Str::slug($value);
+    }
+
+    public function setMainImageAttribute($value)
+    {
+        $this->attributes['main_image'] = str_replace(env('APP_URL'), '', $value);
     }
 
     public function categories()

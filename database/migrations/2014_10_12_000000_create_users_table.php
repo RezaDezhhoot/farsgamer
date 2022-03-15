@@ -15,10 +15,9 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name',30);
-            $table->string('last_name',30);
-            $table->string('user_name',50)->unique();
-            $table->string('email',70)->unique();
+            $table->string('name');
+            $table->string('user_name')->unique();
+            $table->string('email')->unique();
             $table->string('province');
             $table->string('city');
             $table->string('phone',11)->unique();
@@ -31,9 +30,8 @@ class CreateUsersTable extends Migration
             $table->string('description')->nullable();
             $table->string('ip')->nullable();
             $table->integer('score')->default(0);
-            $table->integer('order-transactions')->default(0);
-            $table->integer('orders')->default(0);
             $table->timestamp('ban')->nullable();
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
         });

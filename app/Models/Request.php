@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Morilog\Jalali\Jalalian;
 use App\Traits\Admin\Searchable;
 
@@ -27,7 +28,7 @@ use App\Traits\Admin\Searchable;
  */
 class Request extends Model
 {
-    use HasFactory , Searchable;
+    use HasFactory , Searchable , SoftDeletes;
 
     protected $searchAbleColumns = ['track_id','id'];
 
@@ -55,6 +56,11 @@ class Request extends Model
             self::REJECTED => 'رد شده',
             self::NEW => 'جدید',
         ];
+    }
+
+    public function setFileAttribute($value)
+    {
+        $this->attributes['file'] = str_replace(env('APP_URL'), '', $value);
     }
 
     public function getDateAttribute()

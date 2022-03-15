@@ -23,7 +23,7 @@ class IndexComment extends BaseComponent
         })->when($this->status,function ($query){
             return $query->where('status',$this->status);
         })->when($this->for,function ($query){
-            return $query->where('type',$this->for);
+            return $query->where('commentable_type',$this->for);
         })->paginate($this->pagination);
 
         $this->data['status'][Comment::CONFIRMED] = Comment::getStatus()[Comment::CONFIRMED].' ('.Comment::where('status',Comment::CONFIRMED)->count().')';

@@ -20,8 +20,8 @@ class StoreComment extends BaseComponent
             $this->header = $this->comment->user->user_name;
             $this->status = $this->comment->status;
             $this->content = $this->comment->content;
-            $this->type = $this->comment->type;
-            $this->case = $this->comment->target;
+            $this->type = $this->comment->commentableTypeLabel;;
+            $this->case = $this->comment->commentable->title;
             $this->score = $this->comment->score;
             $this->chatUserId = $this->comment->user->id;
             $this->chats = \auth()->user()->singleContact($this->comment->user->id);

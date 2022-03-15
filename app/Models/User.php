@@ -6,6 +6,7 @@ use App\Traits\Admin\Searchable;
 use Bavix\Wallet\Traits\CanPay;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -40,18 +41,28 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed profile_image
  * @property mixed|string pass_word
  * @property mixed id
+ * @property mixed full_name
+ * @property mixed name
  */
 class User extends Authenticatable implements Wallet, Confirmable
 {
     use HasApiTokens, HasFactory, Notifiable , HasRoles , HasWallet, CanConfirm;
-    use Searchable;
+    use Searchable , SoftDeletes;
 
 
     const NOT_CONFIRMED = 'not_confirmed';
     const NEW = 'new';
     const CONFIRMED = 'confirmed';
 
+    protected $guarded = [];
+
     protected $searchAbleColumns = ['user_name','phone'];
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
 
     public static function getStatus()
     {
@@ -78,25 +89,6 @@ class User extends Authenticatable implements Wallet, Confirmable
     }
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'user_name',
-
-        'email',
-        'province',
-        'city',
-        'phone',
-        'status',
-        'pass_word',
-        'ip',
-    ];
-
-    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array
@@ -117,7 +109,7 @@ class User extends Authenticatable implements Wallet, Confirmable
 
     public function getFullNameAttribute()
     {
-        return $this->first_name .' ' . $this->last_name;
+        return $this->name;
     }
 
 
@@ -201,6 +193,16 @@ class User extends Authenticatable implements Wallet, Confirmable
 
     public function overtimes(){
         return $this->hasMany(Overtime::class);
+    }
+
+    public function setProfileImageAttribute($value)
+    {
+        $this->attributes['profile_image'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function setAuthImageAttribute($value)
+    {
+        $this->attributes['auth_image'] = str_replace(env('APP_URL'), '', $value);
     }
 }
 

@@ -49,10 +49,9 @@ class StoreOrder extends BaseComponent
                 ['subject',Notification::ORDER],
                 ['model_id',$this->order->id],
             ])->get();
-        } elseif($action == 'create')
+        } elseif($action == 'create'){
             $this->header = 'اگهی جدید';
-
-        else abort(404);
+        } else abort(404);
 
         $this->data['province'] = Setting::getProvince();
         $this->data['status'] = Order::getStatus();
@@ -65,12 +64,17 @@ class StoreOrder extends BaseComponent
     }
     public function render()
     {
-        $this->data['city'] = Setting::getCity()[$this->province];
-        $this->parameters = Parameter::where('category_id',$this->category_id)->where([
-            ['status','available']
-        ])->get();
-        $category = Category::findOrFail($this->category_id);
-        $this->platforms = $category->platforms;
+        if (isset($this->province))
+            $this->data['city'] = Setting::getCity()[$this->province];
+
+        if (isset($this->category_id)){
+            $this->parameters = Parameter::where('category_id',$this->category_id)->where([
+                ['status','available']
+            ])->get();
+            $category = Category::find($this->category_id);
+            $this->platforms = $category->platforms;
+        }
+
         return view('livewire.site.dashboard.orders.store-order');
     }
 

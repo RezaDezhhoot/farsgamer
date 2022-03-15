@@ -13,8 +13,8 @@
             <x-admin.forms.dropdown id="status" :data="$data['status']" label="وضعیت سایت*" wire:model.defer="status"/>
             <x-admin.forms.input type="text" id="registerGift" label="هدیه ثبت نام(تومان)" wire:model.defer="registerGift"/>
             <x-admin.forms.lfm-standalone id="logInImage" label="تصویر صفحه ورود*" :file="$logInImage" type="image" required="true" wire:model="logInImage"/>
-            <x-admin.forms.text-area label="توضیحات سئو" id="seoDescription" wire:model.defer="seoDescription" />
-            <x-admin.forms.text-area label="کلمات سئو" help="کلمات را با کاما از هم جدا کنید" id="seoKeyword" wire:model.defer="seoKeyword" />
+            <x-admin.forms.text-area label="توضیحات سئو*" id="seoDescription" wire:model.defer="seoDescription" />
+            <x-admin.forms.text-area label="کلمات سئو*" help="کلمات را با کاما از هم جدا کنید" id="seoKeyword" wire:model.defer="seoKeyword" />
             <x-admin.forms.input type="text" id="notification" label="اعلان بالای صفحه" wire:model.defer="notification"/>
             <x-admin.forms.input type="text" id="tel" label="تلفن*" wire:model.defer="tel"/>
             <x-admin.forms.input type="email" id="email" label="ایمیل*" wire:model.defer="email"/>
@@ -32,7 +32,7 @@
                     <div><button class="btn btn-danger" wire:click="delete({{ $key }})">حذف</button></div>
                 </div>
             @endforeach
-            <x-admin.forms.text-area id="copyRight" label="متن کپی رایت*" wire:model.defer="copyRight"/>
+            <x-admin.forms.text-area id="copyRight" label="متن کپی رایت" wire:model.defer="copyRight"/>
             <x-admin.form-section label="موضوعات تیکت">
                 <x-admin.button class="primary" content="افزودن موضوع" wire:click="addSubject()" />
                 @foreach($subject as $key => $item)

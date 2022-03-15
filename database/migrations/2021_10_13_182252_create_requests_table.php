@@ -23,6 +23,7 @@ class CreateRequestsTable extends Migration
             $table->string('file')->nullable();
             $table->string('link')->nullable();
             $table->string('track_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

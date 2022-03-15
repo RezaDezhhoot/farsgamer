@@ -30,8 +30,8 @@
                             <tr>
                                 <td>{{ $item->user->fullName ?? $item->user->user_name }}</td>
                                 <td>{{ $item::getStatus()[$item->status] }}</td>
-                                <td>{{ $item::getFor()[$item->type] }}</td>
-                                <td>{{ $item->target }}</td>
+                                <td>{{ $item::type()[$item->commentable_type] }}</td>
+                                <td>{{ $item->commentable->title ??  $item->commentable->fullName }}</td>
                                 <td>{{ $item->score }}</td>
                                 <td style="width: 40%;">{!!  $item->content !!}</td>
                                 <td>

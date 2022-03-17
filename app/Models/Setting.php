@@ -247,6 +247,10 @@ class Setting extends Model
     public static function codes()
     {
         return [
+            '{address_country}' => 'کشور ادرس',
+            '{address_province}' => 'استان ادرس',
+            '{address_city}' => 'شهر ادرس',
+            '{address_postal_code}' => 'کد پستی ادرس',
             '{card_card_number}'=> 'شماره کارت ',
             '{card_card_sheba}'=> 'شماره شبا',
             '{category_id}' => 'شماره دسته بندی',
@@ -270,6 +274,7 @@ class Setting extends Model
             '{orderTransaction_code}' => 'کد معامله',
             '{orderTransaction_status}' => 'وضعیت معامله',
             '{orderTransaction_timer}' => 'زمان باقی مانده معامله',
+            '{payment_amount}' => 'مبلغ پرداختی',
             '{user_name}' => 'نام کاربر',
             '{user_user_name}' => 'نام کابری',
             '{user_status}' => 'وضعیت کابر',

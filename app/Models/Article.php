@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|mixed commentable
  * @property int|mixed google_indexing
  * @property int|mixed|string|null user_id
+ * @property mixed status_label
  */
 class Article extends Model
 {
@@ -56,6 +57,16 @@ class Article extends Model
     public function setSlugAttribute($value)
     {
         $this->attributes['slug'] = Str::slug($value);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status',self::SHARED);
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
     }
 
     public function setMainImageAttribute($value)

@@ -9,8 +9,6 @@ use App\Models\Order;
 use App\Models\OrderParameter;
 use App\Models\Parameter;
 use App\Models\Setting;
-use App\Sends\SendMessages;
-use App\Traits\Admin\TextBuilder;
 use Carbon\Carbon;
 use Livewire\WithFileUploads;
 
@@ -20,7 +18,7 @@ class StoreOrder extends BaseComponent
     public $slug , $category_id , $content , $price , $image , $mainImage , $gallery = [] , $galleries = [] , $province , $city ,$result;
     public $parameters , $parameter = [] , $platforms , $platform = [] , $message , $commission , $intermediary;
     public $data = [];
-    use WithFileUploads , TextBuilder;
+    use WithFileUploads ;
     public function mount($action , $id = null)
     {
         $ban = Carbon::make(now())->diff(\auth()->user()->ban)->format('%r%i');
@@ -172,9 +170,6 @@ class StoreOrder extends BaseComponent
                 $order->platforms()->sync($selectedPlatform);
             }
             $order->save();
-            $text = $this->createText('new_order',$order);
-            $send = new SendMessages();
-            $send->sends($text,$order,Notification::ORDER,$order->id);
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
             $this->resetErrorBag();
 

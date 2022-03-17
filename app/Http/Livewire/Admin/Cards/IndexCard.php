@@ -34,7 +34,6 @@ class IndexCard extends BaseComponent
     public function delete($id)
     {
         $this->authorize('delete_cards');
-        $this->authorize('delete_cards');
         Card::findOrFail($id)->delete();
     }
 

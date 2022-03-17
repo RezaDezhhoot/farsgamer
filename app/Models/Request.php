@@ -21,6 +21,7 @@ use App\Traits\Admin\Searchable;
  * @property int|mixed|string|null user_id
  * @property mixed card_id
  * @property mixed id
+ * @property mixed status_label
  * @method static latest(string $string)
  * @method static where(string $string, string $NEW)
  * @method static findOrFail($id)
@@ -61,6 +62,11 @@ class Request extends Model
     public function setFileAttribute($value)
     {
         $this->attributes['file'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
     }
 
     public function getDateAttribute()

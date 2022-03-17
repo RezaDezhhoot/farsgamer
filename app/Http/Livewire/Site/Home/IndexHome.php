@@ -31,19 +31,17 @@ class IndexHome extends BaseComponent
         JsonLd::setTitle(Setting::getSingleRow('title'));
         JsonLd::setDescription(Setting::getSingleRow('seoDescription'));
         JsonLd::addImage(Setting::getSingleRow('logo'));
-        $this->most_categories = Category::where('status',Category::AVAILABLE)->withCount('orders')
+        $this->most_categories = Category::withCount('orders')->active()
             ->take(Setting::getSingleRow('categoryHomeCount') ?? 120)->get()->sortByDesc('order_count');
 
-        $categories = Category::with(['childrenRecursive'])->where([
-            ['status',Category::AVAILABLE],
-        ])->whereNull('parent_id')->get()->toArray();
+        $categories = Category::with(['childrenRecursive'])->whereNull('parent_id')->active()->get()->toArray();
         $original_categories = [];
         $i = 0;
         foreach ($categories as $category){
             if ($i >= Setting::getSingleRow('categoryHomeCount')) break;
 
             $sub_categories_id = $this->array_value_recursive('id',$category['children_recursive']);
-            $sub_categories =  Category::where('status',Category::AVAILABLE)->findMany($sub_categories_id);
+            $sub_categories =  Category::active()->findMany($sub_categories_id);
             $original_categories[$i] = $category;
             $original_categories[$i]['sub_categories'] = $sub_categories;
             $i++;
@@ -75,21 +73,11 @@ class IndexHome extends BaseComponent
                 return $query->whereHas('platforms',function ($query) {
                     return $query->where('slug',$this->platform);
                 });
-            });
+            })->active();
         $orders = $orders->orderBy($this->view == 1 ? 'view_count' : 'id','desc');
         $this->data['orders'] = $orders->get();
         return view('livewire.site.home.index-home')
             ->extends('livewire.site.layouts.site.site');
-    }
-
-    public function newOrder()
-    {
-        return redirect()->route('user.store.order',['create']);
-    }
-
-    public function goTo($route)
-    {
-        return redirect()->route($route);
     }
 
     public function setCategory($id)

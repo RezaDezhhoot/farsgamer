@@ -26,7 +26,7 @@
                                 <td>{{ \App\Models\Setting::getProvince()[$item->province] }}</td>
                                 <td>{{ \App\Models\Setting::getCity()[$item->province][$item->city] }}</td>
                                 <td>{{ $item->postal_code }}</td>
-                                <td>{{ $item->name }}</td>
+                                <td>{{ $item->user->name }}</td>
                                 <td> {{ $item->phone }} </td>
                                 <td> {{ $item::getStatus()[$item->status] }}</td>
                                 <td>

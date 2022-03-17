@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
  * @method static find(int[] $array)
  * @method static fineMany(array $sub_categories_id)
  * @method static findMany(array $sub_categories_id)
+ * @method static active()
  * @property mixed title
  * @property mixed slug
  * @property mixed logo
@@ -58,9 +59,19 @@ class Category extends Model
         $this->attributes['slug'] = Str::slug($value);
     }
 
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
+    }
+
     public function setLogoAttribute($value)
     {
         $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status',self::AVAILABLE);
     }
 
     public function setSliderAttribute($value)
@@ -89,7 +100,7 @@ class Category extends Model
     public static function available()
     {
         return [
-            self::YES => ' قابل معامله',
+            self::YES => 'قابل معامله',
             self::NO => 'غیر قابل معامله',
         ];
     }

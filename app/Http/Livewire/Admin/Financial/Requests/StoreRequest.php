@@ -5,10 +5,7 @@ namespace App\Http\Livewire\Admin\Financial\Requests;
 use App\Http\Livewire\BaseComponent;
 use App\Models\Card;
 use App\Models\Notification;
-use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
-use App\Traits\Admin\TextBuilder;
 use Bavix\Wallet\Exceptions\BalanceIsEmpty;
 use Bavix\Wallet\Exceptions\InsufficientFunds;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -16,7 +13,7 @@ use App\Models\Request;
 
 class StoreRequest extends BaseComponent
 {
-    use AuthorizesRequests , Sends , TextBuilder , ChatList;
+    use AuthorizesRequests  , ChatList;
     public $request , $header , $mode , $data = [];
     public $status , $result , $file , $link , $track_id , $user , $phone , $sheba , $bank , $card , $price;
     /**
@@ -97,9 +94,6 @@ class StoreRequest extends BaseComponent
             $model->user->deposit($model->price, ['description' =>  $model->result , 'from_admin'=> true]);
         }
 
-        if ($this->status <> $model->status)
-            $this->notify();
-
         $model->status = $this->status;
         $model->result = $this->result;
         $model->file = $this->file;
@@ -109,22 +103,6 @@ class StoreRequest extends BaseComponent
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
-    public function notify()
-    {
-        $text = [];
-        switch ($this->status){
-            case Request::SETTLEMENT:{
-                $text = $this->createText('complete_request',$this->request);
-                break;
-            }
-            case Request::REJECTED:{
-                $text = $this->createText('rejected_request',$this->request);
-                break;
-            }
-        }
-        $send = new SendMessages();
-        $send->sends($text,$this->request->user,Notification::REQUEST,$this->request->id);
-    }
 
     public function render()
     {
@@ -148,9 +126,6 @@ class StoreRequest extends BaseComponent
         $result->model = Notification::REQUEST;
         $result->model_id = $this->request->id;
         $result->save();
-        $text = $this->createText('new_message',$this->request->user);
-        $send = new SendMessages();
-        $send->sends($text,$this->request->user,Notification::REQUEST);
         $this->message->push($result);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');

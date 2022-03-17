@@ -137,8 +137,6 @@ class StoreUser extends BaseComponent
         }
 
         $this->validate($fields,[],$messages);
-        if ($this->mode == 'edit' && $this->status <> $this->user->status)
-            $this->notify();
 
         $model->name = $this->full_name;
         $model->user_name = $this->user_name;
@@ -238,22 +236,6 @@ class StoreUser extends BaseComponent
         return view('livewire.admin.users.store-user')->extends('livewire.admin.layouts.admin');;
     }
 
-    public function notify()
-    {
-        $text = [];
-        switch ($this->status){
-            case User::NOT_CONFIRMED:{
-                $text = $this->createText('not_confirmed',$this->user);
-                break;
-            }
-            case User::CONFIRMED:{
-                $text = $this->createText('auth',$this->user);
-                break;
-            }
-        }
-        $send = new SendMessages();
-        $send->sends($text,$this->user,Notification::User,$this->user->id);
-    }
 
     public function setBan()
     {
@@ -287,8 +269,6 @@ class StoreUser extends BaseComponent
         $this->authorize('edit_cards');
         $card = Card::findOrFail($id);
         $card->status = Card::CONFIRMED;
-        $sends = new SendMessages();
-        $sends->sends($this->createText('confirm_card',$card),$this->user,Notification::CARD,$card->id);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
         return $card->save();
     }

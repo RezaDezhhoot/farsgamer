@@ -2,9 +2,6 @@
 
 namespace App\Http\Livewire\Admin\Addresses;
 
-use App\Models\Notification;
-use App\Sends\SendMessages;
-use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Livewire\BaseComponent;
 use Livewire\WithPagination;
@@ -12,7 +9,7 @@ use App\Models\Address;
 
 class IndexAddress extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests , TextBuilder;
+    use WithPagination , AuthorizesRequests ;
 
     protected $queryString = ['status'];
     public $status;
@@ -44,8 +41,5 @@ class IndexAddress extends BaseComponent
         $address = Address::findOrFail($id);
         $address->status = Address::CONFIRMED;
         $address->save();
-        $text = $this->createText('confirm_address',$address);
-        $send = new SendMessages();
-        $send->sends($text,$address->user,Notification::ADDRESS,$id);
     }
 }

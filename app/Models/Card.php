@@ -11,6 +11,15 @@ use phpDocumentor\Reflection\Types\Self_;
  * @method static lateast(string $string)
  * @method static latest(string $string)
  * @method static where(string $string, string $NOT_CONFIRMED)
+ * @property mixed status_label
+ * @property mixed user_id
+ * @property mixed status
+ * @property mixed user
+ * @property mixed id
+ * @property mixed card_number
+ * @property mixed card_sheba
+ * @property mixed bank
+ * @property mixed bank_logo
  */
 class Card extends Model
 {
@@ -32,6 +41,11 @@ class Card extends Model
             self::CONFIRMED => 'تایید شده ',
             self::NOT_CONFIRMED => 'تایید نشده ',
         ];
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
     }
 
     public static function bank()

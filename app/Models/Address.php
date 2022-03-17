@@ -14,6 +14,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property mixed city
  * @property mixed address
  * @property mixed status
+ * @property mixed user
+ * @property mixed id
+ * @property mixed status_label
+ * @property mixed user_id
  */
 class Address extends Model
 {
@@ -28,9 +32,19 @@ class Address extends Model
         return $this->country.' - '.$this->province.' - '.$this->city.' - '.$this->address;
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('status',self::CONFIRMED);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
     }
 
     public static function getStatus()

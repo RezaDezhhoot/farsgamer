@@ -261,8 +261,6 @@ class StoreOrderTransaction extends BaseComponent
                 $result->model = Notification::TRANSACTION;
                 $result->model_id = $this->transaction->id;
                 $result->user_id = $this->transaction->{$code}->id;
-                $text = $this->createText('new_message',$this->transaction->{$code});
-                $send->sends($text,$this->transaction->{$code},Notification::TRANSACTION);
                 $result->save();
                 $this->message->push($result);
             }
@@ -273,15 +271,11 @@ class StoreOrderTransaction extends BaseComponent
             $result->type = Notification::PRIVATE;
             $result->model = Notification::TRANSACTION;
             $result->model_id = $this->transaction->id;
-            if ($this->newMessageStatus == $this->transaction->seller->id) {
+            if ($this->newMessageStatus == $this->transaction->seller->id)
                 $result->user_id = $this->transaction->seller->id;
-                $text = $this->createText('new_message',$this->transaction->seller);
-                $send->sends($text,$this->transaction->seller,Notification::TRANSACTION);
-            } elseif ($this->newMessageStatus == $this->transaction->customer->id) {
+            elseif ($this->newMessageStatus == $this->transaction->customer->id)
                 $result->user_id = $this->transaction->customer->id;
-                $text = $this->createText('new_message',$this->transaction->customer);
-                $send->sends($text,$this->transaction->customer,Notification::TRANSACTION);
-            }
+
             $result->save();
             $this->message->push($result);
         }

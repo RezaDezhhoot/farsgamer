@@ -21,6 +21,8 @@ use Morilog\Jalali\Jalalian;
  * @property mixed file
  * @property mixed|string sender_type
  * @property mixed id
+ * @property mixed user
+ * @property mixed status_label
  */
 class Ticket extends Model
 {

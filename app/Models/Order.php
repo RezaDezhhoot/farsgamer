@@ -27,6 +27,9 @@ use Morilog\Jalali\Jalalian;
  * @property mixed city
  * @property mixed id
  * @property mixed created_at
+ * @property mixed status_label
+ * @property mixed user_id
+ * @property mixed user
  */
 class Order extends Model
 {
@@ -52,6 +55,10 @@ class Order extends Model
         $this->attributes['image'] = str_replace(env('APP_URL'), '', $value);
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('status',self::IS_CONFIRMED);
+    }
 
     public function setGalleryAttribute($value)
     {
@@ -96,11 +103,6 @@ class Order extends Model
     public function parameters()
     {
         return $this->belongsToMany(Parameter::class , 'orders_has_parameters' ,'order_id' ,'parameter_id');
-    }
-
-    public function saves()
-    {
-        return $this->hasMany(Save::class);
     }
 
     public static function getStatus()

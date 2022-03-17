@@ -4,16 +4,13 @@ namespace App\Http\Livewire\Admin\Cards;
 
 use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
-use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
-use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\Card;
 
 class StoreCard extends BaseComponent
 {
-    use AuthorizesRequests , Sends , TextBuilder , ChatList;
+    use AuthorizesRequests  , ChatList;
     public $card , $header , $mode , $data = [];
     public $card_number , $card_sheba , $bank , $bank_logo , $status , $newMessageStatus , $message , $newMessage;
 
@@ -79,35 +76,15 @@ class StoreCard extends BaseComponent
         $model->card_sheba = $this->card_sheba;
         $model->bank = $this->bank;
         $model->bank_logo = $this->bank_logo;
-        if ($this->status <> $model->status)
-            $this->notify();
         $model->status = $this->status;
         $model->save();
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
-    public function notify()
-    {
-        $text = [];
-        switch ($this->status){
-            case Card::CONFIRMED:{
-                $text = $this->createText('confirm_card',$this->card);
-                break;
-            }
-            case Card::NOT_CONFIRMED:{
-                $text = $this->createText('reject_card',$this->card);
-                break;
-            }
-        }
-        $send = new SendMessages();
-        $send->sends($text,$this->card->user,Notification::CARD,$this->card->id);
-    }
-
     public function sendMessage()
     {
-        $this->authorize('edit_orders');
         $this->validate([
-            'newMessage' => ['required','string'],
+            'newMessage' => ['required','string','max:255'],
             'newMessageStatus' => ['required','in:'.implode(',',array_keys(Notification::getSubject()))]
         ],[],[
             'newMessage'=> 'متن',
@@ -121,9 +98,6 @@ class StoreCard extends BaseComponent
         $result->model = Notification::CARD;
         $result->model_id = $this->card->id;
         $result->save();
-        $text = $this->createText('new_message',$this->card->user);
-        $send = new SendMessages();
-        $send->sends($text,$this->card->user,Notification::CARD);
         $this->message->push($result);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');

@@ -16,6 +16,12 @@ use Morilog\Jalali\Jalalian;
  * @method static where(string $string, string $string1)
  * @method static find($code)
  * @property mixed created_at
+ * @property mixed status
+ * @property mixed status_code
+ * @property mixed status_label
+ * @property mixed user_id
+ * @property mixed user
+ * @property mixed id
  */
 class Payment extends Model
 {
@@ -32,7 +38,10 @@ class Payment extends Model
         ];
     }
 
-
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status_code];
+    }
 
     protected $searchAbleColumns = ['payment_token'];
 

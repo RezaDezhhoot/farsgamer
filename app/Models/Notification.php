@@ -16,6 +16,7 @@ use Morilog\Jalali\Jalalian;
  * @property mixed user_id
  * @property mixed model
  * @property mixed model_id
+ * @property mixed user
  */
 class Notification extends Model
 {
@@ -24,7 +25,7 @@ class Notification extends Model
     const PUBLIC = 'public' , PRIVATE = 'private';
 
     const TRANSACTION = 'OrderTransaction' , ORDER = 'Order' , AUTH = 'Auth' , ADDRESS = 'Address' , CARD = 'Card' , REQUEST = 'Request';
-    const CHAT = 'Chat' , TICKET = 'Ticket' , ALL = 'All' , NEWS = 'News'  , SECURITY = 'Security' , User = 'User';
+    const CHAT = 'Chat' , TICKET = 'Ticket' , ALL = 'All' , NEWS = 'News'  , SECURITY = 'Security' , User = 'User' , PAYMENT = 'payment';
 
     public static function getSubject()
     {
@@ -39,6 +40,7 @@ class Notification extends Model
             self::CHAT => 'چت',
             self::TICKET => 'تیکت',
             self::SECURITY => 'امنیتی',
+            self::PAYMENT => 'پرداخت',
             self::NEWS => 'اطلاع رسانی',
             self::ALL => 'عمومی',
         ];
@@ -51,7 +53,7 @@ class Notification extends Model
 
     public function getSubjectLabelAttribute()
     {
-        return self::getSubject()[$this->subject];
+        return self::getSubject()[in_array($this->subject,self::getSubject()) ? $this->subject : self::ALL];
     }
 
     public static function getType()

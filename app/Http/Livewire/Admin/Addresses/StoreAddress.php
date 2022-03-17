@@ -5,16 +5,13 @@ namespace App\Http\Livewire\Admin\Addresses;
 use App\Models\Notification;
 use App\Models\Setting;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
-use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Livewire\BaseComponent;
 use App\Models\Address;
-use App\Sends\SendMessages;
 
 class StoreAddress extends BaseComponent
 {
-    use AuthorizesRequests , Sends , TextBuilder , ChatList;
+    use AuthorizesRequests  , ChatList;
     public $address , $header , $mode , $data = [];
     public $country , $province , $city , $addressText , $postal_code ,$first_name , $last_name , $phone , $email , $status;
     /**
@@ -42,7 +39,7 @@ class StoreAddress extends BaseComponent
             $this->city = $this->address->city;
             $this->addressText = $this->address->address;
             $this->postal_code = $this->address->postal_code;
-            $this->first_name = $this->address->name;
+            $this->first_name = $this->address->first_name;
             $this->last_name = $this->address->last_name;
             $this->phone = $this->address->phone;
             $this->email = $this->address->email;
@@ -76,9 +73,6 @@ class StoreAddress extends BaseComponent
             'status' => 'وضعیت',
         ];
         $this->validate($fields,[],$messages);
-        if ($this->status <> $model->status)
-            $this->notify();
-
         $model->status = $this->status;
         $model->save();
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
@@ -91,23 +85,6 @@ class StoreAddress extends BaseComponent
         return view('livewire.admin.addresses.store-address')->extends('livewire.admin.layouts.admin');
     }
 
-    public function notify()
-    {
-        $text = [];
-        switch ($this->status){
-            case Address::CONFIRMED:{
-                $text = $this->createText('confirm_address',$this->address);
-                break;
-            }
-            case Address::NOT_CONFIRMED:{
-                $text = $this->createText('reject_address',$this->address);
-                break;
-            }
-        }
-        $send = new SendMessages();
-        $send->sends($text,$this->address->user,Notification::ADDRESS,$this->address->id);
-    }
-
     public function deleteItem()
     {
         $this->authorize('delete_addresses');
@@ -117,7 +94,6 @@ class StoreAddress extends BaseComponent
 
     public function sendMessage()
     {
-        $this->authorize('edit_orders');
         $this->validate([
             'newMessage' => ['required','string'],
             'newMessageStatus' => ['required','in:'.implode(',',array_keys(Notification::getSubject()))]
@@ -133,9 +109,6 @@ class StoreAddress extends BaseComponent
         $result->model = Notification::ADDRESS;
         $result->model_id = $this->address->id;
         $result->save();
-        $text = $this->createText('new_message',$this->address->user);
-        $send = new SendMessages();
-        $send->sends($text,$this->address->user,Notification::REQUEST);
         $this->message->push($result);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');

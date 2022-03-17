@@ -3,20 +3,16 @@
 namespace App\Http\Livewire\Admin\Tickets;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Notification;
 use App\Models\Setting;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
-use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 
 class StoreTicket extends BaseComponent
 {
-    use AuthorizesRequests , Sends , TextBuilder ,ChatList;
+    use AuthorizesRequests  ,ChatList;
     public $ticket , $header , $mode , $data = [];
     public $subject , $user_id , $content , $file , $priority , $status , $child = [] , $user_name , $answer , $answerFile;
     public function mount($action , $id = null)
@@ -86,11 +82,6 @@ class StoreTicket extends BaseComponent
         $model->priority = $this->priority;
         $model->status = $this->status;
         $model->save();
-        if ($this->mode == 'create') {
-            $text = $this->createText('new_ticket',$model);
-            $send = new SendMessages();
-            $send->sends($text,$model->user,Notification::TICKET,$model->id);
-        }
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
@@ -122,11 +113,9 @@ class StoreTicket extends BaseComponent
         $new->sender_id = Auth::id();
         $new->sender_type = Ticket::ADMIN;
         $new->priority = $this->priority;
+        $new->status = Ticket::ANSWERED;
         $this->ticket->status = Ticket::ANSWERED;
         $this->ticket->save();
-        $text = $this->createText('ticket_answer',$new);
-        $send = new SendMessages();
-        $send->sends($text,$this->ticket->user,Notification::TICKET,$this->ticket->id);
         $new->save();
         $this->child->push($new);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');

@@ -6,10 +6,7 @@ use App\Http\Livewire\BaseComponent;
 use App\Models\Notification;
 use App\Models\OrderParameter;
 use App\Models\Setting;
-use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
-use App\Traits\Admin\TextBuilder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Models\Order;
 use App\Models\Category;
@@ -17,7 +14,7 @@ use App\Models\Parameter;
 
 class StoreOrder extends BaseComponent
 {
-    use AuthorizesRequests , TextBuilder , Sends , ChatList;
+    use AuthorizesRequests  , ChatList;
     public $mode;
     public $order;
     public $slug , $price , $province , $city , $category , $status , $content , $image , $gallery;
@@ -103,14 +100,9 @@ class StoreOrder extends BaseComponent
         );
 
         if (!in_array($this->order->status , [Order::IS_REQUESTED,Order::IS_FINISHED])) {
-            if ($this->status <> $order->status)
-                $this->notify();
-
             $order->status = $this->status;
             $order->category_id = $this->category;
             $order->price = $this->price;
-//            $order->image = $this->image;
-//            $order->gallery = $this->gallery;
             $order->province = $this->province;
             $order->city = $this->city;
             $order->slug = $this->slug;
@@ -152,17 +144,6 @@ class StoreOrder extends BaseComponent
 
     }
 
-    public function notify()
-    {
-        $text = [];
-        switch ($this->status){
-            case Order::IS_CONFIRMED : $text = $this->createText('confirm_order',$this->order);break;
-            case Order::IS_REJECTED : $text = $this->createText('reject_order',$this->order);break;
-            case Order::IS_REQUESTED : $text = $this->createText('request_order',$this->order);break;
-        }
-        $send = new SendMessages();
-        $send->sends($text,$this->order->user,Notification::ORDER,$this->order->id);
-    }
 
     public function delete()
     {
@@ -179,7 +160,6 @@ class StoreOrder extends BaseComponent
 
     public function sendMessage()
     {
-        $this->authorize('edit_orders');
         $this->validate([
             'newMessage' => ['required','string'],
             'newMessageStatus' => ['required','in:'.implode(',',array_keys(Notification::getSubject()))]
@@ -195,9 +175,6 @@ class StoreOrder extends BaseComponent
         $result->model = Notification::ORDER;
         $result->model_id = $this->order->id;
         $result->save();
-        $text = $this->createText('new_message',$this->order->user);
-        $send = new SendMessages();
-        $send->sends($text,$this->order->user,Notification::ORDER);
         $this->message->push($result);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');

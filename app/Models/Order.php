@@ -16,6 +16,7 @@ use Morilog\Jalali\Jalalian;
  * @method static count()
  * @method static find($id)
  * @method static whereBetween(string $string, string[] $array)
+ * @method static active(bool $active)
  * @property mixed status
  * @property mixed slug
  * @property mixed content
@@ -55,9 +56,9 @@ class Order extends Model
         $this->attributes['image'] = str_replace(env('APP_URL'), '', $value);
     }
 
-    public function scopeActive($query)
+    public function scopeActive($query , $active = true)
     {
-        return $query->where('status',self::IS_CONFIRMED);
+        return $active ? $query->where('status',self::IS_CONFIRMED) : $query;
     }
 
     public function setGalleryAttribute($value)
@@ -67,6 +68,15 @@ class Order extends Model
             $gallery[] = str_replace(env('APP_URL'), '', $item);
 
         $this->attributes['gallery'] = implode(',',$gallery);
+    }
+
+    public function getGalleryAssetAttribute()
+    {
+        $gallery = [];
+        foreach (explode(',',$this->gallery) as $item)
+            $gallery[] = asset($item);
+
+        return implode(',',$gallery);
     }
 
 
@@ -102,7 +112,7 @@ class Order extends Model
 
     public function parameters()
     {
-        return $this->belongsToMany(Parameter::class , 'orders_has_parameters' ,'order_id' ,'parameter_id');
+        return $this->belongsToMany(Parameter::class , 'orders_has_parameters' ,'order_id' ,'parameter_id')->withPivot('value');;
     }
 
     public static function getStatus()

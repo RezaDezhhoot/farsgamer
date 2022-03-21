@@ -36,18 +36,7 @@ class UserObserver
      */
     public function updated(User $user)
     {
-        $text = [];
-        switch ($user->status){
-            case User::NOT_CONFIRMED:{
-                $text = $this->createText('not_confirmed',$user);
-                break;
-            }
-            case User::CONFIRMED:{
-                $text = $this->createText('auth',$user);
-                break;
-            }
-        }
-        $this->send->sends($text,$user,Notification::User,$user->id);
+
     }
 
     /**

@@ -15,6 +15,7 @@ use Morilog\Jalali\Jalalian;
  * @method static count()
  * @method static where(string $string, $status)
  * @method static whereBetween(string $string, string[] $array)
+ * @method static create(array $array)
  * @property mixed customer_id
  * @property mixed seller_id
  * @property mixed created_at
@@ -31,6 +32,8 @@ class OrderTransaction extends Model
     protected $dates = [
         'timer','created_at','updated_at'
     ];
+
+    protected $guarded;
 
     use HasFactory , Searchable;
     const PREFIX = 'FG-';

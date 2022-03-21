@@ -90,9 +90,6 @@
                 @can('show_users')
                     <x-admin.menu-item href="{{route('admin.user')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user','admin.store.user'])" label="کاربران ({{\App\Models\User::getNew()}})" />
                 @endcan
-                @can('show_addresses')
-                    <x-admin.menu-item href="{{route('admin.address')}}" icon="far fa-address-book" :active="request()->routeIs(['admin.address','admin.store.address'])" label="ادرس ها ({{\App\Models\Address::getNew()}})" />
-                @endcan
                 @can('show_articles' , 'show_article_categories')
                     <x-admin.menu-group icon="fas fa-text-height" :active="request()->routeIs('admin.article','admin.store.article','admin.articleCategory','admin.store.articleCategory')" label="مقالات" >
                         @can('show_articles')

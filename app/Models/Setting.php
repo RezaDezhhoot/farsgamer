@@ -247,10 +247,6 @@ class Setting extends Model
     public static function codes()
     {
         return [
-            '{address_country}' => 'کشور ادرس',
-            '{address_province}' => 'استان ادرس',
-            '{address_city}' => 'شهر ادرس',
-            '{address_postal_code}' => 'کد پستی ادرس',
             '{card_card_number}'=> 'شماره کارت ',
             '{card_card_sheba}'=> 'شماره شبا',
             '{category_id}' => 'شماره دسته بندی',

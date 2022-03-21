@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Address;
 use App\Models\Article;
 use App\Models\Card;
 use App\Models\Notification;
@@ -12,7 +11,6 @@ use App\Models\Payment;
 use App\Models\Request;
 use App\Models\Ticket;
 use App\Models\User;
-use App\Observers\AddressObserver;
 use App\Observers\ArticleObserver;
 use App\Observers\CardObserver;
 use App\Observers\NotificationObserver;
@@ -48,7 +46,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Address::observe(AddressObserver::class);
         Article::observe(ArticleObserver::class);
         Card::observe(CardObserver::class);
         Notification::observe(NotificationObserver::class);

@@ -22,7 +22,7 @@ class IndexHome extends BaseComponent
     {
         SEOMeta::setTitle(Setting::getSingleRow('title'),false);
         SEOMeta::setDescription(Setting::getSingleRow('seoDescription'));
-        SEOMeta::addKeyword(explode(',',Setting::getSingleRow('seoKeyword')));
+        SEOMeta::addKeyword(Setting::getSingleRow('seoKeyword'));
         OpenGraph::setUrl(url()->current());
         OpenGraph::setTitle(Setting::getSingleRow('title'));
         OpenGraph::setDescription(Setting::getSingleRow('seoDescription'));

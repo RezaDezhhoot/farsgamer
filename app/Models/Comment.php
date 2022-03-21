@@ -19,7 +19,6 @@ class Comment extends Model
 
     const CONFIRMED = 'confirmed' , UNCONFIRMED = 'unconfirmed' , NEW = 'new';
 
-//    const ARTICLE = 'article' , USER = 'user';
     const ARTICLE = 'App\Models\Article' , USER = 'App\Models\User';
     public function user()
     {
@@ -51,6 +50,11 @@ class Comment extends Model
     public static function getNew()
     {
         return Comment::where('status',self::NEW)->count();
+    }
+
+    public function scopeActive($query,$active = true)
+    {
+        return $active ? $query->where('status',self::CONFIRMED) : $query;
     }
 
     public function commentable()

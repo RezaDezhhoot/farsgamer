@@ -221,8 +221,8 @@ class StoreCategory extends BaseComponent
             'paraType' => ['required','in:number,text'],
             'paraField' => ['required','string','max:250'],
             'paraStatus' => ['required','in:available,unavailable'],
-            'paraMax' => ['nullable','numeric','max:250'],
-            'paraMin' => ['nullable','numeric','max:100'],
+            'paraMax' => ['nullable','numeric','between:-999999999.99999,999999999999.99999999'],
+            'paraMin' => ['nullable','numeric','between:-999999999.99999,999999999999.99999999'],
         ];
         $messages = [
             'paraLogo' => 'ایکون',

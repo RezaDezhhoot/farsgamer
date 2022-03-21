@@ -26,6 +26,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static orderBy(string $string)
  * @method static whereBetween(string $string, string[] $array)
  * @method static role(string $string)
+ * @method static create(array $array)
  * @property mixed first_name
  * @property mixed last_name
  * @property mixed phone
@@ -43,11 +44,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed id
  * @property mixed full_name
  * @property mixed name
+ * @property mixed|string password
  */
 class User extends Authenticatable implements Wallet, Confirmable
 {
     use HasApiTokens, HasFactory, Notifiable , HasRoles , HasWallet, CanConfirm;
-    use Searchable , SoftDeletes;
+    use Searchable , SoftDeletes ;
 
 
     const NOT_CONFIRMED = 'not_confirmed';
@@ -62,7 +64,6 @@ class User extends Authenticatable implements Wallet, Confirmable
     {
         return $this->morphMany(Comment::class, 'commentable');
     }
-
 
     public static function getStatus()
     {
@@ -80,12 +81,12 @@ class User extends Authenticatable implements Wallet, Confirmable
 
     public function getProvinceLabelAttribute()
     {
-        return Setting::getProvince()[$this->province];
+        return !empty($this->province) ? Setting::getProvince()[$this->province] : '';
     }
 
     public function getCityLabelAttribute()
     {
-        return Setting::getCity()[$this->province][$this->city];
+        return (!empty($this->province) && !empty($this->city)) ? Setting::getCity()[$this->province][$this->city] : '';
     }
 
     /**
@@ -96,6 +97,7 @@ class User extends Authenticatable implements Wallet, Confirmable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp',
     ];
 
     /**
@@ -123,10 +125,6 @@ class User extends Authenticatable implements Wallet, Confirmable
         return $this->hasMany(Order::class);
     }
 
-    public function saves()
-    {
-        return $this->hasMany(Save::class);
-    }
     public function tickets()
     {
         return $this->hasMany(Ticket::class);

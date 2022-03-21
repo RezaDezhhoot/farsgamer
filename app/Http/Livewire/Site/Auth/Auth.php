@@ -21,10 +21,10 @@ class Auth extends BaseComponent
     use TextBuilder;
     const MODE_REGISTER = 'register' ,  MODE_LOGIN = 'login' , MODE_VERIFY = 'verify';
     protected $queryString = ['mode'];
-    public $username , $phone , $password , $otp , $mode = self::MODE_LOGIN;
-    public $logo , $authImage , $sms = false , $data = [] , $password_confirmation;
-    public $city , $province  , $passwordLabel = 'رمز عبور';
-    public $first_name , $last_name , $email , $phone_number , $user_name ;
+    public $phone , $password , $name, $otp , $mode = self::MODE_LOGIN;
+    public $logo , $authImage , $sms = false , $data = [] ;
+    public $passwordLabel = 'رمز عبور';
+    public $email , $phone_number , $user_name;
 
     public function mount()
     {
@@ -41,7 +41,6 @@ class Auth extends BaseComponent
         JsonLd::addImage(Setting::getSingleRow('logo'));
         $this->logo = Setting::getSingleRow('logo');
         $this->authImage = Setting::getSingleRow('authImage');
-        $this->data['province'] = Setting::getProvince();
         if ($this->mode == self::MODE_REGISTER) {
             SEOMeta::setTitle('ثبت نام', false);
             OpenGraph::setTitle('ثبت نام');
@@ -52,14 +51,13 @@ class Auth extends BaseComponent
 
     public function render()
     {
-        $this->data['city'] = $this->province ? Setting::getCity()[$this->province] : [];
         return view('livewire.site.auth.auth')->extends('livewire.site.layouts.auth.auth');
     }
 
     public function login()
     {
         $rateKey = 'verify-attempt:' . $this->phone . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count'))) {
+        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count') ?? 5)) {
             $this->resetInputs();
             return
                 $this->addError('phone', 'زیادی تلاش کردید. لطفا پس از مدتی دوباره تلاش کنید.');
@@ -74,14 +72,13 @@ class Auth extends BaseComponent
             'password' => 'رمز عبور',
         ]);
 
-        $user = User::where('phone', $this->phone)->orWhere('user_name',$this->user_name)->first();
+        $user = User::where('phone', $this->phone)->orWhere('user_name',$this->phone)->first();
 
         if (!is_null($user)) {
 
             if ($user->status == User::NEW || $user->status == User::NOT_CONFIRMED) {
                 $this->sendSMS();
                 if (Hash::check($this->password, $user->otp) && $this->sms === true) {
-                    $user->status = User::CONFIRMED;
                     $user->save();
                     \Illuminate\Support\Facades\Auth::login($user,true);
                     request()->session()->regenerate();
@@ -98,7 +95,6 @@ class Auth extends BaseComponent
                     return $this->addError('password','کد تایید یا شماره همراه اشتباه می باشد.');
             } else {
                 if (Hash::check($this->password, $user->pass_word) || (Hash::check($this->password, $user->otp) && $this->sms === true)) {
-
                     \Illuminate\Support\Facades\Auth::login($user,true);
                     request()->session()->regenerate();
                     RateLimiter::clear($rateKey);
@@ -118,41 +114,25 @@ class Auth extends BaseComponent
 
     public function register()
     {
-        $this->validate(
-            [
-                'first_name' => ['required','string','max:120'],
-                'last_name' => ['required','string','max:120'],
-                'email' => ['required','email','max:160','unique:users,email'],
-                'phone_number' => ['required','string','size:11','unique:users,phone'],
-                'user_name' => ['required','string','max:70','unique:users,user_name'],
-                'province' => ['required','in:'.implode(',',array_keys($this->data['province']))],
-                'city' => ['required','in:'.implode(',',array_keys($this->data['city']))],
-//                'password'=>['required','min:8','regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/','confirmed'],
-            ] , [] ,[
-            'first_name' => 'نام',
-            'last_name' => 'نام خانوادگی',
+        $this->validate([
+            'name' => ['required','string','max:180'],
+            'email' => ['required','email','max:160','unique:users,email'],
+            'phone_number' => ['required','string','size:11','unique:users,phone'],
+            'user_name' => ['required','string','max:70','unique:users,user_name'],
+        ] , [] ,[
+            'name' => 'نام',
             'email' => 'ایمیل',
             'phone_number' => 'شماره همراه',
             'user_name' => 'نام کاربری',
-            'province' => 'استان',
-            'city' => 'شهر',
-//            'password' => 'رمز عبور',
         ]);
         $user = User::create([
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
+            'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone_number,
             'user_name' => $this->user_name,
-            'province' => $this->province,
-            'city' => $this->city,
             'otp' => 1,
             'ip' => request()->ip(),
         ]);
-        $send = new SendMessages();
-        $message = $this->createText('signUp',$user);
-        $send->sends($message,$user,Notification::AUTH,$user->id);
-        $this->reset(['password']);
         $this->phone = $this->phone_number;
         $this->sendSMS();
         $this->mode = self::MODE_LOGIN;

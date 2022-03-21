@@ -57,9 +57,6 @@ class Task extends Model
             'cancel_transaction' => 'لفو معامله',#ok
             'control_data' => 'کنترل توسط واسطه',#ok
             'skip_step' => 'رد شدن از مراحل توسط طرف معامله بابت دیر کرد',
-            'confirm_address' => 'تایید ادرس',#ok
-            'reject_address' => 'رد ادرس',#ok
-            'delete_address' => 'حذف ادرس',#ok
             'confirm_card' => 'تایید حساب بانکی',#ok
             'reject_card' => 'رد حساب بانکی',#ok
             'delete_card' => 'حذف بانکی',#ok

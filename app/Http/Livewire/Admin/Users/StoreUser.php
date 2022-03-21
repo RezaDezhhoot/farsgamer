@@ -9,7 +9,6 @@ use App\Models\Schedule;
 use App\Models\Setting;
 use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
 use App\Traits\Admin\TextBuilder;
 use Bavix\Wallet\Exceptions\BalanceIsEmpty;
 use Bavix\Wallet\Exceptions\InsufficientFunds;
@@ -22,7 +21,7 @@ use Spatie\Permission\Models\Role;
 
 class StoreUser extends BaseComponent
 {
-    use AuthorizesRequests, Sends , TextBuilder , ChatList;
+    use AuthorizesRequests , TextBuilder , ChatList;
     public $user , $mode , $header ,$data = [] , $userRole = [] , $pass_word  , $code_id ,$score , $description , $profile_image , $auth_image;
     public $full_name  , $user_name , $phone , $province , $city  , $status , $email , $actionWallet , $editWallet , $sendMessage , $subjectMessage,
     $statusMessage , $result , $walletMessage , $banDescription , $banTime , $ban , $cards  = [] , $userWallet;
@@ -137,6 +136,8 @@ class StoreUser extends BaseComponent
         }
 
         $this->validate($fields,[],$messages);
+        if ($this->mode == 'edit' && $this->status <> $this->user->status)
+            $this->notify();
 
         $model->name = $this->full_name;
         $model->user_name = $this->user_name;
@@ -152,7 +153,7 @@ class StoreUser extends BaseComponent
         $model->profile_image = $this->profile_image;
 
         if ($this->mode == 'create' && isset($this->pass_word))
-            $model->pass_word = Hash::make($this->pass_word);
+            $model->password = Hash::make($this->pass_word);
 
         $model->save();
 
@@ -236,6 +237,22 @@ class StoreUser extends BaseComponent
         return view('livewire.admin.users.store-user')->extends('livewire.admin.layouts.admin');;
     }
 
+    public function notify()
+    {
+        $text = [];
+        switch ($this->status){
+            case User::NOT_CONFIRMED:{
+                $text = $this->createText('not_confirmed',$this->user);
+                break;
+            }
+            case User::CONFIRMED:{
+                $text = $this->createText('auth',$this->user);
+                break;
+            }
+        }
+        $send = new SendMessages();
+        $send->sends($text,$this->user,Notification::User,$this->user->id);
+    }
 
     public function setBan()
     {

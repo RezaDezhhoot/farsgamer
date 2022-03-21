@@ -40,7 +40,7 @@ class IndexProfile extends BaseComponent
             'user_name' => ['required', 'string' ,'max:150' ,'unique:users,user_name,'. ($this->user->id ?? 0)],
             'phone' => ['required','size:11' , 'unique:users,phone,'. ($this->user->id ?? 0)],
             'email' => ['required','email','unique:users,email,'. ($this->user->id ?? 0)],
-            'file' => ['nullable','image','mimes:jpg,jpeg,png,PNG,JPG,JPEG','max:'.Setting::getSingleRow('max_profile_image_size')],
+            'file' => ['nullable','image','mimes:jpg,jpeg,png,PNG,JPG,JPEG','max:'.(Setting::getSingleRow('max_profile_image_size') ?? 2048)],
         ];
         $messages = [
             'full_name' => 'نام ',
@@ -52,7 +52,7 @@ class IndexProfile extends BaseComponent
         ];
         if (isset($this->pass_word))
         {
-            $fields['pass_word'] = ['required','min:'.Setting::getSingleRow('password_length'),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'];
+            $fields['pass_word'] = ['required','min:'.(Setting::getSingleRow('password_length') ?? 5),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'];
             $messages['pass_word'] = 'گذرواژه';
         }
         $this->validate($fields,[],$messages);
@@ -68,13 +68,12 @@ class IndexProfile extends BaseComponent
         }
 
         $this->user->name = $this->full_name;
-        $this->user->last_name = $this->last_name;
         $this->user->description = $this->description;
         $this->user->user_name = $this->user_name;
         $this->user->phone = $this->phone;
         $this->user->email = $this->email;
         if (isset($this->pass_word))
-            $this->user->pass_word = Hash::make($this->pass_word);
+            $this->user->password = Hash::make($this->pass_word);
         $this->user->save();
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }

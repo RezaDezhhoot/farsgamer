@@ -14,10 +14,6 @@ use Spatie\Permission\Models\Permission;
 |
 */
 
-Route::get('/',\App\Http\Livewire\Site\Home\IndexHome::class)->name('home');
-Route::get('/saved',\App\Http\Livewire\Site\Dashboard\Others\IndexSaved::class)->name('save');
-Route::get('/orders/{userID}/{id}/{slug}',\App\Http\Livewire\Site\Orders\SingleOrder::class)->name('order');
-Route::get('/users/{user}',\App\Http\Livewire\Site\Users\SingleUser::class)->name('user');
 // admin
 Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
 {
@@ -43,8 +39,6 @@ Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewir
     Route::get('/platforms/{action}/{id?}', Platforms\StorePlatform::class)->name('admin.store.platform');
     Route::get('/categories', Categories\IndexCategory::class)->name('admin.category');
     Route::get('/categories/{action}/{id?}', Categories\StoreCategory::class)->name('admin.store.category');
-    Route::get('/addresses', Addresses\IndexAddress::class)->name('admin.address');
-    Route::get('/addresses/{action}/{id?}', Addresses\StoreAddress::class)->name('admin.store.address');
     Route::get('/articleCategories', ArticlesCategories\IndexArticleCategory::class)->name('admin.articleCategory');
     Route::get('/articleCategories/{action}/{id?}', ArticlesCategories\StoreArticleCategory::class)->name('admin.store.articleCategory');
     Route::get('/articles', Articles\IndexArticle::class)->name('admin.article');
@@ -75,6 +69,24 @@ Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewir
     Route::get('/settings/fag', Settings\QuestionSetting::class)->name('admin.setting.fag');
     Route::get('/settings/fag/{action}/{id?}', Settings\CreateFag::class)->name('admin.setting.fag.create');
 });
+// file manager
+Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth','role:admin','schedule']], function () {
+    \UniSharp\LaravelFilemanager\Lfm::routes();
+});
+// logout
+Route::get('/logout', function (){
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect()->route('auth');
+})->name('logout');
+// web auth
+Route::middleware('guest')->group(function () {
+    Route::get('/auth', \App\Http\Livewire\Site\Auth\Auth::class)->name('auth');
+});
+
+// api:
+
 // user
 Route::middleware(['auth'])->namespace('App\Http\Livewire\Site')->prefix('/user')->group(function (){
     Route::get('/dashboard', Dashboard\Dashboards\IndexDashboard::class)->name('user.dashboard')->middleware('userAuth');
@@ -89,20 +101,11 @@ Route::middleware(['auth'])->namespace('App\Http\Livewire\Site')->prefix('/user'
     Route::get('/order-transactions', Dashboard\Transactions\IndexTransaction::class)->name('user.transaction')->middleware('userAuth');
     Route::get('/order-transactions/{action}/{id?}', Dashboard\Transactions\StoreTransaction::class)->name('user.store.transaction')->middleware('userAuth');
 });
-// auth
-Route::middleware('guest')->group(function () {
-    Route::get('/auth', \App\Http\Livewire\Site\Auth\Auth::class)->name('auth');
-});
-// logout
-Route::get('/logout', function (){
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-    return redirect()->route('auth');
-})->name('logout');
-// file manager
-Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth','role:admin','schedule']], function () {
-    \UniSharp\LaravelFilemanager\Lfm::routes();
-});
+// home
+Route::get('/',\App\Http\Livewire\Site\Home\IndexHome::class)->name('home');
+Route::get('/saved',\App\Http\Livewire\Site\Dashboard\Others\IndexSaved::class)->name('save');
+Route::get('/orders/{userID}/{id}/{slug}',\App\Http\Livewire\Site\Orders\SingleOrder::class)->name('order');
+Route::get('/users/{user}',\App\Http\Livewire\Site\Users\SingleUser::class)->name('user');
+
 // checkout
 Route::middleware(['auth'])->get('/verify/{gateway}',\App\Http\Livewire\Cart\CallBack::class);

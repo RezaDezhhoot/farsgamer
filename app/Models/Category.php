@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
  * @method static find(int[] $array)
  * @method static fineMany(array $sub_categories_id)
  * @method static findMany(array $sub_categories_id)
- * @method static active()
+ * @method static active(bool $active)
  * @property mixed title
  * @property mixed slug
  * @property mixed logo
@@ -69,9 +69,9 @@ class Category extends Model
         $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
     }
 
-    public function scopeActive($query)
+    public function scopeActive($query, $active = false)
     {
-        return $query->where('status',self::AVAILABLE);
+        return $active ? $query->where('status',self::AVAILABLE) : $query;
     }
 
     public function setSliderAttribute($value)

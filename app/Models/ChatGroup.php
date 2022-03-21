@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(\Closure $param)
+ * @method static create(array $array)
  * @property mixed|string slug
  * @property int|mixed|string|null user1
  * @property mixed user2
@@ -20,6 +21,8 @@ class ChatGroup extends Model
     use HasFactory;
     protected $table = 'chats_groups';
     const OPEN = 'open' , CLOSE = 'close';
+
+    protected $guarded = [];
 
     public function user_one()
     {

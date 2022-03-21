@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @method static findOrFail($id)
  * @method static latest(string $string)
+ * @method static active(bool $active)
  * @property mixed slug
  * @property mixed title
  * @property mixed|string main_image
@@ -59,9 +60,9 @@ class Article extends Model
         $this->attributes['slug'] = Str::slug($value);
     }
 
-    public function scopeActive($query)
+    public function scopeActive($query , $active = true)
     {
-        return $query->where('status',self::SHARED);
+        return $active ? $query->where('status',self::SHARED) : $query;
     }
 
     public function getStatusLabelAttribute()

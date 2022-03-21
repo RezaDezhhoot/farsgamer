@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserAuth
 {
@@ -19,7 +20,12 @@ class UserAuth
     {
         if (auth()->user()->status == User::CONFIRMED)
             return $next($request);
-        else
-            return redirect()->intended(route('user.auth'));
+
+        return response([
+            'data'=>[
+                'message' => 'نیاز به احراز هویت'
+            ],
+            'status' => 'error'
+        ],Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

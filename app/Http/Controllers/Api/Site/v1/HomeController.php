@@ -25,12 +25,9 @@ class HomeController extends Controller
         $this->categoryRepository = $categoryRepository;
         $this->settingRepository = $settingRepository;
     }
-
     /**
-     * Display a listing of the resource.
-     *
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\Response
      */
     public function __invoke(Request $request)
     {
@@ -40,7 +37,7 @@ class HomeController extends Controller
         return response([
             'data' => [
                 'orders' => new OrderCollection($orders),
-                'most_order_categories' => new CategoryCollection($most_categories),
+                'most_used_categories' => new CategoryCollection($most_categories),
             ],'status' => 'success'
         ],Response::HTTP_OK);
     }

@@ -61,10 +61,8 @@ class BasicController extends Controller
                 'tel' => $this->settingRepository->getSiteFaq('tel'),
                 'notification' => $this->settingRepository->getSiteFaq('notification'),
                 'user_data' => [
-                    'user' => (auth()->check()) ? new User(auth()->user()) :
-                        (auth('api')->check() ? new User(auth('api')->user()) : ['data' => [] ,'status' => 'User not authorized'] ),
-                    'notifications' => (auth()->check()) ? new NotificationCollection(auth()->user()->alerts) :
-                        (auth('api')->check() ? new NotificationCollection(auth('api')->user()->alerts) : ['data' => [] ,'status' => 'User not authorized'] ),
+                    'user' => auth()->check() ? new User(auth()->user()) : ['message' => 'نیاز به احراز هویت' ,'status' => 'error'] ,
+                    'notifications' =>auth()->check() ? new NotificationCollection(auth()->user()->alerts) : ['message' => 'نیاز به احراز هویت' ,'status' => 'error'],
                 ],
             ]
             ,'status' => 'success'

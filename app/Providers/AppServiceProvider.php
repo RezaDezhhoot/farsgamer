@@ -2,15 +2,19 @@
 
 namespace App\Providers;
 
+use App\Repositories\Classes\ArticleRepository;
 use App\Repositories\Classes\CategoryRepository;
 use App\Repositories\Classes\ChatRepository;
+use App\Repositories\Classes\OffendRepository;
 use App\Repositories\Classes\OrderRepository;
 use App\Repositories\Classes\OrderTransactionRepository;
 use App\Repositories\Classes\PlatformRepository;
 use App\Repositories\Classes\SettingRepository;
 use App\Repositories\Classes\UserRepository;
+use App\Repositories\Interfaces\ArticleRepositoryInterface;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\ChatRepositoryInterface;
+use App\Repositories\Interfaces\OffendRepositoryInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use App\Repositories\Interfaces\PlatformRepositoryInterface;
@@ -60,6 +64,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class,
+        );
+
+        $this->app->bind(
+            OffendRepositoryInterface::class,
+            OffendRepository::class,
+        );
+
+        $this->app->bind(
+            ArticleRepositoryInterface::class,
+            ArticleRepository::class,
         );
     }
 

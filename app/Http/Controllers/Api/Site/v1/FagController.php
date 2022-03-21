@@ -17,11 +17,15 @@ class FagController extends Controller
 
     public function about()
     {
+        $public = [
+            'title' => 'درباره ما'
+        ];
         return response([
             'data' => [
                 'about_text' => $this->settingRepository->getSiteFaq('aboutUs'),
                 'about_images' => $this->settingRepository->getSiteFaq('aboutUsImages'),
                 'copyRight' => $this->settingRepository->getSiteFaq('copyRight'),
+                'head' => $public,
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -29,6 +33,9 @@ class FagController extends Controller
 
     public function contact()
     {
+        $public = [
+            'title' => 'ارتباط با ما'
+        ];
         return response([
             'data' => [
                 'tel' => $this->settingRepository->getSiteFaq('tel'),
@@ -36,6 +43,21 @@ class FagController extends Controller
                 'address' => $this->settingRepository->getSiteFaq('address'),
                 'contact_links' => $this->settingRepository->getSiteFaq('contact',[]),
                 'googleMap' => $this->settingRepository->getSiteFaq('googleMap'),
+                'head' => $public,
+            ],
+            'status' => 'success'
+        ],Response::HTTP_OK);
+    }
+
+    public function fag()
+    {
+        $public = [
+            'title' => 'سوالات متداول'
+        ];
+        return response([
+            'data' => [
+                $this->settingRepository->getFagList(),
+                'head' => $public,
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -43,10 +65,14 @@ class FagController extends Controller
 
     public function law()
     {
+        $public = [
+            'title' => 'قوانین'
+        ];
         return response([
             'data' => [
                 'law' => $this->settingRepository->getSiteLaw('law'),
                 'chatLaw' => $this->settingRepository->getSiteLaw('chatLaw'),
+                'head' => $public,
             ],
             'status' => 'success'
         ],Response::HTTP_OK);

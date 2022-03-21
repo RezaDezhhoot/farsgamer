@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(string $string, string $CONFIRMED)
+ * @method static create(array $data)
  * @property mixed type
  * @property mixed status
  * @property mixed commentable_type
@@ -18,6 +19,8 @@ class Comment extends Model
     use HasFactory;
 
     const CONFIRMED = 'confirmed' , UNCONFIRMED = 'unconfirmed' , NEW = 'new';
+
+    protected $guarded = [];
 
     const ARTICLE = 'App\Models\Article' , USER = 'App\Models\User';
     public function user()

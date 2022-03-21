@@ -35,26 +35,20 @@ class OrderController extends Controller
     public function show($order_id)
     {
         $order = $this->orderRepository->getOrder($order_id);
-        return response([
-            'data' => [
-                'order' => new OrderResource($order),
-                'Law' => $this->settingRepository->getSiteLaw('law'),
-                'chatLaw' => $this->settingRepository->getSiteLaw('chatLaw'),
-            ]
-        ],Response::HTTP_OK);
-    }
-
-    public function head($order_id)
-    {
-        $order = $this->orderRepository->getOrder($order_id);
         $public = [
             'title' => $order->category->title.' | '.$order->slug,
             'seoDescription' => $order->category->seo_description,
             'seoKeywords' => $order->category->seo_keywords,
             'logo' => asset($this->settingRepository->getSiteFaq('logo')),
         ];
-
-        return response(['data'=> $public ,'status' => 'success'],Response::HTTP_OK);
+        return response([
+            'data' => [
+                'order' => new OrderResource($order),
+                'head' => $public,
+                'Law' => $this->settingRepository->getSiteLaw('law'),
+                'chatLaw' => $this->settingRepository->getSiteLaw('chatLaw'),
+            ]
+        ],Response::HTTP_OK);
     }
 
     public function startTransaction($order_id , Request $request)
@@ -70,7 +64,9 @@ class OrderController extends Controller
                     ]);
                 if ($validator->fails()) {
                     return \response([
-                        'data' => $validator->errors(),
+                        'data' => [
+                            'message' => $validator->errors()
+                        ],
                         'status' => 'error'
                     ],Response::HTTP_UNPROCESSABLE_ENTITY);
                 }
@@ -112,7 +108,9 @@ class OrderController extends Controller
         ]);
         if ($validator->fails()) {
             return response([
-                'data' => $validator->errors(),
+                'data' => [
+                    'message' => $validator->errors()
+                ],
                 'status' => 'error'
             ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }

@@ -12,7 +12,7 @@ use App\Models\Article;
 class StoreArticle extends BaseComponent
 {
     use AuthorizesRequests;
-    public $article , $mode , $header , $data = [] , $categories;
+    public $article , $mode , $header , $data = [] , $categories = [];
     public $slug ,$title,$main_image,$content,$seo_keywords,$seo_description,$score,$status,$commentable,$google_indexing;
 
     public function mount($action , $id = null)
@@ -56,7 +56,7 @@ class StoreArticle extends BaseComponent
             $this->saveInDateBase($this->article);
         else{
             $this->saveInDateBase(new Article());
-            $this->reset(['slug','title','main_image','content','seo_keywords','seo_description','score','status','commentable','google_indexing']);
+            $this->reset(['slug','title','categories','main_image','content','seo_keywords','seo_description','score','status','commentable','google_indexing']);
         }
     }
 
@@ -66,13 +66,13 @@ class StoreArticle extends BaseComponent
             'slug' => ['required','string','unique:articles,slug,'.($this->article->id ?? 0)],
             'title' => ['required','string','max:100'],
             'main_image' => ['nullable','string','max:250'],
-            'content' => ['required','string'],
+            'content' => ['required','string','max:1000000'],
             'seo_keywords' => ['required','string','max:250'],
             'seo_description' => ['required','string','max:250'],
             'score' => ['required','numeric','between:0,5'],
             'status' => ['required','in:'.Article::SHARED.','.Article::DEMO],
-            'commentable' => ['nullable'],
-            'google_indexing' => ['nullable'],
+            'commentable' => ['nullable','boolean'],
+            'google_indexing' => ['nullable','boolean'],
         ];
         $messages = [
             'slug' => 'نام مستعار',
@@ -96,7 +96,7 @@ class StoreArticle extends BaseComponent
         $model->score = $this->score ?? 0;
         $model->status = $this->status;
         $model->commentable = $this->commentable ?? 0;
-        $model->google_indexing = $this->commentable ?? 1;
+        $model->google_indexing = $this->google_indexing ?? 1;
         $model->user_id = Auth::id();
         $model->save();
 

@@ -129,7 +129,7 @@
                 @can('show_settings')
                     <x-admin.menu-group icon="flaticon2-settings" :active="request()->routeIs(
                     ['admin.setting.base','admin.setting.home','admin.setting.aboutUs','admin.setting.contactUs','admin.setting.law',
-                    'admin.setting.chatLaw','admin.setting.fag','admin.setting.transaction'])" label="تنظیمات" >
+                    'admin.setting.chatLaw','admin.setting.fag','admin.setting.fag.create','admin.setting.chatLaw.create','admin.setting.law.create'])" label="تنظیمات" >
                         @can('show_settings_base')
                             <x-admin.menu-item href="{{route('admin.setting.base')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.base')" label="پایه " />
                         @endcan
@@ -143,13 +143,13 @@
                             <x-admin.menu-item href="{{route('admin.setting.contactUs')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.contactUs')" label="ارتباط با ما " />
                         @endcan
                         @can('show_settings_law')
-                            <x-admin.menu-item href="{{route('admin.setting.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.law')" label="قوانین " />
+                            <x-admin.menu-item href="{{route('admin.setting.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.law','admin.setting.law.create'])" label="قوانین " />
                         @endcan
                         @can('show_settings_chatLaw')
-                            <x-admin.menu-item href="{{route('admin.setting.chatLaw')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.chatLaw')" label="قوانین چت " />
+                            <x-admin.menu-item href="{{route('admin.setting.chatLaw')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.chatLaw','admin.setting.chatLaw.create'])" label="قوانین چت " />
                         @endcan
                         @can('show_settings_fag')
-                            <x-admin.menu-item href="{{route('admin.setting.fag')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.fag')" label="سوالات متداول " />
+                            <x-admin.menu-item href="{{route('admin.setting.fag')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.fag','admin.setting.fag.create'])" label="سوالات متداول " />
                         @endcan
                     </x-admin.menu-group>
                 @endcan

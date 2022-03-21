@@ -44,6 +44,17 @@
                     </div>
                 @endforeach
             </x-admin.form-section>
+            <x-admin.form-section label="موضوعات تخلف">
+                <x-admin.button class="primary" content="افزودن موضوع" wire:click="addOffend()" />
+                @foreach($offends as $key => $item)
+                    <div class="form-group" style="display: flex;align-items: center">
+                        <div style="padding: 5px">
+                            <input class="form-control" id="{{ $key }}subject" type="text" placeholder="عنوان" wire:model.defer="offends.{{$key}}">
+                        </div>
+                        <div><button class="btn btn-danger" wire:click="deleteOffend({{ $key }})">حذف</button></div>
+                    </div>
+                @endforeach
+            </x-admin.form-section>
         </div>
     </div>
 </div>

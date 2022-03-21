@@ -55,7 +55,9 @@ class AuthController extends Controller
         ]);
         if ($validator->fails()){
             return response([
-                'data' =>  $validator->errors(),
+                'data' =>  [
+                    'message' => $validator->errors()
+                ],
                 'status' => 'error'
             ],Response::HTTP_UNAUTHORIZED);
         }
@@ -91,7 +93,9 @@ class AuthController extends Controller
         ]);
         if ($validator->fails()){
             return response([
-                'data' =>  $validator->errors(),
+                'data' => [
+                    'message' => $validator->errors()
+                ],
                 'status' => 'error'
             ],Response::HTTP_UNAUTHORIZED);
         }
@@ -148,12 +152,14 @@ class AuthController extends Controller
         ]);
         if ($validator->fails()){
             return response([
-                'data' =>  $validator->errors(),
+                'data' => [
+                    'message' => $validator->errors()
+                ],
                 'status' => 'error'
             ],Response::HTTP_UNAUTHORIZED);
         }
 
-        $rand = rand(12345,999998);
+        $rand = mt_rand(12345,999998);
         $otp = Hash::make($rand);
         $user = $this->userRepository->getUser('phone',$request['phone']);
         $this->userRepository->update($user,['otp'=>$otp]);
@@ -165,14 +171,5 @@ class AuthController extends Controller
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
-    }
-
-    public function head()
-    {
-        $public = [
-            'title' => 'احراز هویت',
-        ];
-
-        return response(['data'=> $public ,'status' => 'success'],Response::HTTP_OK);
     }
 }

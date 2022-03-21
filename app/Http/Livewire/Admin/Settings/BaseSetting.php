@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class BaseSetting extends BaseComponent
 {
     use AuthorizesRequests;
-    public $header , $name , $logo , $status , $title  , $copyRight , $subject = [] ,$logInImage , $contact = [] , $waterMark;
+    public $header , $name , $logo , $status , $title  , $copyRight , $subject = [],$offends = [] ,$logInImage , $contact = [] , $waterMark;
     public  $data = [] , $i = 1 , $registerGift , $notification  , $tel , $email, $address, $seoDescription , $seoKeyword ,$categoryHomeCount;
 
     public function mount()
@@ -19,6 +19,7 @@ class BaseSetting extends BaseComponent
         $this->data['status'] = ['0' => 'بسته','1' => 'باز'];
         $this->contact = Setting::getSingleRow('contact',[]);
         $this->subject = Setting::getSingleRow('subject',[]);
+        $this->offends = Setting::getSingleRow('offends',[]);
         $this->copyRight = Setting::getSingleRow('copyRight');
         $this->status = Setting::getSingleRow('status');
         $this->logo = Setting::getSingleRow('logo');
@@ -48,6 +49,12 @@ class BaseSetting extends BaseComponent
         array_push($this->subject,'');
     }
 
+    public function addOffend()
+    {
+        $this->i = $this->i+ 1;
+        array_push($this->offends,'');
+    }
+
     public function store()
     {
         $this->authorize('show_settings_base');
@@ -65,6 +72,8 @@ class BaseSetting extends BaseComponent
                 'email' => ['required','email','max:150'],
                 'subject' => ['nullable','array'],
                 'subject.*' => ['required','string','max:70'],
+                'offends' => ['nullable','array'],
+                'offends.*' => ['required','string','max:70'],
                 'seoDescription' => ['required','string','max:400'],
                 'seoKeyword' => ['required','string','max:400'],
                 'logInImage' => ['required','string','max:300'],
@@ -84,6 +93,9 @@ class BaseSetting extends BaseComponent
                 'address' => 'ادرس',
                 'email' => 'ایمیل',
                 'subject' => 'موضوع ها',
+                'subject.*' => 'موضوع ها',
+                'offends' => 'موضوعات تخلف',
+                'offends.*' => 'موضوعات تخلف',
                 'seoDescription' => 'توضیحات سئو',
                 'seoKeyword' => 'کلمات سئو',
                 'logInImage' => 'تصویر صفحه ورود',
@@ -108,12 +120,18 @@ class BaseSetting extends BaseComponent
         Setting::updateOrCreate(['name' => 'registerGift'], ['value' => $this->registerGift]);
         Setting::updateOrCreate(['name' => 'contact'], ['value' => json_encode($this->contact)]);
         Setting::updateOrCreate(['name' => 'categoryHomeCount'], ['value' => $this->categoryHomeCount]);
+        Setting::updateOrCreate(['name' => 'offends'], ['value' => json_encode($this->offends)]);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
     public function deleteSubject($key)
     {
         unset($this->subject[$key]);
+    }
+
+    public function deleteOffend($key)
+    {
+        unset($this->offends[$key]);
     }
     public function addLink()
     {

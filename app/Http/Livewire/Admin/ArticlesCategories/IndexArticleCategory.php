@@ -3,31 +3,30 @@
 namespace App\Http\Livewire\Admin\ArticlesCategories;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\ArticleCategoryRepositoryInterface;
 use Livewire\WithPagination;
-use App\Models\ArticleCategory;
 
 class IndexArticleCategory extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
+    use WithPagination ;
 
     protected $queryString = ['status'];
     public $status;
-    public $pagination = 10 , $search , $data = [] ,$placeholder = 'عنوان یا نام مستعار';
+    public $data = [] ,$placeholder = 'عنوان یا نام مستعار';
 
-    public function render()
+    public function render(ArticleCategoryRepositoryInterface $articleCategoryRepository)
     {
-        $this->authorize('show_article_categories');
-        $categories = ArticleCategory::latest('id')->when($this->status,function ($query){
-            return $query->where('status',$this->status);
-        })->search($this->search)->paginate($this->pagination);
-        $this->data['status'] = ArticleCategory::getStatus();
-        return view('livewire.admin.articles-categories.index-article-category',['categories'=>$categories])->extends('livewire.admin.layouts.admin');
+        $this->authorizing('show_article_categories');
+        $categories = $articleCategoryRepository->getAllAdminList($this->search,$this->status,$this->pagination,false);
+        $this->data['status'] = $articleCategoryRepository->getStatus();
+        return view('livewire.admin.articles-categories.index-article-category',['categories'=>$categories])
+            ->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete($id , ArticleCategoryRepositoryInterface $articleCategoryRepository)
     {
-        $this->authorize('delete_article_categories');
-        ArticleCategory::findOrFail($id)->delete();
+        $this->authorizing('delete_article_categories');
+        $article = $articleCategoryRepository->find($id,false);
+        $articleCategoryRepository->delete($article);
     }
 }

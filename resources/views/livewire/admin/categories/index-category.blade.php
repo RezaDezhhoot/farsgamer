@@ -27,10 +27,10 @@
                                 <td><img style="width: 30px;height: 30px" src="{{ asset($item->logo) }}" alt=""></td>
                                 <td>{{ $item->slug }}</td>
                                 <td>{{ $item->title }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>{{ $item->parent->title ?? '' }}</td>
-                                <td>{{ $data['is_available'][$item->is_available] }}</td>
-                                <td>{{ $data['type'][$item->type] }}</td>
+                                <td>{{ $item->available_label }}</td>
+                                <td>{{ $item->type_label }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.category',['edit', $item->id]) }}" />
                                     <x-admin.delete-btn onclick="deleteItem({{$item->id}})" />

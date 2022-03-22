@@ -42,4 +42,30 @@ class UserRepository implements UserRepositoryInterface
     {
         return $user->comments()->active($active)->get();
     }
+
+    public function hasRole($role)
+    {
+        return auth()->user()->hasRole($role);
+    }
+
+    public function getUserNotifications(User $user , $subject = null , $model_id = null)
+    {
+        if (!is_null($subject))
+            return $user->alerts()->where('subject' , $subject)->get();
+        elseif (!is_null($subject) && !is_null($model_id))
+            return $user->alerts()->where([
+                ['subject' , $subject],
+                ['model_id' , $model_id],
+            ])->get();
+
+        return  $user->alerts;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function newStatus()
+    {
+        return User::NEW;
+    }
 }

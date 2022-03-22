@@ -46,13 +46,13 @@
                     <p>
                         <b> استان :</b>
                         <span>
-                        {{ $data['province'][$payment->user->province] ?? '' }}
+                        {{ $payment->user->province_label ?? '' }}
                     </span>
                     </p>
                     <p>
                         <b> شهر :</b>
                         <span>
-                        {{ $data['city'][$payment->user->city] ?? '' }}
+                        {{ $payment->user->city_label ?? '' }}
                     </span>
                     </p>
 

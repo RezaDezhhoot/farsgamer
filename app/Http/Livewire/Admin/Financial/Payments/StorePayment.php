@@ -3,39 +3,38 @@
 namespace App\Http\Livewire\Admin\Financial\Payments;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Payment;
-use App\Models\Setting;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\PaymentRepositoryInterface;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class StorePayment extends BaseComponent
 {
-    use AuthorizesRequests;
     public $payment , $header , $mode , $data = [] , $json;
 
-    public function mount($action , $id = null)
+    public function mount(PaymentRepositoryInterface $paymentRepository , SettingRepositoryInterface $settingRepository,$action , $id = null)
     {
-        $this->authorize('show_payments');
+        $this->authorizing('show_payments');
         if ($action == 'edit')
         {
-            $this->payment = Payment::findOrFail($id);
+            $this->payment = $paymentRepository->find($id);
             $this->header = 'رسید پرداخت شماره '.$id;
         } else abort(404);
         $this->json = json_decode($this->payment->json,true);
-        $this->data['status'] = Payment::getStatus();
-        $this->data['province'] = Setting::getProvince();
-        $this->data['city'] = Setting::getCity()[$this->payment->user->province];
+        $this->data['status'] = $paymentRepository::getStatus();
+        $this->data['province'] = $settingRepository::getProvince();
+        $this->data['city'] = $settingRepository::getCity()[$this->payment->user->province];
         $this->mode = $action;
     }
 
     public function render()
     {
-        return view('livewire.admin.financial.payments.store-payment')->extends('livewire.admin.layouts.admin');
+        return view('livewire.admin.financial.payments.store-payment')
+            ->extends('livewire.admin.layouts.admin');
     }
 
-    public function deleteItem()
+    public function deleteItem(PaymentRepositoryInterface $paymentRepository)
     {
-        $this->authorize('delete_payments');
-        $this->payment->delete();
+        $this->authorizing('delete_payments');
+        $paymentRepository->delete($this->payment);
         return redirect()->route('admin.payment');
     }
 }

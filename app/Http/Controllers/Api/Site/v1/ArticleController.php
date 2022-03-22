@@ -72,7 +72,7 @@ class ArticleController extends Controller
     public function storeComment($slug,Request $request)
     {
         $article = $this->articleRepository->getArticle('slug',$slug);
-        $rateKey = 'verify-attempt:' . auth()->id() . '|' . request()->ip();
+        $rateKey = 'verify-attempt:' . auth('api')->id() . '|' . request()->ip();
         if (RateLimiter::tooManyAttempts($rateKey, 4)) {
             return
                 response([
@@ -83,7 +83,7 @@ class ArticleController extends Controller
                 ],Response::HTTP_UNAUTHORIZED);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
-        $request['user_id'] = auth()->id();
+        $request['user_id'] = auth('api')->id();
         $validator = Validator::make($request->all(),[
             'content' => 'required|max:450|string'
         ],[],[

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static findOrFail($id)
  * @method static where(string $string, string $CONFIRMED)
  * @method static create(array $data)
+ * @method static active(bool $active)
  * @property mixed type
  * @property mixed status
  * @property mixed commentable_type
@@ -48,6 +49,11 @@ class Comment extends Model
     public function getStatusLabelAttribute()
     {
         return self::getStatus()[$this->status];
+    }
+
+    public function getForLabelAttribute()
+    {
+        return self::getFor()[$this->commentable_type];
     }
 
     public static function getNew()

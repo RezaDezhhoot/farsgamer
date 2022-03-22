@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(string $string, string $AVAILABLE)
+ * @method static active(bool $active)
  * @property mixed slug
  * @property mixed title
  * @property mixed logo
@@ -37,6 +38,16 @@ class ArticleCategory extends Model
     public function setLogoAttribute($value)
     {
         $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function scopeActive($query , $active = true)
+    {
+        return $active ? $query->where('status',self::AVAILABLE) : $query;
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
     }
 
     public function setSlugAttribute($value)

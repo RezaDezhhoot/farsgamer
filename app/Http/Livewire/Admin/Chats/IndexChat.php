@@ -3,81 +3,56 @@
 namespace App\Http\Livewire\Admin\Chats;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Chat;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\ChatRepositoryInterface;
+use App\Traits\Admin\ChatList;
 use Livewire\WithPagination;
-use App\Models\ChatGroup;
 
 class IndexChat extends BaseComponent
 {
-    use AuthorizesRequests , WithPagination;
-    public $placeholder = ' شماره همراه یا نام کاربری کاربر' , $pagination = 10 , $search , $data = [] , $chatList = [] , $chatText;
+    use WithPagination , ChatList;
+    public $placeholder = ' شماره همراه یا نام کاربری کاربر'  , $data = [] , $chatList , $chatText;
 
-    public function render()
+    public function render(ChatRepositoryInterface $chatRepository)
     {
-        $this->authorize('show_chats');
-        $groups = ChatGroup::latest('id')->with(['user_one','user_two','chats'])
-            ->when($this->search,function ($query){
-                return $query->whereHas('user_one',function ($query){
-               return is_numeric($this->search)
-                   ? $query->where('phone',$this->search) : $query->where('user_name',$this->search);
-            })->orWhereHas('user_two',function ($query){
-                return is_numeric($this->search)
-                    ? $query->where('phone',$this->search) : $query->where('user_name',$this->search);
-            })->orWhere('slug',$this->search);
-        })->whereColumn('user1', '!=' ,'user2')->get();
-        $this->data['status'] = ChatGroup::getStatus();
-        return view('livewire.admin.chats.index-chat',['groups'=>$groups])->extends('livewire.admin.layouts.admin');
+        $this->authorizing('show_chats');
+        $groups = $chatRepository->getAllAdminListGroup($this->search);
+        $this->data['status'] = $chatRepository->getStatus();
+        return view('livewire.admin.chats.index-chat',['groups'=>$groups , 'open' => $chatRepository->openStatus(),'close' => $chatRepository->closeStatus()])
+            ->extends('livewire.admin.layouts.admin');
     }
 
 
-    public function openChatList($id)
+    public function openChatList($id , ChatRepositoryInterface $chatRepository)
     {
-        $this->authorize('show_chats');
-        $group = ChatGroup::findOrFail($id);
-        $this->chatList = $group;
+        $this->authorizing('show_chats');
+        $this->chatList = $chatRepository->find($id);
+        $this->chats = $this->chatList;
+        $this->chatUserId = $this->chatList->user1 == auth()->id() ? $this->chatList->user2 : $this->chatList->user1;
     }
 
-    public function sendChatText()
+    public function blockChat(ChatRepositoryInterface $chatRepository)
     {
-        $this->authorize('edit_chats');
-        if (!empty($this->chatList )  && !empty(preg_replace('/\s+/', '', $this->chatText)) && !is_null(trim($this->chatText))) {
-            $chat = new Chat();
-            $chat->sender_id = \auth()->id();
-            $chat->receiver_id = $this->chatList->user1 == \auth()->id() ? $this->chatList->user2 : $this->chatList->user1;
-            $chat->content = $this->chatText;
-            $chat->is_admin = auth()->user()->hasRole('admin');
-            $chat->group_id = $this->chatList->id;
-            $chat->save();
-            $this->chatList = ChatGroup::findOrFail($this->chatList->id);
-            $this->reset(['chatText']);
+        $this->authorizing('edit_chats');
+        if (!empty($this->chatList )){
+            $this->chatList->status = $chatRepository->closeStatus();
+            $chatRepository->save($this->chatList);
         }
     }
 
-
-    public function blockChat()
+    public function unBlockChat(ChatRepositoryInterface $chatRepository)
     {
-        $this->authorize('edit_chats');
+        $this->authorizing('edit_chats');
         if (!empty($this->chatList )){
-            $this->chatList->status = ChatGroup::CLOSE;
-            $this->chatList->save();
+            $this->chatList->status = $chatRepository->openStatus();
+            $chatRepository->save($this->chatList);
         }
     }
 
-    public function unBlockChat()
+    public function deleteChat(ChatRepositoryInterface $chatRepository)
     {
-        $this->authorize('edit_chats');
+        $this->authorizing('delete_chats');
         if (!empty($this->chatList )){
-            $this->chatList->status = ChatGroup::OPEN;
-            $this->chatList->save();
-        }
-    }
-
-    public function deleteChat()
-    {
-        $this->authorize('delete_chats');
-        if (!empty($this->chatList )){
-            $this->chatList->delete();
+            $chatRepository->delete($this->chatList);
             $this->reset(['chatList']);
         }
     }

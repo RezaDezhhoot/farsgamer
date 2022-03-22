@@ -3,38 +3,31 @@
 namespace App\Http\Livewire\Admin\Financial\Requests;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Card;
-use App\Models\Notification;
+use App\Repositories\Interfaces\CardRepositoryInterface;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
+use App\Repositories\Interfaces\RequestRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\Admin\ChatList;
 use Bavix\Wallet\Exceptions\BalanceIsEmpty;
 use Bavix\Wallet\Exceptions\InsufficientFunds;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Request;
 
 class StoreRequest extends BaseComponent
 {
-    use AuthorizesRequests  , ChatList;
+    use ChatList;
     public $request , $header , $mode , $data = [];
     public $status , $result , $file , $link , $track_id , $user , $phone , $sheba , $bank , $card , $price;
-    /**
-     * @var mixed
-     */
-    public $newMessage;
-    /**
-     * @var mixed
-     */
-    public $message;
-    /**
-     * @var mixed|string
-     */
-    public $newMessageStatus;
+    public $newMessage , $message , $newMessageStatus;
 
-    public function mount($action , $id =null)
+
+    public function mount(
+        RequestRepositoryInterface $requestRepository,NotificationRepositoryInterface $notificationRepository
+        ,CardRepositoryInterface $cardRepository,UserRepositoryInterface $userRepository,$action , $id =null
+    )
     {
-        $this->authorize('show_requests');
+        $this->authorizing('show_requests');
         if ($action == 'edit')
         {
-            $this->request = Request::findOrFail($id);
+            $this->request = $requestRepository->find($id);
             $this->header = 'درخواست شماره '.$id;
             $this->status = $this->request->status;
             $this->price = number_format($this->request->price);
@@ -46,31 +39,29 @@ class StoreRequest extends BaseComponent
             $this->phone = $this->request->user->phone;
             $this->card = $this->request->card->card_number;
             $this->sheba = $this->request->card->card_sheba;
-            $this->bank = Card::bank()[$this->request->card->bank];
+            $this->bank = $cardRepository->getBank()[$this->request->card->bank];
             $this->chatUserId = $this->request->user->id;
-            $this->chats = \auth()->user()->singleContact($this->request->user->id);
+            $this->chats = auth()->user()->singleContact($this->request->user->id);
         } else abort(404);
 
-        $this->message = $this->request->user->alerts()->where([
-            ['subject',Notification::REQUEST],
-            ['model_id',$this->request->id],
-        ])->get();
-        $this->data['status'] = Request::getStatus();
-        $this->data['subject'] = Notification::getSubject();
-        $this->newMessageStatus = Notification::REQUEST;
+        $this->message = $userRepository->getUserNotifications($this->request->user,$notificationRepository->requestStatus(),$this->request->id);
+
+        $this->data['status'] = $requestRepository::getStatus();
+        $this->data['subject'] = $notificationRepository->getSubjects();
+        $this->newMessageStatus = $notificationRepository->requestStatus();
     }
 
-    public function store()
+    public function store(RequestRepositoryInterface $requestRepository)
     {
-        $this->authorize('edit_requests');
-        $this->saveInDateBase($this->request);
+        $this->authorizing('edit_requests');
+        $this->saveInDateBase($requestRepository,$this->request);
     }
 
-    public function saveInDateBase(Request $model)
+    public function saveInDateBase($requestRepository, $model)
     {
         $this->validate([
-            'status' => ['required','in:'.Request::SETTLEMENT.','.Request::REJECTED],
-            'result' => ['nullable','string'],
+            'status' => ['required','in:'.implode(',',array_keys($requestRepository->getStatus()))],
+            'result' => ['nullable','string','max:5600'],
             'file' => ['nullable','string','max:250'],
             'link' => ['nullable','url','max:250'],
             'track_id' => ['nullable','numeric','max:250'],
@@ -82,15 +73,15 @@ class StoreRequest extends BaseComponent
             'track_id' => 'کد پیگیری',
         ]);
 
-        if ( $this->status == Request::REJECTED && $model->status == Request::NEW) {
+        if ($this->status == $requestRepository::rejectedStatus() && $model->status == $requestRepository::newStatus()) {
             $model->user->deposit($model->price, ['description' =>  $model->result , 'from_admin'=> true]);
-        } elseif ($this->status == Request::SETTLEMENT && $model->status == Request::REJECTED) {
+        } elseif ($this->status == $requestRepository::settlementStatus() && $model->status == $requestRepository::rejectedStatus()) {
             try {
                 $this->user->forceWithdraw($this->price, ['description' => $this->result, 'from_admin'=> true]);
             } catch (BalanceIsEmpty | InsufficientFunds $exception) {
                 return $this->addError('walletAmount', $exception->getMessage());
             }
-        } elseif ($this->status == Request::REJECTED && $model->status == Request::SETTLEMENT) {
+        } elseif ($this->status == $requestRepository::rejectedStatus() && $model->status == $requestRepository::settlementStatus()) {
             $model->user->deposit($model->price, ['description' =>  $model->result , 'from_admin'=> true]);
         }
 
@@ -99,34 +90,35 @@ class StoreRequest extends BaseComponent
         $model->file = $this->file;
         $model->link = $this->link;
         $model->track_id = $this->track_id;
-        $model->save();
+        $requestRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
 
     public function render()
     {
-        return view('livewire.admin.financial.requests.store-request')->extends('livewire.admin.layouts.admin');
+        return view('livewire.admin.financial.requests.store-request')
+            ->extends('livewire.admin.layouts.admin');
     }
-    public function sendMessage()
+    public function sendMessage(NotificationRepositoryInterface $notificationRepository)
     {
-        $this->authorize('edit_orders');
         $this->validate([
             'newMessage' => ['required','string'],
-            'newMessageStatus' => ['required','in:'.implode(',',array_keys(Notification::getSubject()))]
+            'newMessageStatus' => ['required','in:'.implode(',',array_keys($notificationRepository->getSubjects()))]
         ],[],[
             'newMessage'=> 'متن',
             'newMessageStatus' => 'وضعیت پیام'
         ]);
-        $result = new Notification();
-        $result->subject = Notification::REQUEST;
-        $result->content = $this->newMessage;
-        $result->type = Notification::PRIVATE;
-        $result->user_id = $this->request->user->id;
-        $result->model = Notification::REQUEST;
-        $result->model_id = $this->request->id;
-        $result->save();
-        $this->message->push($result);
+        $notification = [
+            'subject' => $notificationRepository->requestStatus(),
+            'content' =>  $this->newMessage,
+            'type' => $notificationRepository->privateType(),
+            'user_id' => $this->request->user->id,
+            'model' => $notificationRepository->requestStatus(),
+            'model_id' => $this->request->id
+        ];
+        $notification = $notificationRepository->create($notification);
+        $this->message->push($notification);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }

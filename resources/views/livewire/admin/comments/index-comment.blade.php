@@ -29,9 +29,9 @@
                         @forelse($comments as $item)
                             <tr>
                                 <td>{{ $item->user->fullName ?? $item->user->user_name }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
-                                <td>{{ $item::type()[$item->commentable_type] }}</td>
-                                <td>{{ $item->commentable->title ??  $item->commentable->fullName }}</td>
+                                <td>{{ $item->status_label }}</td>
+                                <td>{{ $item->for_label }}</td>
+                                <td>{{ $item->commentable->title ??  $item->commentable->user_name }}</td>
                                 <td>{{ $item->score }}</td>
                                 <td style="width: 40%;">{!!  $item->content !!}</td>
                                 <td>

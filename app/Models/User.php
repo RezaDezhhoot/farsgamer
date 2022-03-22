@@ -45,6 +45,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed full_name
  * @property mixed name
  * @property mixed|string password
+ * @property mixed alerts
  */
 class User extends Authenticatable implements Wallet, Confirmable
 {

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Site\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User;
-use App\Models\User as UserModel;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Sends\SendMessages;
@@ -41,7 +40,7 @@ class AuthController extends Controller
                 ],Response::HTTP_UNAUTHORIZED);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
-        $request['status'] = UserModel::NEW;
+        $request['status'] = $this->userRepository->newStatus();
         $validator = Validator::make($request->all(),[
             'name' => 'required|string|max:250',
             'phone' => 'required|size:11|unique:users,phone',
@@ -64,7 +63,7 @@ class AuthController extends Controller
 
         $user = $this->userRepository->create($request->all());
         Auth::login($user);
-        $token = auth()->user()->createToken('auth_token')->plainTextToken;
+        $token = 'Bearer '.auth()->user()->createToken('auth_token')->plainTextToken;
         return response([
             'data'=> new User(auth()->user() , $token),
             'status' => 'success'
@@ -103,7 +102,7 @@ class AuthController extends Controller
 
         if ((!empty($user->otp) && password_verify($request['password'],$user->otp)) || password_verify($request['password'],$user->password)) {
             Auth::login($user);
-            $token = auth()->user()->createToken('auth_token')->plainTextToken;
+            $token = 'Bearer '.auth()->user()->createToken('auth_token')->plainTextToken;
             $this->userRepository->update($user,['otp' => null]);
             RateLimiter::clear($rateKey);
             return response([

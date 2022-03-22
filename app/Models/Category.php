@@ -64,6 +64,16 @@ class Category extends Model
         return self::getStatus()[$this->status];
     }
 
+    public function getTypeLabelAttribute()
+    {
+        return self::type()[$this->type];
+    }
+
+    public function getAvailableLabelAttribute()
+    {
+        return self::available()[$this->is_available];
+    }
+
     public function setLogoAttribute($value)
     {
         $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
@@ -141,10 +151,5 @@ class Category extends Model
     public function childrenRecursive()
     {
         return $this->child()->with('childrenRecursive');
-    }
-
-    public function getTypeLabelAttribute()
-    {
-        return self::type()[$this->type];
     }
 }

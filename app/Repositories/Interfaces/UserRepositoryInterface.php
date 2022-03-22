@@ -17,4 +17,10 @@ interface UserRepositoryInterface
     public function getMyOrders(User $user , $active = true);
 
     public function getMyComments(User $user , $active = true);
+
+    public function hasRole($role);
+
+    public function getUserNotifications(User $user , $subject = null , $model_id = null);
+
+    public function newStatus();
 }

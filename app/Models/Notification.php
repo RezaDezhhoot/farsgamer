@@ -9,6 +9,7 @@ use Morilog\Jalali\Jalalian;
 /**
  * @method static findOrFail($id)
  * @method static where(array[] $array)
+ * @method static create(array $data)
  * @property mixed created_at
  * @property mixed subject
  * @property mixed content
@@ -23,6 +24,8 @@ class Notification extends Model
     use HasFactory;
 
     const PUBLIC = 'public' , PRIVATE = 'private';
+
+    protected $guarded = [];
 
     const TRANSACTION = 'OrderTransaction' , ORDER = 'Order' , AUTH = 'Auth' , ADDRESS = 'Address' , CARD = 'Card' , REQUEST = 'Request';
     const CHAT = 'Chat' , TICKET = 'Ticket' , ALL = 'All' , NEWS = 'News'  , SECURITY = 'Security' , User = 'User' , PAYMENT = 'payment';
@@ -53,7 +56,7 @@ class Notification extends Model
 
     public function getSubjectLabelAttribute()
     {
-        return self::getSubject()[in_array($this->subject,self::getSubject()) ? $this->subject : self::ALL];
+        return self::getSubject()[in_array($this->subject,array_keys(self::getSubject())) ? $this->subject : self::ALL];
     }
 
     public static function getType()

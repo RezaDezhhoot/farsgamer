@@ -80,7 +80,7 @@
                 <div class="row" style="display: flex">
                     @foreach($data['transfer'] as $key => $item)
                         <div class="col-lg-2">
-                            <x-admin.forms.checkbox label="{{ $item['slug'] }}" value="{{ $item['id'] }}" id="{{ $item['id'] }}transfer"  wire:model.defer="transfer.{{$item['id']}}" />
+                            <x-admin.forms.checkbox label="{{ $item['slug'] }}" value="{{ $item['id'] }}" id="{{ $item['id'] }}transfer"  wire:model.defer="transfer" />
                         </div>
                     @endforeach
                 </div>
@@ -90,7 +90,7 @@
                 <div class="row" style="display: flex">
                     @foreach($data['platform'] as $key => $item)
                         <div class="col-lg-2">
-                            <x-admin.forms.checkbox label="{{ $item['slug'] }}"  value="{{ $item['id'] }}"  id="{{ $item['id'] }}platforms" wire:model.defer="platforms.{{$item['id']}}" />
+                            <x-admin.forms.checkbox label="{{ $item['slug'] }}"  value="{{ $item['id'] }}"  id="{{ $item['id'] }}platforms" wire:model.defer="platforms" />
                         </div>
                     @endforeach
                 </div>

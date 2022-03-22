@@ -11,4 +11,8 @@ interface SettingRepositoryInterface
     public function getSubjects($name , $default = []);
 
     public function getFagList();
+
+    public static function getProvince();
+
+    public function getCity($province);
 }

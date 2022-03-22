@@ -54,8 +54,8 @@ class OrderController extends Controller
     public function startTransaction($order_id , Request $request)
     {
         $order = $this->orderRepository->getOrder($order_id);
-        if ($order->user->id != auth()->id()) {
-            $ban = Carbon::make(now())->diff(auth()->user()->ban)->format('%r%i');
+        if ($order->user->id != auth('api')->id()) {
+            $ban = Carbon::make(now())->diff(auth('api')->user()->ban)->format('%r%i');
             if ($ban <= 0) {
                 $validator = Validator::make($request->all(),[
                     'confirmLaw' => 'required|boolean',

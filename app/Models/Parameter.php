@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static where(string $string, string $string1)
  * @method static find(int|string $key)
  * @method static updateOrCreate(string[] $array, array $array1)
+ * @method static findOrFail($id)
  * @property mixed category_id
  * @property mixed logo
  * @property mixed name

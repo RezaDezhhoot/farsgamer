@@ -3,36 +3,30 @@
 namespace App\Http\Livewire\Admin\Categories;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use Livewire\WithPagination;
-use App\Models\Category;
 
 class IndexCategory extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
+    use WithPagination;
     protected $queryString = ['status' ,'type','is_available'];
-    public $status , $is_available , $type ,$placeholder = 'عنوان یا نام مستعار';
-    public $pagination = 10 , $search , $data = [] ;
+    public $status , $is_available , $type ,$placeholder = 'عنوان یا نام مستعار' , $data = [] ;
 
-    public function render()
+    public function render(CategoryRepositoryInterface $categoryRepository)
     {
-        $this->authorize('show_categories');
-        $categories = Category::latest('id')->when($this->status,function ($query){
-            return $query->where('status',$this->status);
-        })->when($this->is_available,function ($query){
-            return $query->where('is_available',$this->is_available);
-        })->when($this->type,function ($query){
-            return $query->where('type',$this->type);
-        })->search($this->search)->paginate($this->pagination);
-        $this->data['status'] = Category::getStatus();
-        $this->data['is_available'] = Category::available();
-        $this->data['type'] = Category::type();
-        return view('livewire.admin.categories.index-category',['categories'=>$categories])->extends('livewire.admin.layouts.admin');
+        $this->authorizing('show_categories');
+        $categories = $categoryRepository->getAllAdminList($this->search,$this->status,$this->is_available,$this->type,$this->pagination);
+        $this->data['status'] = $categoryRepository->getStatus();
+        $this->data['is_available'] = $categoryRepository->available();
+        $this->data['type'] = $categoryRepository->type();
+        return view('livewire.admin.categories.index-category',['categories'=>$categories])
+            ->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete($id , CategoryRepositoryInterface $categoryRepository)
     {
-        $this->authorize('delete_categories');
-        $category = Category::findOrFail($id)->delete();
+        $this->authorizing('delete_categories');
+        $category = $categoryRepository->find($id,false);
+        $categoryRepository->delete($category);
     }
 }

@@ -34,4 +34,21 @@ class SettingRepository implements SettingRepositoryInterface
             'categories' => array_unique(Helper::array_value_recursive('category',$fag->toArray()))
         ];
     }
+
+    /**
+     * @return mixed
+     */
+    public static function getProvince()
+    {
+        return Setting::getProvince();
+    }
+
+    /**
+     * @param $province
+     * @return mixed
+     */
+    public function getCity($province)
+    {
+        return Setting::getCity()[$province];
+    }
 }

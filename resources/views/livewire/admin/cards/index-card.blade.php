@@ -29,8 +29,8 @@
                                 <td>{{ $item->user->fullName }}</td>
                                 <td>{{ $item->card_number }}</td>
                                 <td>{{ $item->card_sheba }}</td>
-                                <td>{{ $item::bank()[$item->bank] }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->bank_label }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.card',['edit', $item->id]) }}" />
                                     <x-admin.delete-btn onclick="deleteItem({{$item->id}})" />

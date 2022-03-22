@@ -4,11 +4,25 @@ namespace App\Http\Livewire;
 
 use App\Models\Category;
 use App\Models\Setting;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Intervention\Image\Facades\Image;
 use Livewire\Component;
 
 class BaseComponent extends Component
 {
+    use AuthorizesRequests;
+    public $pagination = 10 , $search;
+
+    public function authorizing($ability)
+    {
+        try {
+            $this->authorize($ability);
+        } catch (AuthorizationException $e) {
+            abort(403);
+        }
+    }
+
     public function emitNotify($title, $icon = 'success')
     {
         $data['title'] = $title;

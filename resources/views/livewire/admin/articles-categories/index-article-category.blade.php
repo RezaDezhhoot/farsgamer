@@ -23,7 +23,7 @@
                                 <td><img style="width: 30px;height: 30px" src="{{ asset($item->logo) }}" alt=""></td>
                                 <td>{{ $item->slug }}</td>
                                 <td>{{ $item->title }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>{{ $item->parent->title ?? '' }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.articleCategory',['edit', $item->id]) }}" />

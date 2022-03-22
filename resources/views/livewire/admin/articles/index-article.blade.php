@@ -22,7 +22,7 @@
                             <tr>
                                 <td>{{ $item->slug }}</td>
                                 <td>{{ $item->title }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>
                                     @foreach($item->categories->pluck('slug','id') as $value)
                                         <span class="badge-info">

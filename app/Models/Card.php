@@ -11,6 +11,7 @@ use phpDocumentor\Reflection\Types\Self_;
  * @method static lateast(string $string)
  * @method static latest(string $string)
  * @method static where(string $string, string $NOT_CONFIRMED)
+ * @method static active(bool $active)
  * @property mixed status_label
  * @property mixed user_id
  * @property mixed status
@@ -46,6 +47,16 @@ class Card extends Model
     public function getStatusLabelAttribute()
     {
         return self::getStatus()[$this->status];
+    }
+
+    public function getBankLabelAttribute()
+    {
+        return self::bank()[$this->bank];
+    }
+
+    public function scopeActive($query,$active = true)
+    {
+        return $active ? $query->where('status',self::CONFIRMED) : $query;
     }
 
     public static function bank()

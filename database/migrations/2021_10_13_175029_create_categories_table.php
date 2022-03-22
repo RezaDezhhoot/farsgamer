@@ -29,7 +29,7 @@ class CreateCategoriesTable extends Migration
             $table->decimal('receive_time',65)->nullable();
             $table->decimal('sending_data_time',65)->nullable();
             $table->decimal('no_receive_time',65)->nullable();
-            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
+            $table->integer('parent_id')->nullable();
             $table->string('status')->default('available');
             $table->string('is_available')->default('yes');
             $table->string('type')->default('digital');

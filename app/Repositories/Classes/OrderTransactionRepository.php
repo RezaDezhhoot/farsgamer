@@ -15,7 +15,7 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
     public function start($order,$commission)
     {
         $transaction = OrderTransaction::create([
-            'customer_id' => auth()->id(),
+            'customer_id' => auth('api')->id(),
             'seller_id' => $order->user_id,
             'order_id' => $order->id,
             'status' => OrderTransaction::WAIT_FOR_CONFIRM,

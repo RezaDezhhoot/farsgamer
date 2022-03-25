@@ -3,38 +3,29 @@
 namespace App\Http\Livewire\Admin\Notifications;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Notification;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
 use Livewire\WithPagination;
 
 
 class IndexNotification extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
-    public $pagination = 10 , $search,$subject , $type, $data = [] , $placeholder = 'نام کاربری یا شماره همراه کاربری';
+    use WithPagination ;
+    public $subject , $type, $data = [] , $placeholder = 'نام کاربری یا شماره همراه کاربری';
     protected $queryString = ['type','subject'];
-    public function render()
+    public function render(NotificationRepositoryInterface $notificationRepository)
     {
-        $this->authorize('show_notifications');
-        $notification = Notification::with(['user'])->latest('id')->when($this->search, function ($query) {
-            return $query->whereHas('user', function ($query) {
-                return is_numeric($this->search) ?
-                    $query->where('phone', $this->search) : $query->where('user_name', $this->search);
-            });
-        })->when($this->type,function ($query){
-            return $query->where('type',$this->type);
-        })->when($this->subject,function ($query){
-            return $query->where('subject',$this->subject);
-        })->paginate($this->pagination);
-        $this->data['type'] = Notification::getType();
-        $this->data['subject'] = Notification::getSubject();
+        $this->authorizing('show_notifications');
+        $notification = $notificationRepository->getAllAdminList($this->search,$this->type,$this->subject,$this->pagination);
+        $this->data['type'] = $notificationRepository::getType();
+        $this->data['subject'] = $notificationRepository->getSubjects();
         return view('livewire.admin.notifications.index-notification',['notification' => $notification])
             ->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete($id , NotificationRepositoryInterface $notificationRepository)
     {
-        $this->authorize('delete_notifications');
-        Notification::findOrFail($id)->delete();
+        $this->authorizing('delete_notifications');
+        $notification = $notificationRepository->find($id);
+        $notificationRepository->delete($notification);
     }
 }

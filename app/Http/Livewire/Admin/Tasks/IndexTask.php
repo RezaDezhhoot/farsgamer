@@ -3,24 +3,24 @@
 namespace App\Http\Livewire\Admin\Tasks;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 use Livewire\WithPagination;
-use App\Models\Task;
 
 class IndexTask extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
-    public $pagination = 10 , $search , $placeholder = 'عنوان';
-    public function render()
+    use WithPagination ;
+    public $placeholder = 'عنوان';
+    public function render(TaskRepositoryInterface $taskRepository)
     {
-        $this->authorize('show_tasks');
-        $tasks = Task::latest('id')->search($this->search)->paginate($this->pagination);
+        $this->authorizing('show_tasks');
+        $tasks = $taskRepository->getAllAdminList($this->search , $this->pagination);
         return view('livewire.admin.tasks.index-task',['tasks'=>$tasks])->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete(TaskRepositoryInterface $taskRepository , $id)
     {
-        $this->authorize('edit_tasks');
-        Task::findOrFail($id)->delete();
+        $this->authorizing('edit_tasks');
+        $task = $taskRepository->find($id);
+        $taskRepository->delete($task);
     }
 }

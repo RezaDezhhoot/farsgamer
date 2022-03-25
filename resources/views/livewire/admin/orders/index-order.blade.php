@@ -8,14 +8,17 @@
                         همه
                         ({{$statusCount['all']}})
                     </button>
-                    @foreach(\App\Models\Order::getStatus() as $key => $item)
+                    @foreach($statusCount as $key => $item)
+                        @if($loop->first)
+                            @continue
+                        @endif
                         @if($status == $key)
                             <button  type="button"  wire:click="$set('status', '{{$key}}')" class="btn btn-link disabled"  title="">
-                                {{$item}} ({{$statusCount[$key]}})
+                                {{ $item }}
                             </button>
                         @else
                             <button   wire:click="$set('status', '{{$key}}')" class="btn btn-link" title="">
-                                {{$item}} ({{$statusCount[$key]}})
+                                {{$item}}
                             </button>
                         @endif
                     @endforeach
@@ -27,6 +30,7 @@
                         <table class="table table-striped" id="kt_datatable">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>کد اگهی</th>
                                 <th>عنوان</th>
                                 <th> کاربر</th>
@@ -40,9 +44,10 @@
                             <tbody>
                             @forelse($orders as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->id }}</td>
                                     <td>{{ $item->slug }}</td>
-                                    <td>{{ $item->user->fullName }}</td>
+                                    <td>{{ $item->user->name }}</td>
                                     <td>{{ $item->category->slug }}</td>
                                     <td>
                                         <b>
@@ -57,7 +62,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <td class="text-center" colspan="9">
+                                <td class="text-center" colspan="10">
                                     دیتایی جهت نمایش وجود ندارد
                                 </td>
                             @endforelse

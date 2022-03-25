@@ -8,6 +8,7 @@
                     <table  class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>عنوان</th>
                             <th>رویداد</th>
                             <th>شرط</th>
@@ -17,16 +18,17 @@
                         <tbody>
                         @forelse($tasks as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->name }}</td>
-                                <td>{{ $item::event()[$item->task] }}</td>
-                                <td>{{ $item::tasks()[$item->where] }}</td>
+                                <td>{{ $item->task_label }}</td>
+                                <td>{{ $item->where_label }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.task',['edit', $item->id]) }}" />
                                     <x-admin.delete-btn onclick="deleteItem({{$item->id}})" />
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="6">
+                            <td class="text-center" colspan="5">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

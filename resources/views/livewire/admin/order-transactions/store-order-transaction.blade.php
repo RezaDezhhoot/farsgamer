@@ -12,12 +12,7 @@
                             <p  style="padding: 10px;font-size: 20px" id="clock"></p>
                         </x-admin.form-section>
                     </div>
-                    <div class="col-3">
-                        <x-admin.form-section label="وضعیت فعلی">
-                            {{ $transaction::getStatus()[$nowStatus]['label'] }}
-                        </x-admin.form-section>
-                    </div>
-                    <div class="col-4">
+                    <div class="col-7">
                         <x-admin.forms.dropdown id="status" :data="$data['status']" label="وضعیت" wire:model.defer="status"/>
                     </div>
                     <div class="col-2">
@@ -30,11 +25,11 @@
             <div class="wizard wizard-2" id="kt_wizard" data-wizard-state="step-first" data-wizard-clickable="false">
                 <x-admin.wizard-steps>
                     @if(!$transaction->is_returned)
-                        @foreach(\App\Models\OrderTransaction::standardStatus() as $key => $item)
+                        @foreach($standardStatus as $key => $item)
                             <x-admin.transaction-step label="{{$item['label']}}" icon="{{$item['icon'] }}" active="{{ $transaction->status == $key ? 'current' : 'pending' }}" desc="{{$item['desc']}}" />
                         @endforeach
                     @else
-                        @foreach(\App\Models\OrderTransaction::returnedStatus() as $key => $item)
+                        @foreach($returnedStatus as $key => $item)
                             <x-admin.transaction-step label="{{$item['label']}}" icon="{{$item['icon'] }}" active="{{ $transaction->status == $key ? 'current' : 'pending' }}" desc="{{$item['desc']}}" />
                         @endforeach
                     @endif
@@ -43,7 +38,7 @@
                     <x-admin.form-section label="اطلاعات">
                         @include('livewire.admin.order-transactions.forms')
                     </x-admin.form-section>
-                    @if($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_NO_RECEIVE)
+                    @if($transaction->status == $noReceiveStatus)
                         <div class="form-group">
                             <x-admin.form-section label="وضعیت دریافت توسط خریدار">
                                 <p>
@@ -53,7 +48,7 @@
                             </x-admin.form-section>
                         </div>
                     @endif
-                    @if($transaction->status == \App\Models\OrderTransaction::IS_RETURNED)
+                    @if($transaction->status == $returnStatus)
                         <x-admin.form-section label="مرجوعیت">
                             <x-admin.forms.basic-text-editor id="return_cause" label="علت مرجوعیت*" wire:model.defer="return_cause"/>
                             <x-admin.forms.lfm-standalone id="return_images" disable="{{true}}" label="تصاویر" :file="$return_images" type="image" required="true" wire:model="return_images"/>
@@ -64,7 +59,7 @@
                             @endif
                         </x-admin.form-section>
                     @endif
-                    @if($transaction->order->category->type == \App\Models\Category::PHYSICAL)
+                    @if($transaction->order->category->type == $physical)
                         <x-admin.form-section label="حمل و نقل">
                             <x-admin.forms.dropdown help="مجاز برای دسته بندی های فیزیکی" id="send_id" :data="$data['transfer']" label="روش ارسال*" wire:model.defer="send_id"/>
                             <x-admin.forms.input help="مجاز برای دسته بندی های فیزیکی"  type="text" id="transfer_result" label="کد رهگیری" wire:model.defer="transfer_result"/>
@@ -93,7 +88,7 @@
                                     </thead>
                                     <tbody>
                                     <tr>
-                                        <td>{{ $transaction->seller->fullName }}</td>
+                                        <td>{{ $transaction->seller->name }}</td>
                                         <td>{{ $transaction->seller->user_name }}</td>
                                         <td>{{$transaction->seller->phone }}</td>
                                         <td>{{ $transaction->seller->email }}</td>
@@ -135,7 +130,7 @@
                                     </thead>
                                     <tbody>
                                     <tr>
-                                        <td>{{ $transaction->customer->fullName }}</td>
+                                        <td>{{ $transaction->customer->name }}</td>
                                         <td>{{ $transaction->customer->user_name }}</td>
                                         <td>{{$transaction->customer->phone }}</td>
                                         <td>{{ $transaction->customer->email }}</td>
@@ -205,7 +200,7 @@
                                     </thead>
                                     <tbody>
                                     <tr>
-                                        <td>{{ $transaction->payment->user->fullName ?? '' }}</td>
+                                        <td>{{ $transaction->payment->user->name ?? '' }}</td>
                                         <td>{{ number_format($transaction->payment->price ?? 0).' تومان ' }}</td>
                                         <td>{{ $transaction->payment->statusLabel ?? '' }}</td>
                                         <td>{{ $transaction->payment->gateway ?? '' }}</td>
@@ -225,6 +220,7 @@
                         <table class="table table-striped">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>موضوع</th>
                                 <th>تاریخ</th>
                                 <th>توضیحات</th>
@@ -234,6 +230,7 @@
                             <tbody>
                             @foreach($message as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>
                                         {{ $item->subjectLabel }}
                                     </td>
@@ -244,7 +241,7 @@
                                         {!! $item->content !!}
                                     </td>
                                     <td>
-                                        {{ $item->user->fullName }}({{$data['send'][$item->user->id]}})
+                                        {{ $item->user->name }}({{$data['send'][$item->user->id]}})
                                     </td>
                                 </tr>
                             @endforeach

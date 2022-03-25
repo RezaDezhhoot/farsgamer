@@ -63,7 +63,7 @@ class OrderController extends Controller
                     'confirmLaw' => 'تایید قوانین',
                     ]);
                 if ($validator->fails()) {
-                    return \response([
+                    return response([
                         'data' => [
                             'message' => $validator->errors()
                         ],

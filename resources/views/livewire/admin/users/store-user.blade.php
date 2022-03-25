@@ -45,6 +45,7 @@
                     <table class="table-bordered table table-striped">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>بانک :</th>
                             <th>شماره کارت :</th>
                             <th>شماره شبا :</th>
@@ -55,7 +56,8 @@
                         <tbody>
                         @foreach($cards as $value)
                             <tr>
-                                <td><a href="{{ route('admin.store.card',['edit',$value->id]) }}">{{ $value::bank()[$value->bank] }}</a></td>
+                                <td>{{ $loop->iteration }}</td>
+                                <td><a href="{{ route('admin.store.card',['edit',$value->id]) }}">{{ $value->bank_label }}</a></td>
                                 <td>{{ $value->card_number }}</td>
                                 <td>{{ $value->card_sheba  }}</td>
                                 <td>{{ $value::getStatus()[$value->status]  }}</td>
@@ -84,6 +86,7 @@
                     <table class="table table-striped">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>تاریخ</th>
                             <th>مبلغ</th>
                             <th>نوع تراکنش</th>
@@ -93,6 +96,7 @@
                         <tbody wire:sortable="updateFormPosition()">
                         @forelse($userWallet as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>
                                     <div class="comment__date">
                                         <span class="comment__date-day">{{Morilog\Jalali\Jalalian::forge($item->created_at)->format('%d')}}</span>
@@ -108,7 +112,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td class="text-center" colspan="4">
+                                <td class="text-center" colspan="5">
                                     دیتایی جهت نمایش وجود ندارد
                                 </td>
                             </tr>
@@ -198,6 +202,7 @@
                     <table class="table-bordered table table-striped">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>موضوع</th>
                             <th>متن</th>
                             <th>نوع</th>
@@ -208,6 +213,7 @@
                         <tbody wire:sortable="updateFormPosition()">
                         @forelse($result as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->subject ? $item::getSubject()[$item->subject] : 'بدون موضوع' }}</td>
                                 <td style="max-width: 400px">{!! $item->content !!}</td>
                                 <td>{{ $item::getType()[$item->type] }}</td>

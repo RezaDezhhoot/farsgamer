@@ -3,42 +3,38 @@
 namespace App\Http\Livewire\Admin\OrderTransactions;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Category;
-use App\Models\Notification;
-use App\Models\Order;
-use App\Models\OrderTransactionPayment;
-use App\Models\OrderTransactionData;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\ChatRepositoryInterface;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Sends\SendMessages;
 use App\Traits\Admin\ChatList;
 use App\Traits\Admin\TextBuilder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\OrderTransaction;
 use Illuminate\Support\Carbon;
 
 class StoreOrderTransaction extends BaseComponent
 {
-    use AuthorizesRequests , TextBuilder  , ChatList;
+    use  TextBuilder  , ChatList;
     public  $transaction , $mode , $header;
     public  $status,$nowStatus , $send_id , $transfer_result , $return_cause , $return_images , $newMessageStatus;
     public  $data = [] , $return , $chat ;
     public $newMessage , $message , $newMessageSubject , $timer , $form = []  , $transactionData = [] , $allChats;
-    public function mount($action,$id = null)
+    public function mount(
+        OrderTransactionRepositoryInterface $orderTransactionRepository,NotificationRepositoryInterface $notificationRepository,
+        UserRepositoryInterface $userRepository,ChatRepositoryInterface $chatRepository,
+        $action,$id = null
+    )
     {
-        $this->authorize('show_transactions');
+        $this->authorizing('show_transactions');
         if ($action == 'edit')
         {
-            $this->transaction = OrderTransaction::findOrFail($id);
+            $this->transaction = $orderTransactionRepository->find($id);
             $this->header = $this->transaction->order->slug;
             $this->form = json_decode($this->transaction->order->category->forms,true) ?? [];
-            $this->message = Notification::where([
-                ['subject',Notification::TRANSACTION],
-                ['model_id',$this->transaction->id],
-            ])->where(function ($query){
-                return $query->where('user_id',$this->transaction->seller->id)->orWhere('user_id',$this->transaction->customer->id);
-            })->get();
-
-            OrderTransactionData::updateOrCreate(['order_transaction_id'=>$this->transaction->id],['name'=>uniqid(),'updated_at'=>Carbon::now()]);
-
+            $this->message = $userRepository->getUsersNotifications([$this->transaction->seller,$this->transaction->customer],$notificationRepository->transactionStatus(),
+            $this->transaction->id);
             $this->allChats = $this->transaction->getChatBetweenCustomerAndSeller();
             $this->transactionData = json_decode($this->transaction->data['value'],true);
             $this->send_id = $this->transaction->data->send_id ?? '';
@@ -50,17 +46,15 @@ class StoreOrderTransaction extends BaseComponent
             $this->nowStatus = $this->transaction->status;
 
             $this->chatUserId = $this->transaction->seller->id;
-            $this->chats = \auth()->user()->singleContact($this->transaction->seller->id);
+            $this->chats = $chatRepository->singleContact($this->transaction->seller->id);
 
         } else abort(404);
 
-        $this->data['received_status'] = OrderTransaction::receiveStatus();
+        $this->data['received_status'] = $orderTransactionRepository::receiveStatus();
 
-        $this->data['for'] = [
-            'seller' => 'فروشنده',
-            'customer' => 'خریدار',
-        ];
-        $this->data['messageSubject'] = Notification::getSubject();
+        $this->data['for'] = $orderTransactionRepository::getFor();
+
+        $this->data['messageSubject'] = $notificationRepository->getSubjects();
         $this->data['send'] =[
             $this->transaction->seller->id => 'فروشنده',
             $this->transaction->customer->id => 'خریدار',
@@ -68,28 +62,42 @@ class StoreOrderTransaction extends BaseComponent
         ];
         $this->mode = $action;
         $this->data['transfer'] = $this->transaction->order->category->sends->pluck('slug','id');
-        $this->newMessageSubject = Notification::TRANSACTION;
+        $this->newMessageSubject = $notificationRepository->transactionStatus();
     }
 
-    public function setChat($target)
+    public function setChat(ChatRepositoryInterface $chatRepository,$target)
     {
         if ($target == 'customer'){
             $this->chatUserId = $this->transaction->customer->id;
-            $this->chats = \auth()->user()->singleContact($this->transaction->customer->id);
+            $this->chats = $chatRepository->singleContact($this->transaction->customer->id);
         } elseif ($target == 'seller'){
             $this->chatUserId = $this->transaction->seller->id;
-            $this->chats = \auth()->user()->singleContact($this->transaction->seller->id);
+            $this->chats = $chatRepository->singleContact($this->transaction->seller->id);
         }
     }
 
-    public function render()
+    public function render(OrderTransactionRepositoryInterface $orderTransactionRepository , CategoryRepositoryInterface $categoryRepository)
     {
-        foreach ($this->transaction::getStatus($this->return) as $key => $item) {
+        foreach ($orderTransactionRepository::getStatus($this->return) as $key => $item)
             $this->data['status'][$key] = $item['label'];
-        }
 
-        return view('livewire.admin.order-transactions.store-order-transaction' , ['transaction' => $this->transaction])
-            ->extends('livewire.admin.layouts.admin');
+        $standardStatus = $orderTransactionRepository::standardStatus();
+        $returnedStatus = $orderTransactionRepository::returnedStatus();
+        $returnStatus = $orderTransactionRepository::isReturned();
+        $noReceiveStatus = $orderTransactionRepository::noReceive();
+        $physical = $categoryRepository::physical();
+        $data = [
+            'transaction' =>  $this->transaction,
+            'standardStatus' => $standardStatus,
+            'returnedStatus' => $returnedStatus,
+            'returnStatus' => $returnStatus,
+            'noReceiveStatus' => $noReceiveStatus,
+            'physical' => $physical,
+            'sendingData' => $orderTransactionRepository::sendingData(),
+            'send' => $orderTransactionRepository::send(),
+            'pay' => $orderTransactionRepository::pay()
+        ];
+        return view('livewire.admin.order-transactions.store-order-transaction' , $data)->extends('livewire.admin.layouts.admin');
     }
 
     public function setTimer()
@@ -97,22 +105,26 @@ class StoreOrderTransaction extends BaseComponent
         $this->emit('timer',['data' => $this->transaction->timer->toDateTimeString()]);
     }
 
-    public function store()
+    public function store(
+        OrderTransactionRepositoryInterface $orderTransactionRepository , NotificationRepositoryInterface $notificationRepository ,
+        CategoryRepositoryInterface $categoryRepository , OrderRepositoryInterface $orderRepository
+    )
     {
-        $this->authorize('edit_transactions');
+        $this->authorizing('edit_transactions');
+        $subject = $notificationRepository->transactionStatus();
         // cancel
-        if ($this->status == OrderTransaction::IS_CANCELED && !in_array($this->transaction->status,[OrderTransaction::WAIT_FOR_COMPLETE,
-                OrderTransaction::WAIT_FOR_TESTING,OrderTransaction::IS_RETURNED,OrderTransaction::IS_CANCELED,OrderTransaction::WAIT_FOR_RECEIVE
+        if ($this->status == $orderTransactionRepository::cancel() && !in_array($this->transaction->status,[$orderTransactionRepository::complete(),
+                $orderTransactionRepository::test(),$orderTransactionRepository::isReturned(),$orderTransactionRepository::cancel(),
+                $orderTransactionRepository::receive()
             ])) {
             if ($this->transaction->is_returned){
                 $this->emitNotify('برای این معامله امکان تغییر وجود ندارد','warning');
                 return (false);
             }
-            $this->transaction->order->status = Order::IS_CONFIRMED;
-            OrderTransactionData::where('transaction_id',$this->transaction->id)->update([
-                'value'=> null
-            ]);
-            if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
+            $this->transaction->order->status = $orderRepository::isConfirmedStatus();
+            $orderTransactionRepository->updateData($this->transaction,['value'=> null]);
+
+            if (!empty($this->transaction->payment) && $this->transaction->payment->status == $orderTransactionRepository::hasPayment()){
                 $price = $this->transaction->payment->price;
                 $this->transaction->customer->deposit($price,
                     ['description' => $this->transaction->code.'بازگشت هزینه بابت معامله با کد ' , 'from_admin'=> true]);
@@ -122,7 +134,7 @@ class StoreOrderTransaction extends BaseComponent
             $this->nowStatus = $this->status;
             $this->transaction->save();
             return $this->emitNotify('اطلاعات با موفقیت ثبت شد');
-        } elseif ($this->status == OrderTransaction::IS_CANCELED) {
+        } elseif ($this->status == $orderTransactionRepository::cancel()) {
             $this->emitNotify('برای این معامله امکان تغییر وجود ندارد','warning');
             return (false);
         }
@@ -132,16 +144,16 @@ class StoreOrderTransaction extends BaseComponent
         $timer = $carbon;
         $data = $this->transaction->data;
         $this->resetErrorBag();
-        if (!in_array($this->transaction->status,[OrderTransaction::IS_CANCELED,OrderTransaction::WAIT_FOR_COMPLETE])){
+        if (!in_array($this->transaction->status,[$orderTransactionRepository::cancel(),$orderTransactionRepository::complete()])){
             if ($this->transaction->status <> $this->status) {
                 $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
-                    'status' => OrderTransaction::IS_CANCELED,
+                    'status' => $orderTransactionRepository::cancel(),
                 ]);
                 // data
                 if (!is_null($this->transactionData))
                     $data->value = json_encode($this->transactionData) ?? '';
 
-                if ($this->transaction->order->category->type == Category::PHYSICAL) {
+                if ($this->transaction->order->category->type == $categoryRepository::physical()) {
                     $this->validate([
                         'send_id' => ['required','exists:sends,id'],
                         'transfer_result' => ['nullable','string','max:250']
@@ -157,33 +169,36 @@ class StoreOrderTransaction extends BaseComponent
 
                 if ($this->transaction->is_returned == 0) {
                     $this->validate([
-                        'status' => ['required','in:'.OrderTransaction::WAIT_FOR_RECEIVE.','.OrderTransaction::WAIT_FOR_PAY.','
-                            .OrderTransaction::WAIT_FOR_CONFIRM. ','.OrderTransaction::WAIT_FOR_SEND.','. OrderTransaction::WAIT_FOR_TESTING.','
-                            .OrderTransaction::WAIT_FOR_CONTROL.','.OrderTransaction::WAIT_FOR_COMPLETE.','
-                            .OrderTransaction::IS_RETURNED.','.OrderTransaction::WAIT_FOR_NO_RECEIVE
+                        'status' => ['required','in:'.$orderTransactionRepository::receive().','.$orderTransactionRepository::pay().','
+                            .$orderTransactionRepository::confirm().','.$orderTransactionRepository::send().','.$orderTransactionRepository::test().','
+                            .$orderTransactionRepository::control().','.$orderTransactionRepository::complete().','
+                            .$orderTransactionRepository::isReturned().','.$orderTransactionRepository::noReceive()
                         ],
                     ],[],[
                         'status' => 'وضعیت',
                     ]);
-                    if ($this->status == OrderTransaction::WAIT_FOR_CONFIRM)
-                        $this->transaction->order->status = Order::IS_CONFIRMED;
-                    elseif ($this->transaction->status == OrderTransaction::IS_RETURNED){
+
+                    if ($this->transaction->status == $orderTransactionRepository::isReturned()){
                         $send = new SendMessages();
                         $text = $this->createText('reject_returned_transaction',$this->transaction);
-                        $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
-                        $send->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                        $send->sends($text,$this->transaction->seller,$subject,$this->transaction->id);
+                        $send->sends($text,$this->transaction->customer,$subject,$this->transaction->id);
                     }
-                    elseif ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::DIGITAL)
+                    if ($this->status == $orderTransactionRepository::confirm())
+                        $this->transaction->order->status = $orderRepository::isConfirmedStatus();
+                    else $this->transaction->order->status = $orderRepository::isRequestedStatus();
+
+                    if ($this->status == $orderTransactionRepository::receive() && $this->transaction->order->category->type == $categoryRepository::digital())
                         $timer = (float)$this->transaction->order->category->receive_time;
-                    elseif ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::PHYSICAL) {
+                    elseif ($this->status == $orderTransactionRepository::receive() && $this->transaction->order->category->type == $categoryRepository::physical()) {
                         if ($this->transaction->order->city == $this->transaction->customer->city && $this->transaction->order->province == $this->transaction->customer->province)
                             $timer = (float)$this->transaction->data->send->send_time_inner_city;
                         else
                             $timer = (float)$this->transaction->data->send->send_time_outer_city;
                     }
-                    elseif ($this->status == OrderTransaction::WAIT_FOR_COMPLETE){
-                        $this->transaction->order->status = Order::IS_FINISHED;
-                        if (!empty($this->transaction->payment) && $this->transaction->payment->status == OrderTransactionPayment::SUCCESS){
+                    elseif ($this->status == $orderTransactionRepository::complete()){
+                        $this->transaction->order->status = $orderRepository::isFinishedStatus();
+                        if (!empty($this->transaction->payment) && $this->transaction->payment->status == $orderTransactionRepository::hasPayment()){
                             $commission = $this->transaction->commission;
                             $intermediary = $this->transaction->intermediary;
                             $price = $this->transaction->payment->price - $commission - $intermediary;
@@ -193,31 +208,31 @@ class StoreOrderTransaction extends BaseComponent
                     }
                 } elseif ($this->transaction->is_returned == 1){
                     $this->validate([
-                        'status' => ['required','in:'.OrderTransaction::WAIT_FOR_SENDING_DATA.','.OrderTransaction::WAIT_FOR_SEND .','
-                            .OrderTransaction::WAIT_FOR_CONTROL.','.OrderTransaction::IS_CANCELED.','
-                            .OrderTransaction::WAIT_FOR_RECEIVE.','.OrderTransaction::WAIT_FOR_NO_RECEIVE
+                        'status' => ['required','in:'.$orderTransactionRepository::sendingData().','.$orderTransactionRepository::send().','
+                            .$orderTransactionRepository::control().','.$orderTransactionRepository::cancel().','
+                            .$orderTransactionRepository::receive().','.$orderTransactionRepository::noReceive().','.$orderTransactionRepository::complete()
                         ],
                     ],[],[
                         'status' => 'وضعیت',
                     ]);
-                    if ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::DIGITAL)
+                    if ($this->status == $orderTransactionRepository::receive() && $this->transaction->order->category->type == $categoryRepository::digital())
                         $timer = (float)$this->transaction->order->category->receive_time;
-                    elseif ($this->status == OrderTransaction::WAIT_FOR_RECEIVE && $this->transaction->order->category->type == Category::PHYSICAL) {
+                    elseif ($this->status == $orderTransactionRepository::receive() && $this->transaction->order->category->type == $categoryRepository::physical()) {
                         if ($this->transaction->order->city == $this->transaction->seller->city && $this->transaction->order->province == $this->transaction->seller->province)
                             $timer = (float)$this->transaction->data->send->send_time_inner_city;
                         else
                             $timer = (float)$this->transaction->data->send->send_time_outer_city;
                     }
                 }
-                if ($this->status == OrderTransaction::WAIT_FOR_TESTING)
+                if ($this->status == $orderTransactionRepository::test())
                     $timer = (float)$this->transaction->order->category->guarantee_time;
-                elseif ($this->status == OrderTransaction::WAIT_FOR_PAY)
+                elseif ($this->status == $orderTransactionRepository::pay())
                     $timer = (float)$this->transaction->order->category->pay_time;
-                elseif ($this->status == OrderTransaction::WAIT_FOR_SEND)
+                elseif ($this->status == $orderTransactionRepository::send())
                     $timer = (float)$this->transaction->order->category->send_time;
-                elseif ($this->status == OrderTransaction::WAIT_FOR_SENDING_DATA)
+                elseif ($this->status == $orderTransactionRepository::sendingData())
                     $timer = (float)$this->transaction->order->category->sending_data_time;
-                elseif ($this->status == OrderTransaction::WAIT_FOR_NO_RECEIVE)
+                elseif ($this->status == $orderTransactionRepository::noReceive())
                     $timer = (float)$this->transaction->order->category->no_receive_time;
 
                 $timer = $carbon->addMinutes($timer);
@@ -226,10 +241,9 @@ class StoreOrderTransaction extends BaseComponent
                 $this->emit('timer',['data' => $timer->toDateTimeString()]);
                 $this->transaction->status = $this->status;
                 $this->nowStatus = $this->status;
-                $this->transaction->save();
-
-                $this->transaction->order->save();
-                $this->notify();
+                $orderTransactionRepository->save($this->transaction);
+                $orderRepository->save($this->transaction->order);
+                $this->notify($notificationRepository , $orderTransactionRepository);
             }
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
         } else{
@@ -238,98 +252,100 @@ class StoreOrderTransaction extends BaseComponent
         }
     }
 
-    public function sendNewMessage()
+    public function sendNewMessage(NotificationRepositoryInterface $notificationRepository)
     {
-        $this->authorize('edit_transactions');
+        $this->authorizing('edit_transactions');
         $this->validate([
             'newMessage' => ['required','string'],
-            'newMessageSubject' => ['required','in:'.implode(',',array_keys(Notification::getSubject()))],
+            'newMessageSubject' => ['required','in:'.implode(',',array_keys($notificationRepository->getSubjects()))],
             'newMessageStatus' => ['required','in:0,'.$this->transaction->seller->id.','.$this->transaction->customer->id],
         ],[],[
             'newMessage'=> 'متن',
             'newMessageSubject' => 'موضوع پیام',
             'newMessageStatus' => 'ارسال برای'
         ]);
-        $send = new SendMessages();
         if ($this->newMessageStatus == 0) {
             $codes = ['seller','customer'];
             foreach ($codes as $code) {
-                $result = new Notification();
-                $result->subject = Notification::TRANSACTION;
-                $result->content = $this->newMessage;
-                $result->type = Notification::PRIVATE;
-                $result->model = Notification::TRANSACTION;
-                $result->model_id = $this->transaction->id;
-                $result->user_id = $this->transaction->{$code}->id;
-                $result->save();
-                $this->message->push($result);
+                $notification = [
+                    'subject' => $notificationRepository->transactionStatus(),
+                    'content' => $this->newMessage,
+                    'type' => $notificationRepository->privateType(),
+                    'model' => $this->transaction->id,
+                    'user_id' => $this->transaction->{$code}->id
+                ];
+                $notification = $notificationRepository->create($notification);
+                $this->message->push($notification);
             }
         } else {
-            $result = new Notification();
-            $result->subject = Notification::TRANSACTION;
-            $result->content = $this->newMessage;
-            $result->type = Notification::PRIVATE;
-            $result->model = Notification::TRANSACTION;
-            $result->model_id = $this->transaction->id;
+            $notification = [
+                'subject' => $notificationRepository->transactionStatus(),
+                'content' => $this->newMessage,
+                'type' => $notificationRepository->privateType(),
+                'model' => $this->transaction->id,
+            ];
             if ($this->newMessageStatus == $this->transaction->seller->id)
-                $result->user_id = $this->transaction->seller->id;
+                $notification['user_id'] = $this->transaction->seller->id;
             elseif ($this->newMessageStatus == $this->transaction->customer->id)
-                $result->user_id = $this->transaction->customer->id;
+                $notification['user_id'] = $this->transaction->customer->id;
 
-            $result->save();
-            $this->message->push($result);
+            $notification = $notificationRepository->create($notification);
+            $this->message->push($notification);
         }
         $this->reset(['newMessage','newMessageStatus','newMessageSubject']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
-    public function sendToReturn()
+    public function sendToReturn(OrderTransactionRepositoryInterface $orderTransactionRepository
+        , NotificationRepositoryInterface $notificationRepository)
     {
-        $this->authorize('edit_transactions');
-        if ($this->transaction->status == OrderTransaction::IS_RETURNED) {
+        $this->authorizing('edit_transactions');
+        if ($this->transaction->status == $orderTransactionRepository::isReturned()) {
             $this->transaction->is_returned = true;
-            $this->transaction->status = OrderTransaction::WAIT_FOR_SENDING_DATA;
-            $this->status = OrderTransaction::WAIT_FOR_SENDING_DATA;
+            $this->transaction->status = $orderTransactionRepository::sendingData();
+            $this->status = $orderTransactionRepository::sendingData();
             $data = $this->transaction->data;
             $data->send_id  = null;
             $data->transfer_result = null;
-            $data->save();
+            $orderTransactionRepository->saveData($data);
 
-            $this->transaction->save();
             $this->return = true;
-            $this->data['status'] = OrderTransaction::returnedStatus();
-            $timer = Carbon::make(now())->addMinutes((float)OrderTransaction::getTimer(OrderTransaction::WAIT_FOR_SENDING_DATA));
+            $this->data['status'] = $orderTransactionRepository::returnedStatus();
+            $timer = Carbon::make(now())->addMinutes($this->transaction->order->category->sending_data_time);
             $this->transaction->timer = $timer;
+            $orderTransactionRepository->save($this->transaction);
             $this->emit('timer',['data' => $timer->toDateTimeString()]);
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
+
             $send = new SendMessages();
             $text = $this->createText('confirm_returned_transaction',$this->transaction);
-            $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
-            $send->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
-            $this->notify();
+            $send->sends($text,$this->transaction->seller,$notificationRepository->transactionStatus(),$this->transaction->id);
+            $send->sends($text,$this->transaction->customer,$notificationRepository->transactionStatus(),$this->transaction->id);
+            $this->notify($notificationRepository , $orderTransactionRepository);
             return;
         }
         else $this->addError('error','برای انتقال ابتدا وضعیت را به مرجوع شده تغییر دهید');
     }
 
-    public function notify()
+    public function notify($notificationRepository , $orderTransactionRepository)
     {
         $text = [];
         $send = new SendMessages();
+        $subject = $notificationRepository->transactionStatus();
         switch ($this->status){
-            case OrderTransaction::WAIT_FOR_CONFIRM:{
+            case $orderTransactionRepository::confirm():{
                 $text = $this->createText('confirm_transaction',$this->transaction);
                 $model = $this->transaction->seller;
-                $send->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$model,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_PAY:{
+            case $orderTransactionRepository::pay():{
                 $text = $this->createText('pay_transaction',$this->transaction);
                 $model = $this->transaction->customer;
-                $send->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$model,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_SEND:{
+            case $orderTransactionRepository::send():{
                 if ($this->return == 1) {
                     $text = $this->createText('returned_send_transaction',$this->transaction);
                     $model = $this->transaction->customer;
@@ -337,10 +353,10 @@ class StoreOrderTransaction extends BaseComponent
                     $text = $this->createText('send_transaction',$this->transaction);
                     $model = $this->transaction->seller;
                 }
-                $send->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$model,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_RECEIVE:{
+            case $orderTransactionRepository::receive():{
                 if ($this->return == 1) {
                     $text = $this->createText('returned_receive_transaction',$this->transaction);
                     $model = $this->transaction->seller;
@@ -348,10 +364,10 @@ class StoreOrderTransaction extends BaseComponent
                     $text = $this->createText('receive_transaction',$this->transaction);
                     $model = $this->transaction->customer;
                 }
-                $send->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$model,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_NO_RECEIVE:{
+            case $orderTransactionRepository::noReceive():{
                 if ($this->return == 1) {
                     $text = $this->createText('return_no_receive_transaction',$this->transaction);
                     $model = $this->transaction->customer;
@@ -359,35 +375,35 @@ class StoreOrderTransaction extends BaseComponent
                     $text = $this->createText('no_receive_transaction',$this->transaction);
                     $model = $this->transaction->seller;
                 }
-                $send->sends($text,$model,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$model,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_TESTING:{
+            case $orderTransactionRepository::test():{
                 $text = $this->createText('test_transaction',$this->transaction);
-                $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
-                $send->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$this->transaction->seller,$subject,$this->transaction->id);
+                $send->sends($text,$this->transaction->customer,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_COMPLETE:{
+            case $orderTransactionRepository::complete():{
                 $text = $this->createText('complete_transaction',$this->transaction);
-                $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
-                $send->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$this->transaction->seller,$subject,$this->transaction->id);
+                $send->sends($text,$this->transaction->customer,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::IS_RETURNED:{
+            case $orderTransactionRepository::isReturned():{
                 $text = $this->createText('request_to_return_transaction',$this->transaction);
-                $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$this->transaction->seller,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::WAIT_FOR_SENDING_DATA:{
+            case $orderTransactionRepository::sendingData():{
                 $text = $this->createText('send_data_transaction',$this->transaction);
-                $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$this->transaction->seller,$subject,$this->transaction->id);
                 break;
             }
-            case OrderTransaction::IS_CANCELED:{
+            case $orderTransactionRepository::cancel():{
                 $text = $this->createText('cancel_transaction',$this->transaction);
-                $send->sends($text,$this->transaction->seller,Notification::TRANSACTION,$this->transaction->id);
-                $send->sends($text,$this->transaction->customer,Notification::TRANSACTION,$this->transaction->id);
+                $send->sends($text,$this->transaction->seller,$subject,$this->transaction->id);
+                $send->sends($text,$this->transaction->customer,$subject,$this->transaction->id);
                 break;
             }
         }

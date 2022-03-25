@@ -33,6 +33,16 @@ class Task extends Model
         ];
     }
 
+    public function getTaskLabelAttribute()
+    {
+        return self::tasks()[$this->where];
+    }
+
+    public function getWhereLabelAttribute()
+    {
+        return self::event()[$this->task];
+    }
+
     public static function tasks()
     {
         return [

@@ -22,5 +22,31 @@ interface UserRepositoryInterface
 
     public function getUserNotifications(User $user , $subject = null , $model_id = null);
 
+    public function getUsersNotifications(array $users , $subject = null , $model_id = null);
+
     public function newStatus();
+
+    public function getUserOrderBy($col , $desk = 'desc');
+
+    public function pluck($value,$key , $col = 'id' , $desk = 'desc');
+
+    public function save(User $user);
+
+    public function getAllAdminList($status , $roles , $search , $pagination);
+
+    public static function confirmedStatus();
+
+    public static function notConfirmedStatus();
+
+    public function newUserObject();
+
+    public function syncRoles(User $user ,$roles);
+
+    public function getUserCards(User $user);
+
+    public function walletTransactions(User $user);
+
+    public function getUserOvertimes(User $user);
+
+    public static function getNew();
 }

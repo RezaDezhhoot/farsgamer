@@ -31,6 +31,7 @@ use Morilog\Jalali\Jalalian;
  * @property mixed status_label
  * @property mixed user_id
  * @property mixed user
+ * @property mixed category
  */
 class Order extends Model
 {
@@ -93,6 +94,16 @@ class Order extends Model
     public function getCityLabelAttribute()
     {
         return ($this->province && $this->city) ?  Setting::getCity()[$this->province][$this->city] : '';
+    }
+
+    public function getCommissionAttribute()
+    {
+        return $this->price*($this->category->commission/100)/2;
+    }
+
+    public function getIntermediaryAttribute()
+    {
+        return $this->price*($this->category->intermediary/100)/2;
     }
 
     public function category()

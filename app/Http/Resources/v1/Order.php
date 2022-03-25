@@ -17,6 +17,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed content
  * @property mixed gallery_asset
  * @property mixed parameters
+ * @property mixed commission
+ * @property mixed intermediary
  * @method parameters()
  */
 class Order extends JsonResource
@@ -42,6 +44,8 @@ class Order extends JsonResource
             'content' => $this->content,
             'platforms' => new PlatformCollection($this->platforms),
             'parameters' => new ParameterCollection($this->parameters),
+            'commission' => $this->commission,
+            'intermediary' => $this->intermediary,
             'user' => [
                 'user_name' => $this->user->user_name,
                 'user_profile' => asset($this->user->profile_image),

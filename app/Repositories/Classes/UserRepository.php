@@ -3,6 +3,7 @@
 
 namespace App\Repositories\Classes;
 
+use App\Models\Notification;
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 
@@ -30,7 +31,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function getStatus()
     {
-        User::getStatus();
+        return User::getStatus();
     }
 
     public function getMyOrders(User $user ,$active = true)
@@ -61,11 +62,115 @@ class UserRepository implements UserRepositoryInterface
         return  $user->alerts;
     }
 
+    public function getUsersNotifications(array $users, $subject = null, $model_id = null)
+    {
+        // TODO: Implement getUsersNotifications() method.
+        if (!is_null($subject)){
+            return Notification::where([
+                ['subject' , $subject],
+            ])->where(function ($query) use ($users) {
+                return $query->where('user_id',$users[0]->id)->orWhere('user_id',$users[1]->id);
+            })->get();
+        }
+        elseif (!is_null($subject) && !is_null($model_id))
+            return Notification::where([
+                ['subject' , $subject],
+                ['model_id' , $model_id],
+            ])->where(function ($query) use ($users) {
+                return $query->where('user_id',$users[0]->id)->orWhere('user_id',$users[1]->id);
+            })->get();
+    }
+
     /**
      * @return mixed
      */
     public function newStatus()
     {
         return User::NEW;
+    }
+
+
+    /**
+     * @param $col
+     * @param string $desk
+     * @return mixed
+     */
+    public function getUserOrderBy($col,$desk = 'desc')
+    {
+        return User::orderBy($col , $desk);
+    }
+
+    /**
+     * @param $value
+     * @param $key
+     * @param string $col
+     * @param string $desk
+     * @return mixed
+     */
+    public function pluck($value, $key , $col = 'id' , $desk = 'desc')
+    {
+        return $this->getUserOrderBy($col,$desk)->pluck($value,$key);
+    }
+
+    public function save(User $user)
+    {
+        $user->save();
+        return $user;
+    }
+
+    public function getAllAdminList($status, $roles, $search, $pagination)
+    {
+        return User::latest('id')->when($status, function ($query) use ($status) {
+            return $query->where('status' , $status);
+        })->when($roles, function ($query) use ($roles) {
+            return $query->role($roles);
+        })->search($search)->paginate($pagination);
+    }
+
+    public static function confirmedStatus()
+    {
+        return User::CONFIRMED;
+    }
+
+    public static function notConfirmedStatus()
+    {
+        // TODO: Implement unconfirmedStatus() method.
+        return User::NOT_CONFIRMED;
+    }
+
+    public function newUserObject()
+    {
+        // TODO: Implement newUserObject() method.
+        return new User();
+    }
+
+    public function syncRoles(User $user ,$roles)
+    {
+        // TODO: Implement syncRoles() method.
+        return $user->syncRoles($roles);
+    }
+
+    public function getUserCards(User $user)
+    {
+        // TODO: Implement getUserCards() method.
+        return $user->cards;
+    }
+
+    public function walletTransactions(User $user)
+    {
+        // TODO: Implement walletTransactions() method.
+        return $user->walletTransactions()->where('confirmed', 1)->get();
+    }
+
+    public function getUserOvertimes(User $user)
+    {
+        // TODO: Implement getUserOvertimes() method.
+        return $user->overtimes;
+    }
+
+    public static function getNew()
+    {
+        // TODO: Implement getNew() method.
+        return User::getNew();
     }
 }

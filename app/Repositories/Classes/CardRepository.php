@@ -57,4 +57,15 @@ class CardRepository implements CardRepositoryInterface
         $card->save();
         return $card;
     }
+
+    public static function confirmStatus()
+    {
+        return Card::CONFIRMED;
+    }
+
+    public static function getNew()
+    {
+        // TODO: Implement getNew() method.
+        return Card::getNew();
+    }
 }

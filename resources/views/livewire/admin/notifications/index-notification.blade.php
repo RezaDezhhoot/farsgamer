@@ -10,6 +10,7 @@
                     <table  class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>شماره</th>
                             <th>موضوع</th>
                             <th>نام کاربری</th>
@@ -22,10 +23,11 @@
                         <tbody>
                         @forelse($notification as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->id }}</td>
                                 <td>{{ $item->subjectLabel }}</td>
                                 <td>{{ $item->user->user_name ?? 'عمومی' }}</td>
-                                <td>{{ $item::getType()[$item->type] }}</td>
+                                <td>{{ $item->type_label }}</td>
                                 <td style="width: 40%;">{!! $item->content !!}</td>
                                 <td>{{ $item->date }}</td>
                                 <td>
@@ -33,7 +35,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="7">
+                            <td class="text-center" colspan="8">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

@@ -9,6 +9,7 @@ use Morilog\Jalali\Jalalian;
 /**
  * @property mixed created_at
  * @method static create(array $data)
+ * @method static latest(string $string)
  */
 class Offend extends Model
 {

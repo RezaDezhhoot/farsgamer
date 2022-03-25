@@ -10,6 +10,7 @@
                         <table class="table table-striped" id="kt_datatable">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th> ایکون</th>
                                 <th>نام مستعار</th>
                                 <th>وضعیت</th>
@@ -19,16 +20,17 @@
                             <tbody>
                             @forelse($sends as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td><img style="width: 30px;height: 30px" src="{{ asset($item->logo) }}" alt=""></td>
                                     <td>{{ $item->slug }}</td>
-                                    <td>{{ $item::getStatus()[$item->status] }}</td>
+                                    <td>{{ $item->status_label }}</td>
                                     <td>
                                         <x-admin.edit-btn href="{{ route('admin.store.send',['edit', $item->id]) }}" />
                                         <x-admin.delete-btn onclick="deleteItem({{$item->id}})" />
                                     </td>
                                 </tr>
                             @empty
-                                <td class="text-center" colspan="6">
+                                <td class="text-center" colspan="5">
                                     دیتایی جهت نمایش وجود ندارد
                                 </td>
                             @endforelse

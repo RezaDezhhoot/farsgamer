@@ -40,6 +40,7 @@ use Illuminate\Support\Str;
  * @property int|mixed pay_time
  * @property int|mixed no_receive_time
  * @property mixed intermediary
+ * @property mixed parameters
  */
 class Category extends Model
 {

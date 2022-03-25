@@ -21,4 +21,8 @@ interface CardRepositoryInterface
     public function getBank();
 
     public function save(Card $card);
+
+    public static function confirmStatus();
+
+    public static function getNew();
 }

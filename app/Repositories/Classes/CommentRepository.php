@@ -110,4 +110,10 @@ class CommentRepository implements CommentRepositoryInterface
     {
         return Comment::NEW;
     }
+
+    public static function getNew()
+    {
+        // TODO: Implement getNew() method.
+        return Comment::getNew();
+    }
 }

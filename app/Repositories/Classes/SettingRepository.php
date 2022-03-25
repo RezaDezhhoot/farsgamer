@@ -16,6 +16,11 @@ class SettingRepository implements SettingRepositoryInterface
         return $law->sortBy('order');
     }
 
+    public function getAdminLaw($name)
+    {
+        return Setting::where('name',$name)->get()->toArray() ?? [];
+    }
+
     public function getSiteFaq($name , $default = '')
     {
         return Setting::getSingleRow($name , $default);
@@ -24,6 +29,11 @@ class SettingRepository implements SettingRepositoryInterface
     public function getSubjects($name, $default = [])
     {
         return Setting::getSingleRow($name , $default);
+    }
+
+    public function getAdminFag($name)
+    {
+//        return
     }
 
     public function getFagList()
@@ -50,5 +60,36 @@ class SettingRepository implements SettingRepositoryInterface
     public function getCity($province)
     {
         return Setting::getCity()[$province];
+    }
+
+    public static function updateOrCreate(array $key, array $value)
+    {
+        return Setting::updateOrCreate($key, $value);
+    }
+
+    public function find($id)
+    {
+        return Setting::findOrFail($id);
+    }
+
+    public function delete(Setting $setting)
+    {
+        return $setting->delete();
+    }
+
+    public function newSettingObject()
+    {
+        return new Setting();
+    }
+
+    public function save(Setting $setting)
+    {
+        $setting->save();
+        return $setting;
+    }
+
+    public function codes()
+    {
+        return Setting::codes();
     }
 }

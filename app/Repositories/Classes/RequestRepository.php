@@ -93,4 +93,10 @@ class RequestRepository implements RequestRepositoryInterface
     {
         return Request::SETTLEMENT;
     }
+
+    public static function getNew()
+    {
+        // TODO: Implement getNew() method.
+        return Request::getNew();
+    }
 }

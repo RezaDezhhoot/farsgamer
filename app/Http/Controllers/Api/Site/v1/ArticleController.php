@@ -83,7 +83,7 @@ class ArticleController extends Controller
                 ],Response::HTTP_UNAUTHORIZED);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
-        $request['user_id'] = auth('api')->id();
+        $request['user_id'] = auth()->id();
         $validator = Validator::make($request->all(),[
             'content' => 'required|max:450|string'
         ],[],[

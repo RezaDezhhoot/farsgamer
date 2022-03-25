@@ -25,4 +25,6 @@ interface CommentRepositoryInterface
     public static function unconfirmedStatus();
 
     public static function newStatus();
+
+    public static function getNew();
 }

@@ -42,6 +42,7 @@
                 <table class="table table-striped">
                     <thead>
                     <tr>
+                        <th>#</th>
                         <th>تصویر</th>
                         <th>عنوان</th>
                         <th>نوع ورودی</th>
@@ -52,6 +53,7 @@
                     <tbody>
                     @foreach($parameters as $key => $value)
                         <tr>
+                            <td>{{ $loop->iteration }}</td>
                             <td><img src="{{ asset($value['logo']) }}" style="width: 30px;height: 30px" alt=""></td>
                             <td>{{ $value['name'] }}</td>
                             <td>{{ $value['type'] }}</td>
@@ -104,6 +106,7 @@
                 <table class="table table-striped">
                     <thead>
                     <tr>
+                        <th>#</th>
                         <th>عنوان</th>
                         <th>عملیات</th>
                     </tr>
@@ -111,6 +114,7 @@
                     <tbody wire:sortable="updateFormPosition()">
                     @forelse($form as $key => $item)
                         <tr wire:sortable.item="{{ $item['name'] }}" wire:key="{{ $item['name'] }}">
+                            <td>{{ $loop->iteration }}</td>
                             <td>{!! $item['label'] ?? ''!!}</td>
                             <td>
                                 <button type="button" wire:click="editForm({{$key}})" class="btn btn-sm btn-default btn-text-primary btn-hover-primary btn-icon mr-2">
@@ -152,7 +156,7 @@
                 <x-admin.forms.input type="text" id="select-name" label="نام*" wire:model.defer="formName" disabled/>
                 <x-admin.forms.dropdown id="select-required" label="اجباری*" :data="['0' => 'خیر', '1' => 'بله']" wire:model.defer="formRequired"/>
                 <x-admin.forms.dropdown id="select-width" label="عرض*" :data="['6' => '50 درصد', '12' => '100 درصد']"  wire:model.defer="formWidth"/>
-                <x-admin.forms.dropdown id="select-for" label="مخاطب*" :data="['seller'=>'فروشنده','customer'=>'خریدار']"  wire:model.defer="formFor"/>
+                <x-admin.forms.dropdown id="select-for" label="مخاطب*" :data="$data['for']"  wire:model.defer="formFor"/>
                 <x-admin.forms.dropdown id="select-status" label="روال*" :data="['normal'=>'عادی','return'=>'مرجوعی']"  wire:model.defer="formStatus"/>
                 <x-admin.forms.full-text-editor id="select" label="برچسب فیلد*" wire:model.defer="formLabel"/>
                 <x-admin.forms.input type="text" id="select-value" label="مقدار" wire:model.defer="formValue"/>

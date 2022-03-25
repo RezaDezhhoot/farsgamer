@@ -12,7 +12,7 @@
                     <h3>مشخصات کاربر :</h3>
                     <p>
                         <span> نام کامل :</span>
-                        <span>{{ $order->user->fullName }}</span>
+                        <span>{{ $order->user->name }}</span>
                     </p>
                     <p>
                         <span> نام کاربری :</span>
@@ -20,7 +20,7 @@
                     </p>
                     <p>
                         <span> وضعیت :</span>
-                        <span>{{ $order->user->statusLabel }}</span>
+                        <span>{{ $order->user->status_label }}</span>
                     </p>
                     <p>
                         <span> شماره هماره :</span>
@@ -35,12 +35,12 @@
                     <p>
                         <span> استان :</span>
                         <span>
-                        {{ $order->user->provinceLabel ?? '' }}
+                        {{ $order->user->province_label ?? '' }}
                     </span>
                     </p>
                     <p>
                         <span> شهر :</span>
-                        <span>{{ $order->user->cityLabel ?? '' }}</span>
+                        <span>{{ $order->user->city_label ?? '' }}</span>
                     </p>
 
                 </div>
@@ -60,7 +60,7 @@
                     </p>
                     <p>
                         <span> وضعیت :</span>
-                        <span>{{ $order->statusLabel }}</span>
+                        <span>{{ $order->status_label }}</span>
                     </p>
                     <p>
                         <span> تعداد بازدید :</span>
@@ -69,12 +69,12 @@
                     <p>
                         <span> استان :</span>
                         <span>
-                        {{ $order->provinceLabel ?? '' }}
+                        {{ $order->province_label ?? '' }}
                     </span>
                     </p>
                     <p>
                         <span> شهر :</span>
-                        <span>{{ $order->cityLabel }}</span>
+                        <span>{{ $order->city_label }}</span>
                     </p>
 
                 </div>
@@ -145,6 +145,7 @@
                         <table class="table table-striped">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>موضوع</th>
                                 <th>تاریخ</th>
                                 <th style="width: 70%">توضیحات</th>
@@ -153,8 +154,9 @@
                             <tbody>
                             @foreach($message as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>
-                                        {{ $item->subjectLabel }}
+                                        {{ $item->subject_label }}
                                     </td>
                                     <td>
                                         {{$item->date}}

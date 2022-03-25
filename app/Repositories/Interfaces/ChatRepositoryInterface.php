@@ -27,4 +27,6 @@ interface ChatRepositoryInterface
     public function save(ChatGroup $chatGroup);
 
     public function delete(ChatGroup $chatGroup);
+
+    public function getContacts();
 }

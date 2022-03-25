@@ -13,7 +13,9 @@ use Spatie\Permission\Models\Permission;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/welcome', function (){
+    return view('welcome');
+});
 // admin
 Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
 {
@@ -32,6 +34,7 @@ Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewir
     Route::get('/comments/{action}/{id?}', Comments\StoreComment::class)->name('admin.store.comment');
     Route::get('/notifications', Notifications\IndexNotification::class)->name('admin.notification');
     Route::get('/notifications/{action}/{id?}', Notifications\StoreNotification::class)->name('admin.store.notification');
+    Route::get('/offends', Offends\IndexOffend::class)->name('admin.offend');
     // content
     Route::get('/sends', Sends\IndexSend::class)->name('admin.send');
     Route::get('/sends/{action}/{id?}', Sends\StoreSend::class)->name('admin.store.send');
@@ -57,6 +60,7 @@ Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewir
     Route::get('/users', Users\IndexUser::class)->name('admin.user');
     Route::get('/users/{action}/{id?}', Users\StoreUser::class)->name('admin.store.user');
     Route::get('/roles', Roles\IndexRole::class)->name('admin.role');
+    Route::get('/reports', Reports\Logs\IndexLog::class)->name('admin.report');
     Route::get('/roles/{action}/{id?}', Roles\StoreRole::class)->name('admin.store.role');
     Route::get('/settings/base', Settings\BaseSetting::class)->name('admin.setting.base');
     Route::get('/settings/home', Settings\HomeSetting::class)->name('admin.setting.home');

@@ -15,6 +15,7 @@
                     <table class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>کاربر</th>
                             <th>شماره کارت</th>
                             <th>شبا</th>
@@ -26,6 +27,7 @@
                         <tbody>
                         @forelse($cards as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->user->fullName }}</td>
                                 <td>{{ $item->card_number }}</td>
                                 <td>{{ $item->card_sheba }}</td>
@@ -37,7 +39,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="6">
+                            <td class="text-center" colspan="7">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

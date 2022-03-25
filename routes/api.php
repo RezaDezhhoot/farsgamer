@@ -25,10 +25,8 @@ Route::prefix('v1')->group(function (){
 
     Route::prefix('/orders')->group(function (){
         Route::get('/{order_id}',[\App\Http\Controllers\Api\Site\v1\OrderController::class,'show']);
-
         Route::middleware(['auth:sanctum','userAuth'])
             ->post('/start/{order_id}',[\App\Http\Controllers\Api\Site\v1\OrderController::class,'startTransaction']);
-
         Route::middleware(['auth:sanctum','userAuth'])
             ->post('/chat/{user_id}',[\App\Http\Controllers\Api\Site\v1\OrderController::class,'startChat']);
     });
@@ -42,9 +40,7 @@ Route::prefix('v1')->group(function (){
 
     Route::prefix('/auth')->group(function (){
         Route::post('/login',[\App\Http\Controllers\Api\Site\v1\AuthController::class,'login']);
-
         Route::post('/register',[\App\Http\Controllers\Api\Site\v1\AuthController::class,'register']);
-
         Route::post('/send-verification-code',[\App\Http\Controllers\Api\Site\v1\AuthController::class,'sendSMS']);
     });
 

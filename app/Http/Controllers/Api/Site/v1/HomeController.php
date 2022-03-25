@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\CategoryCollection;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use App\Http\Resources\v1\OrderCollection;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
@@ -27,7 +28,7 @@ class HomeController extends Controller
     }
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\Response
+     * @return Application|\Illuminate\Http\Response
      */
     public function __invoke(Request $request)
     {

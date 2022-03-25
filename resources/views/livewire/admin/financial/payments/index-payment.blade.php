@@ -11,6 +11,7 @@
                         <table class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>شماره رسید</th>
                             <th>پرداخت کننده</th>
                             <th>ای پی</th>
@@ -27,6 +28,7 @@
                         <tbody>
                         @forelse($payments as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->id }}</td>
                                 <td>{{ $item->user->fullName }}</td>
                                 <td>{{ $item->user->amount }}</td>
@@ -43,7 +45,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="10">
+                            <td class="text-center" colspan="11">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

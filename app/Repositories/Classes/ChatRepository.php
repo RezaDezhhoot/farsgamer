@@ -115,4 +115,12 @@ class ChatRepository implements ChatRepositoryInterface
     {
         return $chatGroup->delete();
     }
+
+    /**
+     * @return mixed
+     */
+    public function getContacts()
+    {
+        return $this->contacts()->get();
+    }
 }

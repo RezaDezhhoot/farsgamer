@@ -3,25 +3,26 @@
 namespace App\Http\Livewire\Admin\Platforms;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Platform;
+use App\Repositories\Interfaces\PlatformRepositoryInterface;
 use Livewire\WithPagination;
 
 class IndexPlatform extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
-    public $pagination = 10 , $search ,$placeholder = ' نام مستعار';
+    use WithPagination ;
+    public $placeholder = ' نام مستعار';
 
-    public function render()
+    public function render(PlatformRepositoryInterface $platformRepository)
     {
-        $this->authorize('show_platforms');
-        $platforms = Platform::latest('id')->search($this->search)->paginate($this->pagination);
-        return view('livewire.admin.platforms.index-platform',['platforms'=>$platforms])->extends('livewire.admin.layouts.admin');
+        $this->authorizing('show_platforms');
+        $platforms = $platformRepository->getAllAdminList($this->search,$this->pagination);
+        return view('livewire.admin.platforms.index-platform',['platforms'=>$platforms])
+            ->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete($id , PlatformRepositoryInterface $platformRepository)
     {
-        $this->authorize('delete_platforms');
-        Platform::findOrFail($id)->delete();
+        $this->authorizing('delete_platforms');
+        $platform = $platformRepository->find($id);
+        $platformRepository->delete($platform);
     }
 }

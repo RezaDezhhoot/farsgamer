@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @method static where(string $string, string $NEW)
  * @method static create(array $array)
+ * @method static paginate(int $int)
  * @property mixed subject
  */
 class Report extends Model

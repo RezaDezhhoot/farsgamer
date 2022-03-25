@@ -14,4 +14,5 @@ interface ParameterRepositoryInterface
     public function find($id);
 
     public function delete(Parameter $parameter);
+
 }

@@ -67,9 +67,9 @@ class CategoryRepository implements CategoryRepositoryInterface
         return Category::active($active)->where($col,$operator,$value)->get();
     }
 
-    public function getAll($active = true)
+    public function getAll($active = true , $available = false)
     {
-        return Category::active($active)->all();
+        return $available ? Category::active($active)->where('is_available',Category::YES)->get()  : Category::active($active)->get();
     }
 
     public function newCategoryObject()
@@ -101,5 +101,37 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function attachPlatforms(Category $category, $platforms)
     {
         $category->platforms()->attach($platforms);
+    }
+
+    public static function availableStatus()
+    {
+        return Category::AVAILABLE;
+    }
+
+    public static function yes()
+    {
+        return Category::YES;
+    }
+
+    public static function no()
+    {
+        return Category::NO;
+    }
+
+    public function getParameters(Category $category  ,$available = true)
+    {
+        return $available ? $category->parameters()->where('status','available')->get() :  $category->parameters;
+    }
+
+    public static function digital()
+    {
+        // TODO: Implement digital() method.
+        return Category::DIGITAL;
+    }
+
+    public static function physical()
+    {
+        // TODO: Implement physical() method.
+        return Category::PHYSICAL;
     }
 }

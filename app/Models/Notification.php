@@ -59,6 +59,11 @@ class Notification extends Model
         return self::getSubject()[in_array($this->subject,array_keys(self::getSubject())) ? $this->subject : self::ALL];
     }
 
+    public function getTypeLabelAttribute()
+    {
+        return self::getType()[$this->type];
+    }
+
     public static function getType()
     {
         return [

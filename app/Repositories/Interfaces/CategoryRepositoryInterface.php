@@ -25,7 +25,7 @@ interface CategoryRepositoryInterface
 
     public function getByCondition($col,$operator,$value,$active = true);
 
-    public function getAll($active = true);
+    public function getAll($active = true , $available = false);
 
     public function newCategoryObject();
 
@@ -38,4 +38,16 @@ interface CategoryRepositoryInterface
     public function syncPlatforms(Category $category , $platforms);
 
     public function attachPlatforms(Category $category , $platforms);
+
+    public static function availableStatus();
+
+    public static function yes();
+
+    public static function no();
+
+    public function getParameters(Category $category , $available = true);
+
+    public static function physical();
+
+    public static function digital();
 }

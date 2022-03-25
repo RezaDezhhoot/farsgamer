@@ -3,44 +3,39 @@
 namespace App\Http\Livewire\Admin\Users;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Notification;
-use App\Models\Role;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\User;
 use Livewire\WithPagination;
 
 class IndexUser extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests  , TextBuilder;
-    public $pagination = 10 , $search , $roles , $data , $status , $placeholder = 'نام کاربری یا شماره همراه';
+    use WithPagination  , TextBuilder;
+    public $roles , $data , $status , $placeholder = 'نام کاربری یا شماره همراه';
 
     protected $queryString = ['status','roles'];
 
-    public function render()
+    public function render(UserRepositoryInterface $userRepository , RoleRepositoryInterface $roleRepository)
     {
-        $this->authorize('show_users');
-        $this->data['status'] = User::getStatus();
-        $this->data['roles'] = Role::whereNotIn('name', ['administrator', 'super_admin', 'admin'])->pluck('name','name');
-        $users = User::latest('id')->when($this->status, function ($query) {
-            return $query->where('status' , $this->status);
-        })->when($this->roles, function ($query) {
-            return $query->role($this->roles);
-        })->search($this->search)->paginate($this->pagination);
+        $this->authorizing('show_users');
+        $this->data['status'] = $userRepository->getStatus();
+        $this->data['roles'] = $roleRepository->whereNotIn('name', ['administrator', 'super_admin', 'admin'])->pluck('name','name');
+        $users = $userRepository->getAllAdminList($this->status,$this->roles ,$this->search,$this->pagination);
         return view('livewire.admin.users.index-user',['users' => $users])->extends('livewire.admin.layouts.admin');
     }
 
-    public function confirm($id)
+    public function confirm(UserRepositoryInterface $userRepository ,NotificationRepositoryInterface $notificationRepository ,$id)
     {
-        $this->authorize('edit_users');
-        $user = User::findOrFail($id);
-        if ($user->status <> User::CONFIRMED) {
-            $user->status = User::CONFIRMED;
-            $user->save();
+        $this->authorizing('edit_users');
+        $user = $userRepository->find($id);
+        if ($user->status <> $userRepository::confirmedStatus()) {
+            $user->status = $userRepository::confirmedStatus();
+            $userRepository->save($user);
             $text = $this->createText('auth',$user);
             $send = new SendMessages();
-            $send->sends($text,$user,Notification::AUTH);
+            $send->sends($text,$user,$notificationRepository->authStatus());
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
         }
     }

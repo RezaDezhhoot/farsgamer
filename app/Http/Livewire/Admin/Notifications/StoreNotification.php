@@ -3,33 +3,33 @@
 namespace App\Http\Livewire\Admin\Notifications;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\User;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Notification;
 
 class StoreNotification extends BaseComponent
 {
     use AuthorizesRequests;
     public $header , $mode , $content , $type , $subject , $user_id , $data = [];
-    public function mount($action , $id = null)
+    public function mount(NotificationRepositoryInterface $notificationRepository,UserRepositoryInterface $userRepository,$action , $id = null)
     {
         $this->authorize('show_notifications');
         if ($action == 'create') {
             $this->header = 'اعلان جدید';
             $this->mode = $action;
-            $this->data['type'] = Notification::getType();
-            $this->data['subject'] = Notification::getSubject();
-            $this->data['user'] = User::orderBy('user_name')->pluck('user_name','id');
+            $this->data['type'] = $notificationRepository::getType();
+            $this->data['subject'] = $notificationRepository->getSubjects();
+            $this->data['user'] = $userRepository->pluck('user_name','id','user_name');
         } else abort(404);
     }
 
-    public function store()
+    public function store(NotificationRepositoryInterface $notificationRepository)
     {
         $this->authorize('edit_notifications');
         $filed = [
             'subject' => ['required', 'string','in:'.implode(',',array_keys($this->data['subject']))],
             'content' => ['required', 'string','max:250'],
-            'type' => ['required','string' ,'in:'.Notification::PUBLIC.','.Notification::PRIVATE],
+            'type' => ['required','string' ,'in:'.implode(',',array_keys($notificationRepository::getType()))],
         ];
         $message = [
             'subject' => 'موضوع',
@@ -37,30 +37,32 @@ class StoreNotification extends BaseComponent
             'type' => 'نوع اعلان',
         ];
 
-        if (isset($this->user_id) || $this->type == Notification::PRIVATE) {
+        if (isset($this->user_id) || $this->type == $notificationRepository->privateType()) {
             $filed['user_id'] = ['required','exists:users,id'];
             $message['user_id'] = 'کاربر';
         }
         $this->validate($filed,[],$message);
-        $notification = new Notification();
-        $notification->subject = $this->subject;
-        $notification->model = $this->subject;
-        $notification->model_id = null;
-        $notification->content = $this->content;
-        $notification->type = $this->type;
-        if ($this->type == Notification::PRIVATE)
-            $notification->user_id = $this->user_id;
+        $notification = [
+            'subject' => $this->subject,
+            'content' =>  $this->content,
+            'type' => $this->type,
+            'model' => $this->subject,
+            'model_id' => null
+        ];
+        if ($this->type == $notificationRepository->privateType())
+            $notification['user_id'] = $this->user_id;
         else
-            $notification->user_id = null;
+            $notification['user_id'] = null;
 
-        $notification->save();
+        $notificationRepository->create($notification);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
-        $this->reset(['content','type','user_id']);
+        $this->reset(['content','type','user_id','subject']);
     }
 
 
     public function render()
     {
-        return view('livewire.admin.notifications.store-notification')->extends('livewire.admin.layouts.admin');
+        return view('livewire.admin.notifications.store-notification')
+            ->extends('livewire.admin.layouts.admin');
     }
 }

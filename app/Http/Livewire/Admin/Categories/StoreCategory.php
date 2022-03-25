@@ -4,6 +4,8 @@ namespace App\Http\Livewire\Admin\Categories;
 
 use App\Http\Livewire\BaseComponent;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use App\Repositories\Interfaces\ParameterRepositoryInterface;
 use App\Repositories\Interfaces\PlatformRepositoryInterface;
 use App\Repositories\Interfaces\SendRepositoryInterface;
@@ -20,7 +22,7 @@ class StoreCategory extends BaseComponent
     public $paraLogo , $paraName , $paraType , $paraField , $paraStatus , $paraMax , $paraMin ;
     public function mount(
         CategoryRepositoryInterface $categoryRepository , PlatformRepositoryInterface $platformRepository,
-        SendRepositoryInterface $sendRepository ,$action , $id = null
+        SendRepositoryInterface $sendRepository , OrderTransactionRepositoryInterface $orderTransactionRepository ,$action , $id = null
     )
     {
         $this->authorizing('show_categories');
@@ -66,6 +68,7 @@ class StoreCategory extends BaseComponent
         $this->data['status'] = $categoryRepository->getStatus();
         $this->data['transfer'] = $sendRepository->getByCondition('status','=',$sendRepository->availableStatus());
         $this->data['platform'] = $platformRepository->getAll();
+        $this->data['for'] = $orderTransactionRepository::getFor();
     }
 
     public function store(CategoryRepositoryInterface $categoryRepository , ParameterRepositoryInterface $parameterRepository)

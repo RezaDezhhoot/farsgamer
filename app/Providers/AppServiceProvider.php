@@ -12,12 +12,19 @@ use App\Repositories\Classes\NotificationRepository;
 use App\Repositories\Classes\OffendRepository;
 use App\Repositories\Classes\OrderRepository;
 use App\Repositories\Classes\OrderTransactionRepository;
+use App\Repositories\Classes\OvertimeRepository;
 use App\Repositories\Classes\ParameterRepository;
 use App\Repositories\Classes\PaymentRepository;
+use App\Repositories\Classes\PermissionRepository;
 use App\Repositories\Classes\PlatformRepository;
+use App\Repositories\Classes\ReportRepository;
 use App\Repositories\Classes\RequestRepository;
+use App\Repositories\Classes\RoleRepository;
+use App\Repositories\Classes\ScheduleRepository;
 use App\Repositories\Classes\SendRepository;
 use App\Repositories\Classes\SettingRepository;
+use App\Repositories\Classes\TaskRepository;
+use App\Repositories\Classes\TicketRepository;
 use App\Repositories\Classes\UserRepository;
 use App\Repositories\Interfaces\ArticleCategoryRepositoryInterface;
 use App\Repositories\Interfaces\ArticleRepositoryInterface;
@@ -29,12 +36,19 @@ use App\Repositories\Interfaces\NotificationRepositoryInterface;
 use App\Repositories\Interfaces\OffendRepositoryInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
+use App\Repositories\Interfaces\OvertimeRepositoryInterface;
 use App\Repositories\Interfaces\ParameterRepositoryInterface;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
+use App\Repositories\Interfaces\PermissionRepositoryInterface;
 use App\Repositories\Interfaces\PlatformRepositoryInterface;
+use App\Repositories\Interfaces\ReportRepositoryInterface;
 use App\Repositories\Interfaces\RequestRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
+use App\Repositories\Interfaces\ScheduleRepositoryInterface;
 use App\Repositories\Interfaces\SendRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
+use App\Repositories\Interfaces\TicketRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 
@@ -130,6 +144,46 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             RequestRepositoryInterface::class,
             RequestRepository::class,
+        );
+
+        $this->app->bind(
+            RoleRepositoryInterface::class,
+            RoleRepository::class,
+        );
+
+        $this->app->bind(
+            PermissionRepositoryInterface::class,
+            PermissionRepository::class,
+        );
+
+        $this->app->bind(
+            TaskRepositoryInterface::class,
+            TaskRepository::class,
+        );
+
+        $this->app->bind(
+            TicketRepositoryInterface::class,
+            TicketRepository::class,
+        );
+
+        $this->app->bind(
+            OvertimeRepositoryInterface::class,
+            OvertimeRepository::class,
+        );
+
+        $this->app->bind(
+            SettingRepositoryInterface::class,
+            SettingRepository::class,
+        );
+
+        $this->app->bind(
+            ReportRepositoryInterface::class,
+            ReportRepository::class,
+        );
+
+        $this->app->bind(
+            ScheduleRepositoryInterface::class,
+            ScheduleRepository::class,
         );
     }
 

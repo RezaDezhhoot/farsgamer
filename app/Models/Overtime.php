@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @method static findOrfail($id)
  * @method static where(string $string, $id)
+ * @method static create(array $data)
  * @property mixed start_at
  * @property mixed end_at
  * @property mixed user_id
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Overtime extends Model
 {
+    protected $guarded = [];
     use HasFactory;
 
     public function mangers()

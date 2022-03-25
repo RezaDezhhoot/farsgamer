@@ -37,8 +37,7 @@ class Dashboard extends BaseComponent
                 ['sender_type',Ticket::USER],
             ])->take(30)->get(),
         ];
-        return view('livewire.admin.dashboards.dashboard',['list'=>$list])
-            ->extends('livewire.admin.layouts.admin');
+        return view('livewire.admin.dashboards.dashboard',['list'=>$list])->extends('livewire.admin.layouts.admin');
     }
     public function confirmFilter()
     {
@@ -76,10 +75,8 @@ class Dashboard extends BaseComponent
             for ($i = 0 ; $i< count($dates); $i++) {
                 array_push($chart[$key],
                     (float)$chartModel['model']->where([$chartModel['where']])
-                    ->whereBetween('created_at', [$dates[$i]->format('Y-m-d')." 00:00:00", $dates[$i]->format('Y-m-d')." 23:59:59"])
-                    ->sum($chartModel['sum']));
+                    ->whereBetween('created_at', [$dates[$i]->format('Y-m-d')." 00:00:00", $dates[$i]->format('Y-m-d')." 23:59:59"])->sum($chartModel['sum']));
                 array_push($chart['label'] ,(string)$dates[$i]->format('Y-m-d') );
-
             }
         }
         return $chart;

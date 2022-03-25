@@ -3,55 +3,41 @@
 namespace App\Http\Livewire\Admin\Orders;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Order;
-use App\Models\Category;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Livewire\WithPagination;
 
 class IndexOrder extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
+    use WithPagination ;
 
     protected $queryString = ['status' ,'category'];
     public $status , $statusCount;
-    public $pagination = 10 , $search , $data = [] , $category , $placeholder="شماره اگهی یا عنوان";
+    public $data = [] , $category , $placeholder="شماره اگهی یا عنوان";
 
-    public function render()
+    public function render(OrderRepositoryInterface $orderRepository , CategoryRepositoryInterface $categoryRepository)
     {
-        $this->authorize('show_orders');
-        $orders = Order::latest('id')->when($this->status, function ($query) {
-            return $query->where('status', $this->status);
-        })->when($this->search, function ($query) {
-            return is_numeric($this->search) ?
-                $query->where('id', (int)$this->search) : $query->where('slug', $this->search);
-        })->when($this->category,function ($query) {
-            return $query->where('category_id',$this->category);
-        })->paginate($this->pagination);
+        $this->authorizing('show_orders');
 
-        $this->statusCount['all'] = Order::count();
-        $this->statusCount['new'] = $this->getCount('new');
-        $this->statusCount['unconfirmed'] = $this->getCount('unconfirmed');
-        $this->statusCount['confirmed'] = $this->getCount('confirmed');
-        $this->statusCount['rejected'] = $this->getCount('rejected');
-        $this->statusCount['requested'] = $this->getCount('requested');
-        $this->statusCount['finished'] = $this->getCount('finished');
-        $this->data['category'] = Category::all()->pluck('title','id');
+        $orders = $orderRepository->getAllAdminList($this->status,$this->search,$this->category,$this->pagination);
+
+        $this->statusCount['all'] = $orderRepository->count();
+
+        foreach ($orderRepository::getStatus() as $key => $value)
+            $this->statusCount[$key] = $value.'('.$orderRepository->getCountWhere($key).')';
+
+        $this->data['category'] = $categoryRepository->getAll(false)->pluck('title','id');
 
         return view('livewire.admin.orders.index-order' ,['orders' => $orders])->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete($id , OrderRepositoryInterface $orderRepository)
     {
-        $this->authorize('delete_orders');
-        $order = Order::findOrFail($id);
-        if (!in_array($order->status,[Order::IS_REQUESTED ,Order::IS_FINISHED]))
-            $order->delete();
+        $this->authorizing('delete_orders');
+        $order = $orderRepository->getOrder($id,false);
+        if (!in_array($order->status,[$orderRepository::isRequestedStatus() ,$orderRepository::isFinishedStatus()]))
+            $orderRepository->delete($order);
          else
             $this->emitNotify('برای این سفارش امکان حدف وجود ندارد','warning');
-    }
-
-    private function getCount($status)
-    {
-        return Order::where('status', $status)->count();
     }
 }

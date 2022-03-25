@@ -4,23 +4,23 @@ namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
 use App\Models\Setting;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class QuestionSetting extends BaseComponent
 {
-    use AuthorizesRequests;
-    public $questions = [] , $header;
-    public function delete($id)
+    public $header;
+    public function delete(SettingRepositoryInterface $settingRepository,$id)
     {
-        $this->authorize('edit_settings_fag');
-        Setting::findOrFail($id)->delete();
+        $this->authorizing('edit_settings_fag');
+        $settings = $settingRepository->find($id);
+        $settingRepository->delete($settings);
     }
-    public function render()
+    public function render(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_settings_fag');
+        $this->authorizing('show_settings_fag');
         $this->header = 'تنظیمات سوالات متداول';
-        $this->questions = Setting::where('name','question')->get()->toArray() ?? [];
-        return view('livewire.admin.settings.question-setting')
+        $questions = $settingRepository->getAdminLaw('question');
+        return view('livewire.admin.settings.question-setting',['questions' => $questions])
             ->extends('livewire.admin.layouts.admin');
     }
 }

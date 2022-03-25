@@ -3,25 +3,23 @@
 namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Setting;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class AboutUsSetting extends BaseComponent
 {
-    use AuthorizesRequests;
     public $aboutUsImages , $aboutUs , $header;
 
-    public function mount()
+    public function mount(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_settings_aboutUs');
+        $this->authorizing('show_settings_aboutUs');
         $this->header = 'تنظیمات درباره ما';
-        $this->aboutUsImages = Setting::getSingleRow('aboutUsImages');
-        $this->aboutUs = Setting::getSingleRow('aboutUs');
+        $this->aboutUsImages = $settingRepository->getSiteFaq('aboutUsImages');
+        $this->aboutUs = $settingRepository->getSiteFaq('aboutUs');
     }
 
-    public function store()
+    public function store(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('edit_settings_aboutUs');
+        $this->authorizing('edit_settings_aboutUs');
         $this->validate(
             [
                 'aboutUs' => ['nullable', 'string','max:600000'],
@@ -31,8 +29,8 @@ class AboutUsSetting extends BaseComponent
                 'aboutUsImages' => 'اسلایدر درباره ما',
             ]
         );
-        Setting::updateOrCreate(['name' => 'aboutUsImages'], ['value' => $this->aboutUsImages]);
-        Setting::updateOrCreate(['name' => 'aboutUs'], ['value' => $this->aboutUs]);
+        $settingRepository::updateOrCreate(['name' => 'aboutUsImages'], ['value' => $this->aboutUsImages]);
+        $settingRepository::updateOrCreate(['name' => 'aboutUs'], ['value' => $this->aboutUs]);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 

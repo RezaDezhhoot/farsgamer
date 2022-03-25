@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
+use App\Repositories\Interfaces\PermissionRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Console\Command;
-use App\Models\Role;
-use App\Models\Permission;
 use Illuminate\Support\Facades\Hash;
 
 class SetPermissionsAndRoles extends Command
@@ -37,9 +37,12 @@ class SetPermissionsAndRoles extends Command
     /**
      * Execute the console command.
      *
+     * @param PermissionRepositoryInterface $permissionRepository
+     * @param RoleRepositoryInterface $roleRepository
+     * @param UserRepositoryInterface $userRepository
      * @return int
      */
-    public function handle()
+    public function handle(PermissionRepositoryInterface $permissionRepository , RoleRepositoryInterface $roleRepository , UserRepositoryInterface $userRepository)
     {
         $permissions = [
             ['name' => 'show_dashboard' , 'guard_name'=> 'web'], ['name' => 'show_orders', 'guard_name'=> 'web'], ['name' => 'edit_orders', 'guard_name'=> 'web'],
@@ -65,15 +68,15 @@ class SetPermissionsAndRoles extends Command
             ['name' => 'show_settings_aboutUs', 'guard_name'=> 'web'], ['name' => 'edit_settings_aboutUs', 'guard_name'=> 'web'], ['name' => 'show_settings_contactUs', 'guard_name'=> 'web'],
             ['name' => 'edit_settings_contactUs', 'guard_name'=> 'web'], ['name' => 'show_settings_law', 'guard_name'=> 'web'], ['name' => 'edit_settings_law', 'guard_name'=> 'web'],
             ['name' => 'show_settings_chatLaw', 'guard_name'=> 'web'], ['name' => 'edit_settings_chatLaw', 'guard_name'=> 'web'], ['name' => 'show_settings_fag', 'guard_name'=> 'web'],
-            ['name' => 'edit_settings_fag', 'guard_name'=> 'web'],
+            ['name' => 'edit_settings_fag', 'guard_name'=> 'web'],['name' => 'show_offends','guard_name'=> 'web'],['name' => 'show_reports','guard_name'=> 'web']
         ];
-        $permission = Permission::insert($permissions);
-        $admin = Role::create(['name' => 'admin']);
-        $super_admin = Role::create(['name' => 'super_admin']);
-        $administrator = Role::create(['name' => 'administrator']);
-        $super_admin->syncPermissions(Permission::all());
-        $administrator->syncPermissions(Permission::all());
-        $user = User::create([
+        $permissionRepository->insert($permissions);
+        $admin = $roleRepository->create(['name' => 'admin']);
+        $super_admin = $roleRepository->create(['name' => 'super_admin']);
+        $administrator = $roleRepository->create(['name' => 'administrator']);
+        $super_admin->syncPermissions($permissionRepository->getAll());
+        $administrator->syncPermissions($permissionRepository->getAll());
+        $user = [
             'first_name'=> 'admin',
             'last_name'=> 'admin',
             'user_name' => 'admin',
@@ -81,11 +84,12 @@ class SetPermissionsAndRoles extends Command
             'province' => 'Tehran',
             'city' => 'Tehran',
             'phone' => '09336332901',
-            'status' => User::CONFIRMED,
+            'status' => $userRepository::confirmedStatus(),
             'pass_word' => Hash::make('admin'),
             'ip' => 1,
-        ]);
-        $user->syncRoles([$admin,$super_admin,$administrator]);
+        ];
+        $user = $userRepository->create($user);
+        $userRepository->syncRoles($user,[$admin,$super_admin,$administrator]);
         return 0;
     }
 }

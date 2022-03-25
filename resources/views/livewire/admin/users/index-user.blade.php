@@ -11,6 +11,7 @@
                         <table class="table table-striped" id="kt_datatable">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>شماره</th>
                                 <th> نام</th>
                                 <th>شماره همراه</th>
@@ -24,20 +25,21 @@
                             <tbody>
                             @forelse($users as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->id }}</td>
                                     <td>{{ $item->name }}</td>
                                     <td>{{ $item->phone }}</td>
                                     <td>{{ number_format( $item->balance)  }}</td>
-                                    <td>{{ $item->orders()->count() }}</td>
+                                    <td>{{ count( $item->orders)  }}</td>
                                     <td>{{ $item->user_name }}</td>
-                                    <td>{{ $item::getStatus()[$item->status] }}</td>
+                                    <td>{{ $item->status_label }}</td>
                                     <td>
                                         <x-admin.edit-btn href="{{ route('admin.store.user',['edit', $item->id]) }}" />
                                         <x-admin.ok-btn wire:click="confirm({{$item->id}})" />
                                     </td>
                                 </tr>
                             @empty
-                                <td class="text-center" colspan="7">
+                                <td class="text-center" colspan="9">
                                     دیتایی جهت نمایش وجود ندارد
                                 </td>
                             @endforelse

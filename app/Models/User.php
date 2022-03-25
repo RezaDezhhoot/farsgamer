@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\Admin\Searchable;
 use Bavix\Wallet\Traits\CanPay;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -46,6 +47,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed name
  * @property mixed|string password
  * @property mixed alerts
+ * @property mixed cards
+ * @property mixed overtimes
+ * @property mixed ban
  */
 class User extends Authenticatable implements Wallet, Confirmable
 {
@@ -110,6 +114,12 @@ class User extends Authenticatable implements Wallet, Confirmable
         'email_verified_at' => 'datetime',
     ];
 
+    public function getBanedAttribute()
+    {
+        $ban = Carbon::make(now())->diff($this->ban,false)->format('%r%i');
+        return  $ban > 0;
+    }
+
     public function getFullNameAttribute()
     {
         return $this->name;
@@ -136,54 +146,18 @@ class User extends Authenticatable implements Wallet, Confirmable
         return $this->hasMany(Request::class);
     }
 
-    public function contacts()
-    {
-        return ChatGroup::where(function ($query){
-            return $query->where('user1',auth()->id())->orWhere('user2',auth()->id());
-        });
-    }
 
     public static function getNew()
     {
         return User::where('status',self::NEW)->orWhere('status',self::NOT_CONFIRMED)->count();
     }
 
-    public function singleContact($id)
-    {
-        return $this->contacts()->where(function ($query) use ($id) {
-            if ($id == auth()->id())
-                return $query->whereColumn('user1', 'user2');
-            else
-                return $query->where('user1',$id)->orWhere('user2',$id)->first();
-        })->first();
-    }
 
     public function cards()
     {
         return $this->hasMany(Card::class);
     }
 
-    public function startChatWith($id , $is_admin = 0)
-    {
-        if ($id == auth()->id())
-            return(false);
-
-        $group = ChatGroup::where(function ($query){
-            $query->where('user1',auth()->id())->orWhere('user2',auth()->id());
-        })->where(function ($query) use ($id){
-            $query->where('user1',$id)->orWhere('user2',$id);
-        })->first();
-        if (is_null($group)) {
-            $group = new ChatGroup();
-            $group->slug = 'chat'.uniqid();
-            $group->user1 = auth()->id();
-            $group->user2 = $id;
-            $group->status = ChatGroup::OPEN;
-            $group->is_admin = $is_admin;
-            $group->save();
-        }
-        return $group->id;
-    }
 
     public function schedule()
     {

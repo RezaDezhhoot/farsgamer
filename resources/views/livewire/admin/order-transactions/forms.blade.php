@@ -3,18 +3,18 @@
         @if($item['status'] == 'normal')
             @continue
         @endif
-            @if($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_SENDING_DATA && $item['for'] == 'customer')
+            @if($transaction->status == $sendingData && $item['for'] == 'customer')
                 @continue
-            @elseif($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_SEND && $item['for'] == 'seller')
+            @elseif($transaction->status == $send && $item['for'] == 'seller')
                 @continue
             @endif
     @else
         @if($item['status'] == 'return')
             @continue
         @endif
-            @if($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_SEND && $item['for'] == 'customer')
+            @if($transaction->status == $send && $item['for'] == 'customer')
                 @continue
-            @elseif($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_PAY && $item['for'] == 'seller')
+            @elseif($transaction->status == $pay && $item['for'] == 'seller')
                 @continue
             @endif
     @endif

@@ -21,4 +21,6 @@ interface RequestRepositoryInterface
     public static function rejectedStatus();
 
     public static function settlementStatus();
+
+    public static function getNew();
 }

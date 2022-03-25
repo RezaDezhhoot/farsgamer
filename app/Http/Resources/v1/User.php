@@ -16,6 +16,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed description
  * @property mixed score
  * @property mixed status
+ * @property mixed baned
+ * @property mixed ban
  */
 class User extends JsonResource
 {
@@ -47,6 +49,8 @@ class User extends JsonResource
             'province' => $this->province_label,
             'city' => $this->city_label,
             'token' => $this->token,
+            'baned' => $this->baned,
+            'baned_timer' => $this->ban
         ];
     }
 }

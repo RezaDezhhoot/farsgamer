@@ -3,18 +3,16 @@
 namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Setting;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class CreateFag extends BaseComponent
 {
-    use AuthorizesRequests;
     public $header , $row , $question , $mode , $answer , $order , $category;
-    public function mount($action , $id = null)
+    public function mount(SettingRepositoryInterface $settingRepository,$action , $id = null)
     {
-        $this->authorize('show_settings_fag');
+        $this->authorizing('show_settings_fag');
         if ($action == 'edit') {
-            $this->row = Setting::where('name','question')->findOrFail($id);
+            $this->row = $settingRepository->find($id);
             $this->question = $this->row->value['question'];
             $this->answer = $this->row->value['answer'];
             $this->order = $this->row->value['order'];
@@ -25,18 +23,18 @@ class CreateFag extends BaseComponent
         $this->mode = $action;
     }
 
-    public function store()
+    public function store(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('edit_settings_fag');
+        $this->authorizing('edit_settings_fag');
         if ($this->mode == 'edit')
-            $this->saveInDataBase($this->row);
+            $this->saveInDataBase($settingRepository,  $this->row);
         elseif ($this->mode == 'create'){
-            $this->saveInDataBase(new Setting());
+            $this->saveInDataBase($settingRepository ,$settingRepository->newSettingObject());
             $this->reset(['question','answer','category','order']);
         }
     }
 
-    public function saveInDataBase(Setting $model)
+    public function saveInDataBase($settingRepository ,  $model)
     {
         $this->validate([
             'question' => ['required','string','max:1000'],
@@ -51,14 +49,14 @@ class CreateFag extends BaseComponent
         ]);
         $model->name = 'question';
         $model->value = json_encode(['question' => $this->question,'answer' => $this->answer,'category' => $this->category , 'order' => $this->order]);
-        $model->save();
+        $settingRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
-    public function deleteItem()
+    public function deleteItem(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('edit_settings_fag');
-        $this->question->delete();
+        $this->authorizing('edit_settings_fag');
+        $settingRepository->delete($this->question);
         return redirect()->route('admin.setting.law');
     }
 

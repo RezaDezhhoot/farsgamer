@@ -38,6 +38,8 @@ interface UserRepositoryInterface
 
     public static function notConfirmedStatus();
 
+    public static function waitToConfirmStatus();
+
     public function newUserObject();
 
     public function syncRoles(User $user ,$roles);
@@ -49,4 +51,8 @@ interface UserRepositoryInterface
     public function getUserOvertimes(User $user);
 
     public static function getNew();
+
+    public function authenticated();
+
+    public function waiting();
 }

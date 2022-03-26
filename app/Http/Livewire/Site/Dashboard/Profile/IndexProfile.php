@@ -83,6 +83,7 @@ class IndexProfile extends BaseComponent
             $this->user->province = $this->province;
             $this->user->city = $this->city;
         }
+
         $this->uploadFile();
         if (!is_null($this->file)) {
             if (!is_null($this->user->profile_image))

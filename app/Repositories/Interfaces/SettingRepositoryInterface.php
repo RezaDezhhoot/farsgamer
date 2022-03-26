@@ -17,6 +17,8 @@ interface SettingRepositoryInterface
 
     public function getCity($province);
 
+    public function getCities();
+
     public static function updateOrCreate(array $key , array $value);
 
     public function find($id);

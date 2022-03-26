@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\Site\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Sends\SendMessages;
+use App\Traits\Admin\TextBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,15 +18,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    private $settingRepository , $userRepository;
+    use TextBuilder;
+    public $send;
+    private $settingRepository , $userRepository , $notificationRepository;
 
     public function __construct(
         SettingRepositoryInterface $settingRepository,
-        UserRepositoryInterface $userRepository
+        UserRepositoryInterface $userRepository,
+        NotificationRepositoryInterface $notificationRepository
     )
     {
         $this->settingRepository = $settingRepository;
         $this->userRepository = $userRepository;
+        $this->notificationRepository = $notificationRepository;
+        $this->send = new SendMessages();
     }
 
     public function register(Request $request)
@@ -34,10 +41,12 @@ class AuthController extends Controller
             return
                 response([
                     'data' => [
-                        'message' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                        'message' => [
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
+                        ]
                     ],
                     'status' => 'error'
-                ],Response::HTTP_UNAUTHORIZED);
+                ],Response::HTTP_TOO_MANY_REQUESTS);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $request['status'] = $this->userRepository->newStatus();
@@ -45,7 +54,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:250',
             'phone' => 'required|size:11|unique:users,phone',
             'user_name' => 'required|string|max:250|unique:users,user_name',
-            'email' => 'required|string|email|unique:users,email',
+            'email' => 'required|string|max:150|email|unique:users,email',
         ],[],[
             'name' => 'نام',
             'phone' => 'شماره همراه',
@@ -58,12 +67,14 @@ class AuthController extends Controller
                     'message' => $validator->errors()
                 ],
                 'status' => 'error'
-            ],Response::HTTP_UNAUTHORIZED);
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user = $this->userRepository->create($request->all());
         Auth::login($user);
         $token = 'Bearer '.auth()->user()->createToken('auth_token')->plainTextToken;
+        $message = $this->createText('signUp',$user);
+        $this->send->sends($message,$user,$this->notificationRepository->authStatus(),$user->id);
         return response([
             'data'=> new User(auth()->user() , $token),
             'status' => 'success'
@@ -77,10 +88,12 @@ class AuthController extends Controller
             return
                 response([
                     'data' => [
-                        'message' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                        'message' => [
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
+                        ]
                     ],
                     'status' => 'error'
-                ],Response::HTTP_UNAUTHORIZED);
+                ],Response::HTTP_TOO_MANY_REQUESTS);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $validator = Validator::make($request->all(),[
@@ -96,7 +109,7 @@ class AuthController extends Controller
                     'message' => $validator->errors()
                 ],
                 'status' => 'error'
-            ],Response::HTTP_UNAUTHORIZED);
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $user = $this->userRepository->getUser('phone',$request['phone']);
 
@@ -105,6 +118,8 @@ class AuthController extends Controller
             $token = 'Bearer '.auth()->user()->createToken('auth_token')->plainTextToken;
             $this->userRepository->update($user,['otp' => null]);
             RateLimiter::clear($rateKey);
+            $message = $this->createText('login',$user);
+            $this->send->sends($message,$user,$this->notificationRepository->authStatus(),$user->id);
             return response([
                 'data'=> new User(auth()->user() , $token),
                 'status' => 'success'
@@ -112,10 +127,13 @@ class AuthController extends Controller
         }
         return response([
             'data' => [
-                'message' => 'اطلاعات نادرست'
+                'message' => [
+                    'phone' => ['اطلاعات نادرست'],
+                    'password' => ['اطلاعات نادرست'],
+                ]
             ],
             'status' => 'error'
-        ],Response::HTTP_UNAUTHORIZED);
+        ],Response::HTTP_TOO_MANY_REQUESTS);
 
     }
 
@@ -125,7 +143,9 @@ class AuthController extends Controller
 
         return response([
             'data' => [
-                'message' => 'خروج از سیستم با موفقیت انجام شد',
+                'message' => [
+                    'user' => [ 'خروج از سیستم با موفقیت انجام شد',]
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -138,10 +158,12 @@ class AuthController extends Controller
             return
                 response([
                     'data' => [
-                        'message' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                        'message' => [
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
+                        ]
                     ],
                     'status' => 'error'
-                ],Response::HTTP_UNAUTHORIZED);
+                ],Response::HTTP_TOO_MANY_REQUESTS);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $validator = Validator::make($request->all(),[
@@ -155,18 +177,19 @@ class AuthController extends Controller
                     'message' => $validator->errors()
                 ],
                 'status' => 'error'
-            ],Response::HTTP_UNAUTHORIZED);
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $rand = mt_rand(12345,999998);
         $otp = Hash::make($rand);
         $user = $this->userRepository->getUser('phone',$request['phone']);
         $this->userRepository->update($user,['otp'=>$otp]);
-        $send = new SendMessages();
-        $send->sendCode($rand,$user);
+        $this->send->sendCode($rand,$user);
         return response([
             'data' => [
-                'message' => 'کد تایید با موفقیت ارسال شد'
+                'message' => [
+                    'phone' => ['کد تایید با موفقیت ارسال شد']
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);

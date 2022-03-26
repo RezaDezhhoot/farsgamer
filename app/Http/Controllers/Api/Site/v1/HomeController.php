@@ -32,13 +32,13 @@ class HomeController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $most_categories = $this->categoryRepository->getMostUsedCategories();
+        $most_used_categories = $this->categoryRepository->getMostUsedCategories();
         $orders = $this->orderRepository->getHomeOrders($request);
 
         return response([
             'data' => [
                 'orders' => new OrderCollection($orders),
-                'most_used_categories' => new CategoryCollection($most_categories),
+                'most_used_categories' => new CategoryCollection($most_used_categories),
             ],'status' => 'success'
         ],Response::HTTP_OK);
     }

@@ -3,6 +3,7 @@ namespace App\Repositories\Interfaces;
 
 
 use App\Models\Card;
+use App\Models\User;
 
 interface CardRepositoryInterface
 {
@@ -24,5 +25,13 @@ interface CardRepositoryInterface
 
     public static function confirmStatus();
 
+    public static function newStatus();
+
     public static function getNew();
+
+    public function create(array $data);
+
+    public function updateOrCreate(array $key , array $value);
+
+    public function getFirst( $user);
 }

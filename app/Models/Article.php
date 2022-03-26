@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Article extends Model
 {
-    use HasFactory , Searchable , SoftDeletes;
+    use HasFactory , Searchable;
 
     protected $guarded = [];
 
@@ -77,7 +77,7 @@ class Article extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(ArticleCategory::class,'articles_has_categories','article_id','article_category_id');
+        return $this->belongsToMany(ArticleCategory::class,'articles_has_categories','article_id','article_category_id')->withTrashed();
     }
 
 }

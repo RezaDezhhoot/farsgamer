@@ -29,4 +29,9 @@ class Parameter extends Model
         $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
     }
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class)->withTrashed();
+    }
+
 }

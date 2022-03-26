@@ -37,7 +37,7 @@ class Request extends Model
 
     public function card()
     {
-        return $this->belongsTo(Card::class);
+        return $this->belongsTo(Card::class)->withTrashed();
     }
 
     public static function getNew()

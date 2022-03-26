@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\Admin\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 /**
@@ -20,7 +21,7 @@ use Illuminate\Support\Str;
  */
 class ArticleCategory extends Model
 {
-    use HasFactory , Searchable;
+    use HasFactory , Searchable , SoftDeletes;
     protected $table = 'articles_categories';
     protected $searchAbleColumns = ['title','slug'];
     const AVAILABLE = 'available' , UNAVAILABLE = 'unavailable';

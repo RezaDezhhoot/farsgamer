@@ -77,10 +77,12 @@ class ArticleController extends Controller
             return
                 response([
                     'data' => [
-                        'message' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                        'message' => [
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
+                        ]
                     ],
                     'status' => 'error'
-                ],Response::HTTP_UNAUTHORIZED);
+                ],Response::HTTP_TOO_MANY_REQUESTS);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $request['user_id'] = auth()->id();
@@ -95,12 +97,14 @@ class ArticleController extends Controller
                     'message' => $validator->errors()
                 ],
                 'status' => 'error'
-            ],Response::HTTP_UNAUTHORIZED);
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $this->articleRepository->registerComment($article,$request->all());
         return response([
             'data' =>  [
-                'message' => 'کامنت با موفقیت ثبت شد.'
+                'message' => [
+                    'content' => ['کامنت با موفقیت ثبت شد.']
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);

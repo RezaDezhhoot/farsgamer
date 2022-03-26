@@ -62,6 +62,12 @@ class SettingRepository implements SettingRepositoryInterface
         return Setting::getCity()[$province];
     }
 
+    public function getCities()
+    {
+        return Setting::getCity();
+        // TODO: Implement getCities() method.
+    }
+
     public static function updateOrCreate(array $key, array $value)
     {
         return Setting::updateOrCreate($key, $value);

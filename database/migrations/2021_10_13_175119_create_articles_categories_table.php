@@ -20,6 +20,7 @@ class CreateArticlesCategoriesTable extends Migration
             $table->string('logo')->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('articles_categories')->onDelete('cascade');
             $table->string('status')->default('available');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

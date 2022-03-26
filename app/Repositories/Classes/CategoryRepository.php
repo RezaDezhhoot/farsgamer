@@ -59,7 +59,7 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     public function find($id , $active = true)
     {
-        return Category::active($active)->findOrFail($id);
+        return Category::active($active)->withTrashed()->findOrFail($id);
     }
 
     public function getByCondition($col , $operator, $value, $active = true)

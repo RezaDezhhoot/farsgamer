@@ -3,6 +3,7 @@ namespace App\Repositories\Interfaces;
 
 use App\Models\OrderTransaction;
 use App\Models\OrderTransactionData;
+use App\Models\User;
 
 interface OrderTransactionRepositoryInterface
 {
@@ -57,4 +58,6 @@ interface OrderTransactionRepositoryInterface
     public static function standardStatus();
 
     public static function getFor();
+
+    public function getUserTransactions( $user);
 }

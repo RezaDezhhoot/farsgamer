@@ -31,6 +31,7 @@ class Controller extends BaseController
     }
 
     public function resize_image($file, $w, $h, $crop = FALSE) {
+
         list($width, $height) = getimagesize($file);
         $r = $width / $height;
         if ($crop) {

@@ -55,8 +55,7 @@ class OrderController extends Controller
     {
         $order = $this->orderRepository->getOrder($order_id);
         if ($order->user->id != auth('api')->id()) {
-            $ban = Carbon::make(now())->diff(auth('api')->user()->ban)->format('%r%i');
-            if ($ban <= 0) {
+            if (!auth()->user()->baned) {
                 $validator = Validator::make($request->all(),[
                     'confirmLaw' => 'required|boolean',
                 ],[],[
@@ -75,14 +74,18 @@ class OrderController extends Controller
                 return response([
                     'data' => [
                         'transaction' => new Transaction($transaction),
-                        'message' =>  'معامله با موفقیت ایجاد شد. '
+                        'message' =>  [
+                            'transaction' => 'معامله با موفقیت ایجاد شد. '
+                        ]
                     ],
                     'status' => 'success',
                 ],Response::HTTP_OK);
             } else {
                 return response([
                     'data' => [
-                        'message' => 'کاربر مسدود شده است. '
+                        'message' => [
+                            'user'  => ['کاربر مسدود شده است.']
+                        ]
                     ],
                     'status' => 'error',
                 ],Response::HTTP_FORBIDDEN);
@@ -90,7 +93,9 @@ class OrderController extends Controller
         } else {
             return response([
                 'data' => [
-                    'message' => 'کاربر نمی تواند با خودش معامله انجام دهد .'
+                    'message' => [
+                        'user' => ['کاربر نمی تواند با خودش معامله انجام دهد .']
+                    ]
                 ],
                 'status' => 'error',
             ],Response::HTTP_FORBIDDEN);

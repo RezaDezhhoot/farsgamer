@@ -60,6 +60,7 @@ class User extends Authenticatable implements Wallet, Confirmable
     const NOT_CONFIRMED = 'not_confirmed';
     const NEW = 'new';
     const CONFIRMED = 'confirmed';
+    const WAIT_TO_CONFIRM = 'wait_for_confirm';
 
     protected $guarded = [];
 
@@ -76,6 +77,7 @@ class User extends Authenticatable implements Wallet, Confirmable
             self::NEW => 'جدید',
             self::NOT_CONFIRMED => 'تایید نشده',
             self::CONFIRMED => 'تایید شده',
+            self::WAIT_TO_CONFIRM => 'در انتظار تایید',
         ];
     }
 
@@ -149,7 +151,7 @@ class User extends Authenticatable implements Wallet, Confirmable
 
     public static function getNew()
     {
-        return User::where('status',self::NEW)->orWhere('status',self::NOT_CONFIRMED)->count();
+        return User::where('status',self::NEW)->orWhere('status',self::NOT_CONFIRMED)->orWhere('status',self::WAIT_TO_CONFIRM)->count();
     }
 
 

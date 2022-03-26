@@ -36,7 +36,7 @@ use Morilog\Jalali\Jalalian;
 class Order extends Model
 {
     use HasFactory;
-    use Searchable , SoftDeletes;
+    use Searchable;
 
     const IS_UNCONFIRMED = 'unconfirmed' , IS_CONFIRMED = 'confirmed' ,  IS_NEW = 'new';
     const IS_REJECTED = 'rejected' , IS_REQUESTED = 'requested' , IS_FINISHED = 'finished';
@@ -108,7 +108,7 @@ class Order extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class)->withTrashed();
     }
 
     public function getStatusLabelAttribute()

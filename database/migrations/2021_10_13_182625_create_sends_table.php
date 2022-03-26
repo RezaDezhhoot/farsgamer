@@ -23,6 +23,7 @@ class CreateSendsTable extends Migration
             $table->tinyInteger('pursuit')->default(1);
             $table->string('status')->default('available');
             $table->string('pursuit_web_site')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

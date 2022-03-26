@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Admin\Financial\Requests;
 
 use App\Http\Livewire\BaseComponent;
 use App\Repositories\Interfaces\CardRepositoryInterface;
+use App\Repositories\Interfaces\ChatRepositoryInterface;
 use App\Repositories\Interfaces\NotificationRepositoryInterface;
 use App\Repositories\Interfaces\RequestRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
@@ -20,8 +21,9 @@ class StoreRequest extends BaseComponent
 
 
     public function mount(
-        RequestRepositoryInterface $requestRepository,NotificationRepositoryInterface $notificationRepository
-        ,CardRepositoryInterface $cardRepository,UserRepositoryInterface $userRepository,$action , $id =null
+        RequestRepositoryInterface $requestRepository,NotificationRepositoryInterface $notificationRepository,
+        CardRepositoryInterface $cardRepository,UserRepositoryInterface $userRepository ,
+        ChatRepositoryInterface $chatRepository,$action , $id =null
     )
     {
         $this->authorizing('show_requests');
@@ -41,7 +43,7 @@ class StoreRequest extends BaseComponent
             $this->sheba = $this->request->card->card_sheba;
             $this->bank = $cardRepository->getBank()[$this->request->card->bank];
             $this->chatUserId = $this->request->user->id;
-            $this->chats = auth()->user()->singleContact($this->request->user->id);
+            $this->chats = $chatRepository  ->singleContact($this->request->user->id);
         } else abort(404);
 
         $this->message = $userRepository->getUserNotifications($this->request->user,$notificationRepository->requestStatus(),$this->request->id);

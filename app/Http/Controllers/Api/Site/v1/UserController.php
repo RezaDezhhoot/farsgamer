@@ -55,10 +55,12 @@ class UserController extends Controller
             return
                 response([
                     'data' => [
-                        'message' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                        'message' => [
+                            'user' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                        ]
                     ],
                     'status' => 'error'
-                ],Response::HTTP_UNAUTHORIZED);
+                ],Response::HTTP_TOO_MANY_REQUESTS);
         }
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $request['user_id'] = $user_object->id;
@@ -77,12 +79,14 @@ class UserController extends Controller
                     'message' => $validator->errors()
                 ],
                 'status' => 'error'
-            ],Response::HTTP_UNAUTHORIZED);
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        $offend = $this->offendRepository->create($request->all());
+        $this->offendRepository->create($request->all());
         return response([
             'data' =>  [
-                'message' => 'گزارش با موفقیت ثبت شد.'
+                'message' => [
+                    'content' => 'گزارش با موفقیت ثبت شد.'
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);

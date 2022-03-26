@@ -173,4 +173,22 @@ class UserRepository implements UserRepositoryInterface
         // TODO: Implement getNew() method.
         return User::getNew();
     }
+
+    public function authenticated()
+    {
+        // TODO: Implement authenticated() method.
+        return auth()->user()->status == self::confirmedStatus();
+    }
+
+    public static function waitToConfirmStatus()
+    {
+        // TODO: Implement waitToConfirmStatus() method.
+        return User::WAIT_TO_CONFIRM;
+    }
+
+    public function waiting()
+    {
+        // TODO: Implement waiting() method.
+        return auth()->user()->status == self::waitToConfirmStatus();
+    }
 }

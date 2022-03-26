@@ -23,10 +23,6 @@ class OrderTransactionData extends Model
 
     public function send()
     {
-        return $this->belongsTo(Send::class);
-    }
-    public function address()
-    {
-        return $this->belongsTo(Address::class);
+        return $this->belongsTo(Send::class)->withTrashed();;
     }
 }

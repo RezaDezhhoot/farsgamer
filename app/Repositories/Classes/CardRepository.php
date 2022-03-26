@@ -4,6 +4,7 @@
 namespace App\Repositories\Classes;
 
 use App\Models\Card;
+use App\Models\User;
 use App\Repositories\Interfaces\CardRepositoryInterface;
 
 
@@ -67,5 +68,27 @@ class CardRepository implements CardRepositoryInterface
     {
         // TODO: Implement getNew() method.
         return Card::getNew();
+    }
+
+    public function create(array $data)
+    {
+        // TODO: Implement create() method.
+        return Card::create($data);
+    }
+
+    public static function newStatus()
+    {
+        return Card::NEW;
+    }
+
+    public function updateOrCreate(array $key, array $value)
+    {
+        return Card::updateOrCreate($key,$value);
+    }
+
+    public function getFirst( $user)
+    {
+        // TODO: Implement getFirst() method.
+        return $user->cards()->where('first',$user->id)->first();
     }
 }

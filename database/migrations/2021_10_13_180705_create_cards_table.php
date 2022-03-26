@@ -21,6 +21,8 @@ class CreateCardsTable extends Migration
             $table->string('bank');
             $table->string('bank_logo')->nullable();
             $table->string('status')->default('new');
+            $table->bigInteger('first')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

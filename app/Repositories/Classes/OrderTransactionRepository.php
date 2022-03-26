@@ -3,10 +3,12 @@
 
 namespace App\Repositories\Classes;
 
+use App\Models\Category;
 use App\Models\OrderTransaction;
 use App\Models\OrderTransactionData;
 use App\Models\OrderTransactionPayment;
 use App\Models\Setting;
+use App\Models\User;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use Carbon\Carbon;
 
@@ -188,5 +190,18 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
     {
         // TODO: Implement getFor() method.
         return OrderTransaction::getFor();
+    }
+
+    public function getUserTransactions( $user)
+    {
+        return OrderTransaction::with(['order'])->where('status',OrderTransaction::WAIT_FOR_SEND)->
+        where(function ($query) use ($user){
+            $query->where('seller_id',$user->id)->orWhere('customer_id',$user->id);
+        })->whereHas('order',function ($query){
+            return $query->whereHas('category',function ($query){
+                return $query->where('type',Category::PHYSICAL);
+            });
+        })->count();
+        // TODO: Implement getUserTransactions() method.
     }
 }

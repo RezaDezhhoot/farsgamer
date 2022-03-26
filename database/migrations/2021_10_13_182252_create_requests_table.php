@@ -17,7 +17,7 @@ class CreateRequestsTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->decimal('price',20);
-            $table->foreignId('card_id')->constrained('cards')->onDelete('cascade');
+            $table->bigInteger('card_id');
             $table->string('status')->default('new');
             $table->text('result')->nullable();
             $table->string('file')->nullable();

@@ -17,15 +17,15 @@ class FagController extends Controller
 
     public function about()
     {
-        $public = [
-            'title' => 'درباره ما'
-        ];
         return response([
             'data' => [
-                'about_text' => $this->settingRepository->getSiteFaq('aboutUs'),
-                'about_images' => $this->settingRepository->getSiteFaq('aboutUsImages'),
-                'copyRight' => $this->settingRepository->getSiteFaq('copyRight'),
-                'head' => $public,
+                'about' => [
+                    'about_text' => $this->settingRepository->getSiteFaq('aboutUs'),
+                    'about_images' => collect(explode(',',$this->settingRepository->getSiteFaq('aboutUsImages')))->map(function ($item) {
+                        return asset($item);
+                    }),
+                    'copyRight' => $this->settingRepository->getSiteFaq('copyRight'),
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -33,17 +33,15 @@ class FagController extends Controller
 
     public function contact()
     {
-        $public = [
-            'title' => 'ارتباط با ما'
-        ];
         return response([
             'data' => [
-                'tel' => $this->settingRepository->getSiteFaq('tel'),
-                'email' => $this->settingRepository->getSiteFaq('email'),
-                'address' => $this->settingRepository->getSiteFaq('address'),
-                'contact_links' => $this->settingRepository->getSiteFaq('contact',[]),
-                'googleMap' => $this->settingRepository->getSiteFaq('googleMap'),
-                'head' => $public,
+                'contact' => [
+                    'tel' => $this->settingRepository->getSiteFaq('tel'),
+                    'email' => $this->settingRepository->getSiteFaq('email'),
+                    'address' => $this->settingRepository->getSiteFaq('address'),
+                    'contact_links' => $this->settingRepository->getSiteFaq('contact',[]),
+                    'googleMap' => $this->settingRepository->getSiteFaq('googleMap'),
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -51,13 +49,11 @@ class FagController extends Controller
 
     public function fag()
     {
-        $public = [
-            'title' => 'سوالات متداول'
-        ];
         return response([
             'data' => [
-                $this->settingRepository->getFagList(),
-                'head' => $public,
+               'fag' => [
+                   'questions' => $this->settingRepository->getFagList(),
+               ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -65,14 +61,12 @@ class FagController extends Controller
 
     public function law()
     {
-        $public = [
-            'title' => 'قوانین'
-        ];
         return response([
             'data' => [
-                'law' => $this->settingRepository->getSiteLaw('law'),
-                'chatLaw' => $this->settingRepository->getSiteLaw('chatLaw'),
-                'head' => $public,
+                'laws' => [
+                    'laws' => $this->settingRepository->getSiteLaw('law'),
+                    'chatLaws' => $this->settingRepository->getSiteLaw('chatLaw'),
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);

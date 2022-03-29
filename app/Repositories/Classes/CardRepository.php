@@ -86,9 +86,21 @@ class CardRepository implements CardRepositoryInterface
         return Card::updateOrCreate($key,$value);
     }
 
-    public function getFirst( $user)
+    public function getFirst($user)
     {
         // TODO: Implement getFirst() method.
         return $user->cards()->where('first',$user->id)->first();
+    }
+
+    public function destroy($id)
+    {
+        Card::destroy($id);
+    }
+
+    public function update(Card $card, array $data)
+    {
+        // TODO: Implement update() method.
+        $card->update($data);
+        return $card;
     }
 }

@@ -19,7 +19,7 @@ class CreateChatsTable extends Migration
             $table->foreignId('receiver_id')->constrained('users');
             $table->text('content');
             $table->integer('is_admin')->default(0);
-            $table->integer(' is_read')->default(0);
+            $table->tinyInteger('is_read')->default(0);
             $table->foreignId('group_id')->constrained('chats_groups')->onDelete('cascade');
             $table->timestamps();
         });

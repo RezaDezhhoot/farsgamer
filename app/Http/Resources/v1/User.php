@@ -50,7 +50,8 @@ class User extends JsonResource
             'city' => $this->city_label,
             'token' => $this->token,
             'baned' => $this->baned,
-            'baned_timer' => $this->ban
+            'baned_timer' => $this->ban,
+            'role' => $this->hasRole('admin') ? 'مدیر' : 'کاربر'
         ];
     }
 }

@@ -181,7 +181,6 @@ class StoreCategory extends BaseComponent
                 $parameter->name  = $value['name'];
                 $parameter->type  = $value['type'];
                 $parameter->field  = $value['field'];
-                $parameter->status  = $value['status'];
                 $parameter->max  = $value['max'];
                 $parameter->min  = $value['min'];
                 $parameter = $parameterRepository->save($parameter);
@@ -216,7 +215,6 @@ class StoreCategory extends BaseComponent
             $this->paraName = $this->parameters[$title]['name'];
             $this->paraType = $this->parameters[$title]['type'];
             $this->paraField = $this->parameters[$title]['field'];
-            $this->paraStatus = $this->parameters[$title]['status'];
             $this->paraMax = $this->parameters[$title]['max'];
             $this->paraMin = $this->parameters[$title]['min'];
         }
@@ -231,7 +229,6 @@ class StoreCategory extends BaseComponent
             'paraName' => ['required','string','max:40'],
             'paraType' => ['required','in:number,text'],
             'paraField' => ['required','string','max:250'],
-            'paraStatus' => ['required','in:available,unavailable'],
             'paraMax' => ['nullable','numeric','between:-999999999.99999,999999999999.99999999'],
             'paraMin' => ['nullable','numeric','between:-999999999.99999,999999999999.99999999'],
         ];
@@ -240,7 +237,6 @@ class StoreCategory extends BaseComponent
             'paraName' => 'عنوان',
             'paraType' => 'نوع ورودی',
             'paraField' => 'مقدار پیشفرض',
-            'paraStatus' => 'وضعیت',
             'paraMax' => 'حداکثر مقدار',
             'paraMin' => 'حداقل مقدار',
         ];
@@ -251,7 +247,6 @@ class StoreCategory extends BaseComponent
             'name' => $this->paraName,
             'type' => $this->paraType,
             'field' => $this->paraField,
-            'status' => $this->paraStatus,
             'max' => $this->paraMax,
             'min' => $this->paraMin
         ];
@@ -259,7 +254,7 @@ class StoreCategory extends BaseComponent
             array_push($this->parameters,$parameter);
         else
             $this->parameters[$this->paraID] = $parameter;
-        $this->reset(['paraLogo','paraName','paraType','paraField','paraMax','paraMin','paraStatus']);
+        $this->reset(['paraLogo','paraName','paraType','paraField','paraMax','paraMin']);
         $this->emitHideModal('parameter');
     }
 

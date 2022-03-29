@@ -191,4 +191,14 @@ class UserRepository implements UserRepositoryInterface
         // TODO: Implement waiting() method.
         return auth()->user()->status == self::waitToConfirmStatus();
     }
+
+    public function getUserCard(User $user, $id)
+    {
+        return $user->cards()->findOrFail($id);
+    }
+
+    public function getLastNotifications(User $user, $count)
+    {
+        return $user->alerts()->latest('id')->take($count)->get();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Interfaces;
 
+use App\Http\Resources\v1\Group;
 use App\Models\ChatGroup;
 
 interface ChatRepositoryInterface
@@ -10,9 +11,11 @@ interface ChatRepositoryInterface
 
     public function contacts();
 
+    public function get($model);
+
     public function singleContact($id);
 
-    public function sendMessage( array $data);
+    public function sendMessage(array $data);
 
     public function getAllAdminListGroup($search);
 
@@ -29,4 +32,10 @@ interface ChatRepositoryInterface
     public function delete(ChatGroup $chatGroup);
 
     public function getContacts();
+
+    public function findContact($id);
+
+    public function seen(ChatGroup $group);
+
+    public static function isOpen(ChatGroup $group);
 }

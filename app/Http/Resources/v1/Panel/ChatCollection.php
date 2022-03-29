@@ -14,6 +14,16 @@ class ChatCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($item){
+            return [
+                'id' => $item->id,
+                'sender_id' => $item->sender_id,
+                'receiver_id' => $item->receiver_id,
+                'content' => $item->content,
+                'is_admin' => $item->is_admin,
+                'group_id' => $item->group_id,
+                'is_read' => $item->is_read,
+            ];
+        });
     }
 }

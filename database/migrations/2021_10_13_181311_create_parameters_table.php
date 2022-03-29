@@ -20,7 +20,6 @@ class CreateParametersTable extends Migration
             $table->string('name');
             $table->string('type');
             $table->string('field')->nullable();
-            $table->string('status')->default('available');
             $table->string('max')->nullable();
             $table->string('min')->nullable();
             $table->timestamps();

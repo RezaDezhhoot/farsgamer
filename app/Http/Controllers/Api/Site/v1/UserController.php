@@ -32,16 +32,20 @@ class UserController extends Controller
     public function __invoke($user)
     {
         $user_object = $this->userRepository->getUser('user_name',$user);
-        $public = [
-            'title' => $user_object->name,
-        ];
         return response([
             'data' => [
-                'user' => new User($user_object),
-                'orders' => new OrderCollection($this->userRepository->getMyOrders($user_object,false)),
-                'head' => $public,
-                'comment' => new CommentCollection($this->userRepository->getMyComments($user_object)),
-                'offend_subjects' => $this->settingRepository->getSubjects('offends',[]),
+                'user' => [
+                    'record' => new User($user_object)
+                ],
+                'orders' => [
+                    'records' => new OrderCollection($this->userRepository->getMyOrders($user_object,false))
+                ],
+                'comments' => [
+                    'records' => new CommentCollection($this->userRepository->getMyComments($user_object))
+                ],
+                'offend' => [
+                    'subjects' => $this->settingRepository->getSubjects('offends',[])
+                ],
             ],
             'status' => 'success',
         ],Response::HTTP_OK);
@@ -56,7 +60,7 @@ class UserController extends Controller
                 response([
                     'data' => [
                         'message' => [
-                            'user' => 'زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.'
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
                         ]
                     ],
                     'status' => 'error'
@@ -85,7 +89,7 @@ class UserController extends Controller
         return response([
             'data' =>  [
                 'message' => [
-                    'content' => 'گزارش با موفقیت ثبت شد.'
+                    'content' => ['گزارش با موفقیت ثبت شد.']
                 ]
             ],
             'status' => 'success'

@@ -9,21 +9,24 @@ use App\Http\Resources\v1\User;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\PlatformRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class BasicController extends Controller
 {
-    private $platformRepository , $categoryRepository , $settingRepository;
+    private $platformRepository , $categoryRepository , $settingRepository , $userRepository;
 
     public function __construct(
         PlatformRepositoryInterface $repository  ,
         CategoryRepositoryInterface $categoryRepository ,
-        SettingRepositoryInterface $settingRepository
+        SettingRepositoryInterface $settingRepository,
+        UserRepositoryInterface $userRepository
     )
     {
         $this->platformRepository = $repository;
         $this->categoryRepository = $categoryRepository;
         $this->settingRepository = $settingRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function sidebar()
@@ -41,9 +44,11 @@ class BasicController extends Controller
         }
         return response([
             'data' => [
-                'categories' => new CategoryCollection($categories),
-                'platforms' => $platforms,
-                'contact_links' => $this->settingRepository->getSiteFaq('contact',[]),
+                'sidebar' => [
+                    'categories' => new CategoryCollection($categories),
+                    'platforms' => $platforms,
+                    'contact_links' => $this->settingRepository->getSiteFaq('contact',[]),
+                ]
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -53,24 +58,29 @@ class BasicController extends Controller
     {
         return response([
             'data'=> [
-                'site_name' => $this->settingRepository->getSiteFaq('name'),
-                'title' => $this->settingRepository->getSiteFaq('title'),
-                'seoDescription' => $this->settingRepository->getSiteFaq('seoDescription'),
-                'seoKeywords' =>  $this->settingRepository->getSiteFaq('seoKeyword'),
-                'logo' => asset($this->settingRepository->getSiteFaq('logo')),
-                'tel' => $this->settingRepository->getSiteFaq('tel'),
-                'notification' => $this->settingRepository->getSiteFaq('notification'),
-                'user_data' => [
-                    'user' => auth('api')->check() ? new User(auth('api')->user()) : [] ,
-                    'notifications' =>auth('api')->check() ? new NotificationCollection(auth('api')->user()->alerts) : [],
-                ],
+                'base' => [
+                    'site_name' => $this->settingRepository->getSiteFaq('name'),
+                    'title' => $this->settingRepository->getSiteFaq('title'),
+                    'seoDescription' => $this->settingRepository->getSiteFaq('seoDescription'),
+                    'seoKeywords' =>  $this->settingRepository->getSiteFaq('seoKeyword'),
+                    'logo' => asset($this->settingRepository->getSiteFaq('logo')),
+                    'tel' => $this->settingRepository->getSiteFaq('tel'),
+                    'notification' => $this->settingRepository->getSiteFaq('notification'),
+                ]
             ]
             ,'status' => 'success'
         ],Response::HTTP_OK);
     }
 
-    public function userSidebar()
+    public function user()
     {
-
+        return response([
+            'data'=> [
+                'user_data' => [
+                    'user' => new User(auth()->user()) ,
+                    'notifications' =>  new NotificationCollection($this->userRepository->getLastNotifications(auth()->user(),10)),
+                ]
+            ],'status' => 'success'
+        ],Response::HTTP_OK);
     }
 }

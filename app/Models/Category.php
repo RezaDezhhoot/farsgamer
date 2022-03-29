@@ -85,6 +85,11 @@ class Category extends Model
         return $active ? $query->where('status',self::AVAILABLE) : $query;
     }
 
+    public function scopeAvailable($query, $available = false)
+    {
+        return $available ? $query->where('is_available',self::YES) : $query;
+    }
+
     public function setSliderAttribute($value)
     {
         $this->attributes['slider'] = str_replace(env('APP_URL'), '', $value);

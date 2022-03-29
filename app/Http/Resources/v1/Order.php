@@ -19,6 +19,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed parameters
  * @property mixed commission
  * @property mixed intermediary
+ * @property mixed category
+ * @property mixed province_label
+ * @property mixed city_label
+ * @property mixed status_label
  * @method parameters()
  */
 class Order extends JsonResource
@@ -33,19 +37,23 @@ class Order extends JsonResource
     {
         return [
             'id' => $this->id,
-            'slug' => $this->slug,
+            'name' => $this->slug,
             'price' => $this->price,
+            'price_unit' => 'toman',
             'image' => asset($this->image),
-            'gallery' => $this->gallery_asset,
+            'gallery' => collect(explode(',',$this->gallery_asset))->map(fn ($item) => asset($item)),
+            'status_label' => $this->status_label,
             'view_count' => $this->view_count,
-            'province' => isset($this->province) ? Setting::getProvince()[$this->province] : null,
-            'city' => (isset($this->province) && isset($this->city)) ? Setting::getCity()[$this->province][$this->city] : null,
+            'province' => isset($this->province) ? $this->province_label : null,
+            'city' => (isset($this->province) && isset($this->city)) ? $this->city_label : null,
             'created_at' => $this->created_at->diffForHumans(),
             'content' => $this->content,
             'platforms' => new PlatformCollection($this->platforms),
             'parameters' => new ParameterCollection($this->parameters),
             'commission' => $this->commission,
             'intermediary' => $this->intermediary,
+            'seoDescription' => $this->category->seo_description,
+            'seoKeywords' => $this->category->seo_keywords,
             'user' => [
                 'user_name' => $this->user->user_name,
                 'user_profile' => asset($this->user->profile_image),

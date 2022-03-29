@@ -8,6 +8,7 @@ use App\Helper\Helper;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderParameter;
+use App\Models\User;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use Illuminate\Http\Request;
 
@@ -29,9 +30,24 @@ class OrderRepository implements OrderRepositoryInterface
             return $query->whereHas('platforms',function ($query) use ($request) {
                 return $query->where('slug',$request['category']);
             });
-        })->orderBy($request['view'] == 1 ? 'view_count' : 'id' , 'desc')->get();
+        })->orderBy($request['view'] == 1 ? 'view_count' : 'id' , 'desc')->paginate(35);
 
         return $orders;
+    }
+
+    public function getUserOrders(User $user , Request $request)
+    {
+        return Order::with(['category','platforms'])->when($request['status'],function ($query) use ($request) {
+            return $query->where('status',$request['status']);
+        })->paginate(35);
+
+        // TODO: Implement getUserOrders() method.
+    }
+
+    public function getUserOrder(User $user , $id)
+    {
+        return Order::with(['category','platforms'])->findOrFail($id);
+        // TODO: Implement getUserOrders() method.
     }
 
     public function getOrder($id , $active = true)
@@ -72,6 +88,7 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function delete(Order $order)
     {
+        return $order->delete();
         // TODO: Implement delete() method.
     }
 
@@ -114,6 +131,12 @@ class OrderRepository implements OrderRepositoryInterface
         return Order::IS_CONFIRMED;
     }
 
+    public static function isNewStatus()
+    {
+        // TODO: Implement isConfirmedStatus() method.
+        return Order::IS_NEW;
+    }
+
     public function save(Order $order)
     {
         $order->save();
@@ -150,4 +173,18 @@ class OrderRepository implements OrderRepositoryInterface
         // TODO: Implement getNew() method.
         return Order::getNew();
     }
+
+    public function create(User $user, array $data)
+    {
+        return $user->orders()->create($data);
+        // TODO: Implement create() method.
+    }
+
+    public function update(Order $order, array $data)
+    {
+        $order->update($data);
+        return $order;
+        // TODO: Implement update() method.
+    }
+
 }

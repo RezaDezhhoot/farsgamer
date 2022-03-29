@@ -1,11 +1,16 @@
 <?php
 namespace App\Repositories\Interfaces;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 interface OrderRepositoryInterface
 {
     public function getHomeOrders(Request $request);
+
+    public function getUserOrders(User $user , Request $request);
+
+    public function getUserOrder(User $user , $id);
 
     public function getOrder($id , $active = true);
 
@@ -25,6 +30,8 @@ interface OrderRepositoryInterface
 
     public static function isConfirmedStatus();
 
+    public static function isNewStatus();
+
     public function save(Order $order);
 
     public function attachParameters(Order $order , $parameters);
@@ -38,4 +45,8 @@ interface OrderRepositoryInterface
     public function deleteParameters(Order $order);
 
     public static function getNew();
+
+    public function create(User $user , array  $data);
+
+    public function update(Order $order , array $data);
 }

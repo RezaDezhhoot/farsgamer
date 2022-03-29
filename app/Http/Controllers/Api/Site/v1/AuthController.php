@@ -76,7 +76,12 @@ class AuthController extends Controller
         $message = $this->createText('signUp',$user);
         $this->send->sends($message,$user,$this->notificationRepository->authStatus(),$user->id);
         return response([
-            'data'=> new User(auth()->user() , $token),
+            'data'=> [
+                'register' => [
+                    'user' => new User(auth()->user() , $token),
+                ],
+                'message' => ['عملیات ثبت نام با موفقیت انجام شد.']
+            ],
             'status' => 'success'
         ],Response::HTTP_OK);
     }
@@ -121,7 +126,12 @@ class AuthController extends Controller
             $message = $this->createText('login',$user);
             $this->send->sends($message,$user,$this->notificationRepository->authStatus(),$user->id);
             return response([
-                'data'=> new User(auth()->user() , $token),
+                'data'=> [
+                    'login' => [
+                        'user' => new User(auth()->user() , $token),
+                    ],
+                    'message' => ['عملیات ورود با موفقیت انجام شد.']
+                ],
                 'status' => 'success'
             ],Response::HTTP_OK);
         }

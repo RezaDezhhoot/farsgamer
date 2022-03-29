@@ -21,7 +21,9 @@ interface CategoryRepositoryInterface
 
     public function delete(Category $category);
 
-    public function find($id  , $active = true);
+    public function find($id  , $active = true , $available = false);
+
+    public function findNormal($id , $active = true , $available = false);
 
     public function getByCondition($col,$operator,$value,$active = true);
 
@@ -45,9 +47,11 @@ interface CategoryRepositoryInterface
 
     public static function no();
 
-    public function getParameters(Category $category , $available = true);
+    public function getParameters(Category $category );
 
     public static function physical();
 
     public static function digital();
+
+    public function getCategories($type ,$active = true, $available = true);
 }

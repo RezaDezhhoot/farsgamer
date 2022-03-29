@@ -10,6 +10,8 @@ use Morilog\Jalali\Jalalian;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(string $string, string $PENDING)
+ * @method static whereNotNull(string $string)
+ * @method static whereNull(string $string)
  * @property mixed created_at
  * @property mixed status
  * @property mixed priority
@@ -28,6 +30,7 @@ class Ticket extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id','user_id'];
 
     const HIGH = 'high';
     const NORMAL = 'normal';

@@ -35,18 +35,15 @@ class OrderController extends Controller
     public function show($order_id)
     {
         $order = $this->orderRepository->getOrder($order_id);
-        $public = [
-            'title' => $order->category->title.' | '.$order->slug,
-            'seoDescription' => $order->category->seo_description,
-            'seoKeywords' => $order->category->seo_keywords,
-            'logo' => asset($this->settingRepository->getSiteFaq('logo')),
-        ];
         return response([
             'data' => [
-                'order' => new OrderResource($order),
-                'head' => $public,
-                'Law' => $this->settingRepository->getSiteLaw('law'),
-                'chatLaw' => $this->settingRepository->getSiteLaw('chatLaw'),
+                'order' => [
+                    'record' => new OrderResource($order)
+                ],
+                'Laws' => [
+                    'laws' => $this->settingRepository->getSiteLaw('law'),
+                    'chatLaws' => $this->settingRepository->getSiteLaw('chatLaw'),
+                ],
             ]
         ],Response::HTTP_OK);
     }
@@ -73,13 +70,15 @@ class OrderController extends Controller
                 $transaction = $this->orderTransactionRepository->start($order,$commission);
                 return response([
                     'data' => [
-                        'transaction' => new Transaction($transaction),
+                        'transaction' => $transaction == 0 ? [] : new Transaction($transaction),
                         'message' =>  [
-                            'transaction' => 'معامله با موفقیت ایجاد شد. '
+                            'transaction' => [
+                                $transaction == 0 ? 'خطا در هنگام ایجاد معامله.' : 'معامله با موفقیت ایجاد شد. '
+                            ]
                         ]
                     ],
-                    'status' => 'success',
-                ],Response::HTTP_OK);
+                    'status' => $transaction == 0 ? 'error' : 'success',
+                ],$transaction == 0 ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK);
             } else {
                 return response([
                     'data' => [
@@ -121,7 +120,14 @@ class OrderController extends Controller
         }
         $group = $this->chatRepository->startChat($request['user_target']);
         return response([
-            'data' => new Group($group),
+            'data' => [
+                'group' => [
+                    'record' => new Group($group)
+                ],
+                'message' => [
+                    'group_chats' => ['چت با موفقیت ایجاد شد']
+                ]
+            ],
             'status' => 'success'
         ],Response::HTTP_OK);
     }

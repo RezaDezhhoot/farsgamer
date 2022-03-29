@@ -14,7 +14,7 @@ class ArticleRepository implements ArticleRepositoryInterface
 
     public function getAll(Request $request , $active = true)
     {
-        return Article::latest('id')->active($active)->search($request['q'])->get();
+        return Article::latest('id')->active($active)->search($request['q'])->paginate(35);
     }
 
     public function findArticle($id , $active = true)

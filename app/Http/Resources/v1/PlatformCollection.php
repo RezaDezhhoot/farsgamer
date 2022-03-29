@@ -16,6 +16,7 @@ class PlatformCollection extends ResourceCollection
     {
         return  $this->collection->map(function ($item){
             return [
+                'id' => $item->id,
                 'slug' => $item->slug,
                 'logo'  => asset($item->logo),
             ];

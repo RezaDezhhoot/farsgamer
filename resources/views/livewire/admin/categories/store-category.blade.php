@@ -34,7 +34,6 @@
                     <x-admin.forms.input type="text" id="paraName" label="نام *" wire:model.defer="paraName"/>
                     <x-admin.forms.dropdown id="paraType" :data="['number'=>'عددی','text'=>'رشته ای']" label="نوع ورودی*" wire:model.defer="paraType"/>
                     <x-admin.forms.input type="text" id="paraField" label="مقدار پیشفرض" wire:model.defer="paraField"/>
-                    <x-admin.forms.dropdown id="paraStatus" :data="['available'=>'فعال','unavailable'=>'غیر فعال']" label="وضعیت*" wire:model.defer="paraStatus"/>
                     <x-admin.forms.input type="number" id="paraMax" label="حداکثر مقدار" wire:model.defer="paraMax"/>
                     <x-admin.forms.input type="number" id="paraMin" label="حداقل مقدار" wire:model.defer="paraMin"/>
                 </x-admin.modal-page>
@@ -57,7 +56,6 @@
                             <td><img src="{{ asset($value['logo']) }}" style="width: 30px;height: 30px" alt=""></td>
                             <td>{{ $value['name'] }}</td>
                             <td>{{ $value['type'] }}</td>
-                            <td>{{ $value['status'] }}</td>
                             <td>
                                 <button type="button" wire:click="addParameter({{$key}})" class="btn btn-sm btn-default btn-text-primary btn-hover-primary btn-icon mr-2">
                                     <span class="svg-icon svg-icon-md">

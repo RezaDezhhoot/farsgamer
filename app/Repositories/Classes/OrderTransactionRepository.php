@@ -11,21 +11,31 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class OrderTransactionRepository implements OrderTransactionRepositoryInterface
 {
     public function start($order,$commission)
     {
-        $transaction = OrderTransaction::create([
-            'customer_id' => auth()->id(),
-            'seller_id' => $order->user_id,
-            'order_id' => $order->id,
-            'status' => OrderTransaction::WAIT_FOR_CONFIRM,
-            'timer' => Carbon::make(now())->addHours(0),
-            'commission' => $commission['commission'],
-            'intermediary' => $commission['intermediary'],
-        ]);
-        OrderTransactionData::updateOrCreate(['order_transaction_id' => $transaction->id] , ['name'=>uniqid()]);
+        $transaction = '';
+        try {
+            DB::beginTransaction();
+            $transaction = OrderTransaction::create([
+                'customer_id' => auth()->id(),
+                'seller_id' => $order->user_id,
+                'order_id' => $order->id,
+                'status' => OrderTransaction::WAIT_FOR_CONFIRM,
+                'timer' => Carbon::make(now())->addHours(0),
+                'commission' => $commission['commission'],
+                'intermediary' => $commission['intermediary'],
+            ]);
+            OrderTransactionData::updateOrCreate(['order_transaction_id' => $transaction->id] , ['name'=>uniqid()]);
+            DB::commit();
+        } catch (\Exception $e){
+            DB::rollBack();
+            return 0;
+        }
+
         return $transaction;
     }
 

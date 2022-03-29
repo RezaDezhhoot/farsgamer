@@ -34,11 +34,21 @@ class HomeController extends Controller
     {
         $most_used_categories = $this->categoryRepository->getMostUsedCategories();
         $orders = $this->orderRepository->getHomeOrders($request);
-
         return response([
             'data' => [
-                'orders' => new OrderCollection($orders),
-                'most_used_categories' => new CategoryCollection($most_used_categories),
+                'orders' => [
+                    'records' => new OrderCollection($orders),
+                    'paginate' => [
+                        'total' => $orders->total(),
+                        'count' => $orders->count(),
+                        'per_page' => $orders->perPage(),
+                        'current_page' => $orders->currentPage(),
+                        'total_pages' => $orders->lastPage()
+                    ],
+                ],
+                'most_used_categories' => [
+                    'record' => new CategoryCollection($most_used_categories)
+                ],
             ],'status' => 'success'
         ],Response::HTTP_OK);
     }

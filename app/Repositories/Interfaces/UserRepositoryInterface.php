@@ -46,6 +46,8 @@ interface UserRepositoryInterface
 
     public function getUserCards(User $user);
 
+    public function getUserCard(User $user,$id);
+
     public function walletTransactions(User $user);
 
     public function getUserOvertimes(User $user);
@@ -55,4 +57,6 @@ interface UserRepositoryInterface
     public function authenticated();
 
     public function waiting();
+
+    public function getLastNotifications(User $user , $count);
 }

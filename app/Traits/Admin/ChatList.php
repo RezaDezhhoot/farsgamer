@@ -23,9 +23,12 @@ trait ChatList
                     'is_admin' => $userRepository->hasRole('admin'),
                     'group_id' => $group->id,
                 ];
-                $chatRepository->sendMessage($chat);
+                $chat = $chatRepository->sendMessage($chat);
                 $this->chats = $chatRepository->startChat($id);
-                $this->reset(['chatText']);
+                if (method_exists($this,'reset'))
+                    $this->reset(['chatText']);
+
+                return $chat;
             }
         }
     }

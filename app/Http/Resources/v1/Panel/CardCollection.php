@@ -14,6 +14,14 @@ class CardCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($item){
+            return [
+                'id' => $item->id,
+                'card_number' => $item->card_number,
+                'card_sheba' => $item->card_sheba,
+                'bank_label' => $item->bank_label,
+                'status_label' => $item->status_label,
+            ];
+        });
     }
 }

@@ -4,6 +4,7 @@ namespace App\Repositories\Interfaces;
 
 
 use App\Models\Ticket;
+use App\Models\User;
 
 interface TicketRepositoryInterface
 {
@@ -13,7 +14,11 @@ interface TicketRepositoryInterface
 
     public function delete(Ticket $ticket);
 
+    public function create(User $user , array $data);
+
     public function find($id);
+
+    public function userTicketFind(User $user , $id);
 
     public static function getStatus();
 
@@ -40,4 +45,6 @@ interface TicketRepositoryInterface
     public function newTicketObject();
 
     public static function getNew();
+
+    public function getUserTickets(User $user);
 }

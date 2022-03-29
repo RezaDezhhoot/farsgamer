@@ -27,8 +27,13 @@ class ChatRepository implements ChatRepositoryInterface
     public function contacts()
     {
         return ChatGroup::where(function ($query){
-            return $query->where('user1',auth('api')->id())->orWhere('user2',auth('api')->id());
+            return $query->where('user1',auth()->id())->orWhere('user2',auth()->id());
         });
+    }
+
+    public function get($model)
+    {
+        return $model->get();
     }
 
     public function singleContact($id)
@@ -123,4 +128,20 @@ class ChatRepository implements ChatRepositoryInterface
     {
         return $this->contacts()->get();
     }
+
+    public function findContact($id)
+    {
+        return $this->contacts()->findOrFail($id);
+    }
+
+    public function seen(ChatGroup $group)
+    {
+        $group->chats()->update(['is_read' => true]);
+    }
+
+    public static function isOpen(ChatGroup $group)
+    {
+        return $group->status == ChatGroup::OPEN;
+    }
+
 }

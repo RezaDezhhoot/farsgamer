@@ -19,6 +19,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed categories
  * @property mixed author
  * @property mixed google_indexing
+ * @property mixed seo_description
+ * @property mixed seo_keywords
  */
 class Article extends JsonResource
 {
@@ -44,6 +46,8 @@ class Article extends JsonResource
             'created_at' => $this->created_at->diffForHumans(),
             'updated_at' => $this->updated_at->diffForHumans(),
             'categories' => new ArticleCategoryCollection($this->categories),
+            'seoDescription' => $this->seo_description,
+            'seoKeywords' => $this->seo_keywords,
             'author' => [
                 'name' => $this->author->name,
                 'user_name' => $this->author->user_name,

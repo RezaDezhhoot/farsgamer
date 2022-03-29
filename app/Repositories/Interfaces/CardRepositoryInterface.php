@@ -17,6 +17,8 @@ interface CardRepositoryInterface
 
     public function delete(Card $card);
 
+    public function destroy($id);
+
     public function find($id,$active = true);
 
     public function getBank();
@@ -33,5 +35,7 @@ interface CardRepositoryInterface
 
     public function updateOrCreate(array $key , array $value);
 
-    public function getFirst( $user);
+    public function getFirst($user);
+
+    public function update(Card $card , array $data);
 }

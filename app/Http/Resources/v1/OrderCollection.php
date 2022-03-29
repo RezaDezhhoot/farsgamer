@@ -19,8 +19,10 @@ class OrderCollection extends ResourceCollection
         return $this->collection->map(function ($item){
             return [
                 'id' => $item->id,
-                'slug' => $item->slug,
+                'name' => $item->slug,
                 'price' => $item->price,
+                'price_unit' => 'toman',
+                'status_label' => $item->status_label,
                 'image' => asset($item->image),
                 'province' => isset($item->province) ? Setting::getProvince()[$item->province] : null,
                 'city' => (isset($item->province) && isset($item->city)) ? Setting::getCity()[$item->province][$item->city] : null,

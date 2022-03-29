@@ -114,7 +114,7 @@ class AuthController extends Controller
         $card = [
             'user_id' => auth()->id(),
             'card_number' => preg_replace('/\D/','',$request['card_number']),
-            'card_sheba' => preg_replace('/\D/','',$request['card_sheba']),
+            'card_sheba' => preg_replace('/\s/','',$request['card_sheba']),
             'bank' => $bank_code,
             'status' => $this->cardRepository::newStatus(),
             'first' => auth()->id()

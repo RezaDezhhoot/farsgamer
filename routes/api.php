@@ -19,8 +19,7 @@ Route::prefix('v1')->group(function (){
     Route::prefix('/basic')->group(function (){
         Route::get('/base',[App\Http\Controllers\Api\Site\v1\BasicController::class,'base']);
         Route::get('/sidebar',[App\Http\Controllers\Api\Site\v1\BasicController::class,'sidebar']);
-        Route::middleware('auth:sanctum')->
-        get('/user-sidebar',[App\Http\Controllers\Api\Site\v1\BasicController::class,'userSidebar']);
+        Route::middleware('auth:sanctum')->get('/user',[App\Http\Controllers\Api\Site\v1\BasicController::class,'user']);
     });
 
     Route::prefix('/orders')->group(function (){
@@ -62,9 +61,24 @@ Route::prefix('v1')->group(function (){
 
     Route::middleware('auth:sanctum')->prefix('client')->group(function (){
         Route::middleware('userAuth')->group(function (){
-            Route::apiResource('orders',App\Http\Controllers\Api\Site\v1\Panel\OrderController::class);
+            Route::get('cards/details',[App\Http\Controllers\Api\Site\v1\Panel\CardController::class,'details']);
+            Route::apiResource('cards',App\Http\Controllers\Api\Site\v1\Panel\CardController::class);
+
+            Route::get('tickets/details',[App\Http\Controllers\Api\Site\v1\Panel\TicketController::class,'details']);
             Route::apiResource('tickets',App\Http\Controllers\Api\Site\v1\Panel\TicketController::class);
+
+            Route::delete('orders/delete-image/{order_id}',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'deleteImage']);
+            Route::get('orders/details',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'details']);
+            Route::post('orders/calculator',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'calculate']);
+            Route::apiResource('orders',App\Http\Controllers\Api\Site\v1\Panel\OrderController::class);
+
             Route::apiResource('transactions',App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class);
+
+            Route::prefix('chat')->group(function (){
+                Route::get('/list',[\App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'list']);
+                Route::get('/list/{group_id}',[\App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'open']);
+                Route::post('/send-message/{group_id}',[\App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'send']);
+            });
         });
 
         Route::get('/dashboard',function (){return auth()->user();});

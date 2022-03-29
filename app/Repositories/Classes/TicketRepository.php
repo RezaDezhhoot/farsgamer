@@ -4,6 +4,7 @@
 namespace App\Repositories\Classes;
 
 use App\Models\Ticket;
+use App\Models\User;
 use App\Repositories\Interfaces\TicketRepositoryInterface;
 
 
@@ -107,5 +108,23 @@ class TicketRepository implements TicketRepositoryInterface
     {
         // TODO: Implement getNew() method.
         return Ticket::getNew();
+    }
+
+    public function getUserTickets(User $user)
+    {
+        return Ticket::latest('id')->whereNull('parent_id')->paginate(25);
+        // TODO: Implement getUserTickets() method.
+    }
+
+    public function create(User $user, array $data)
+    {
+        return $user->tickets()->create($data);
+        // TODO: Implement create() method.
+    }
+
+    public function userTicketFind(User $user, $id)
+    {
+        return $user->tickets()->findOrFail($id);
+        // TODO: Implement userTicketFind() method.
     }
 }

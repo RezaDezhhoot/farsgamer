@@ -14,6 +14,19 @@ class GroupCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($item){
+            return [
+                'id' => $item->id,
+                'user1' => new User($item->user_one),
+                'user2' => new User($item->user_two),
+                'unread_messages_count' => $item->unread,
+                'status_label' => $item->status_label,
+                'last' => [
+                    'text' => $item->last_text,
+                    'date' => $item->last,
+                    'sender_id' => $item->last_sender,
+                ],
+            ];
+        });
     }
 }

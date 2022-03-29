@@ -16,6 +16,7 @@ class ParameterCollection extends ResourceCollection
     {
         return  $this->collection->map(function ($item){
             return [
+                'id' => $item->id,
                 'name' => $item->name,
                 'logo' => asset($item->logo),
                 'value' => $item->pivot->value

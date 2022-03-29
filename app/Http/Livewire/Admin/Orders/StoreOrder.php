@@ -52,15 +52,21 @@ class StoreOrder extends BaseComponent
         $this->chatUserId = $this->order->user->id;
         $this->chats = $chatRepository->singleContact($this->order->user->id);
         $this->newMessageStatus = $notificationRepository->orderStatus();
+        $this->data['province'] = [];
+        $this->data['city'] = [];
     }
 
     public function render(SettingRepositoryInterface $settingRepository , CategoryRepositoryInterface $categoryRepository )
     {
-        $this->data['province'] = $settingRepository::getProvince();
-        $this->data['city'] = $settingRepository->getCity($this->province);
-        $this->data['category'] = $categoryRepository->getAll(true,true)->pluck('title','id');
         $category = $categoryRepository->find($this->category,true);
-        $this->parameters = $categoryRepository->getParameters($category,true);
+
+        if ($category->type == $categoryRepository::physical()){
+            $this->data['province'] = $settingRepository::getProvince();
+            $this->data['city'] = $settingRepository->getCity($this->province);
+        }
+        $this->data['category'] = $categoryRepository->getAll(true,true)->pluck('title','id');
+
+        $this->parameters = $category->parameters;
         $this->platforms = $category->platforms;
         return view('livewire.admin.orders.store-order' , ['order' => $this->order])
             ->extends('livewire.admin.layouts.admin');
@@ -82,8 +88,8 @@ class StoreOrder extends BaseComponent
                 'status' => ['required', 'in:'.implode(',',array_keys($orderRepository::getStatus()))],
                 'content' => ['nullable','string','max:65000'],
                 'price' => ['required','numeric', 'between:0,99999999999.99999'],
-                'province' => ['required','string','in:'.implode(',',array_keys($this->data['province']))],
-                'city' => ['required','string','in:'.implode(',',array_keys($this->data['city']))],
+                'province' => ['nullable','string','in:'.implode(',',array_keys($this->data['province']))],
+                'city' => ['nullable','string','in:'.implode(',',array_keys($this->data['city']))],
             ] , [] , [
                 'slug' => 'عنوان',
                 'category' => 'دست بندی',

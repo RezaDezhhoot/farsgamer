@@ -33,13 +33,19 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
-        $public = [
-            'title' => 'مقالات',
-        ];
+        $articles = $this->articleRepository->getAll($request);
         return response([
             'data' => [
-                'articles' =>new ArticleCollection($this->articleRepository->getAll($request)),
-                'head' => $public
+                'articles' => [
+                    'records' => new ArticleCollection($articles),
+                    'paginate' => [
+                        'total' => $articles->total(),
+                        'count' => $articles->count(),
+                        'per_page' => $articles->perPage(),
+                        'current_page' => $articles->currentPage(),
+                        'total_pages' => $articles->lastPage()
+                    ],
+                ],
             ],
             'status' => 'success'
         ],Response::HTTP_OK);
@@ -54,16 +60,11 @@ class ArticleController extends Controller
     public function show($slug)
     {
         $article = $this->articleRepository->getArticle('slug',$slug);
-        $public = [
-            'title' => $article->title,
-            'seoDescription' => $article->seo_description,
-            'seoKeywords' => $article->seo_keywords,
-            'logo' => asset($this->settingRepository->getSiteFaq('logo')),
-        ];
         return response([
             'data' => [
-                'article' => new Article($article),
-                'head' => $public
+                'article' => [
+                    'record' => new Article($article),
+                ]
             ],
             'status' => 'success',
         ],Response::HTTP_OK);
@@ -73,7 +74,7 @@ class ArticleController extends Controller
     {
         $article = $this->articleRepository->getArticle('slug',$slug);
         $rateKey = 'verify-attempt:' . auth('api')->id() . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, 4)) {
+        if (RateLimiter::tooManyAttempts($rateKey, 6)) {
             return
                 response([
                     'data' => [

@@ -37,6 +37,13 @@ class CategoryRepository implements CategoryRepositoryInterface
         })->search($search)->paginate($pagination);
     }
 
+    public function getCategories($type, $active = true, $available = true)
+    {
+        return Category::active($active)->available($available)->where('type',$type)->get();
+
+        // TODO: Implement getCategories() method.
+    }
+
     public function getStatus()
     {
         return Category::getStatus();
@@ -57,9 +64,14 @@ class CategoryRepository implements CategoryRepositoryInterface
         return $category->delete();
     }
 
-    public function find($id , $active = true)
+    public function find($id , $active = true , $available = false)
     {
-        return Category::active($active)->withTrashed()->findOrFail($id);
+        return Category::active($active)->available($available)->withTrashed()->findOrFail($id);
+    }
+
+    public function findNormal($id , $active = true , $available = false)
+    {
+        return Category::active($active)->available($available)->findOrFail($id);
     }
 
     public function getByCondition($col , $operator, $value, $active = true)
@@ -93,6 +105,7 @@ class CategoryRepository implements CategoryRepositoryInterface
         $category->sends()->attach($transfer);
     }
 
+
     public function syncPlatforms(Category $category, $platforms)
     {
         $category->platforms()->sync($platforms);
@@ -118,9 +131,9 @@ class CategoryRepository implements CategoryRepositoryInterface
         return Category::NO;
     }
 
-    public function getParameters(Category $category  ,$available = true)
+    public function getParameters(Category $category )
     {
-        return $available ? $category->parameters()->where('status','available')->get() :  $category->parameters;
+        return $category->parameters;
     }
 
     public static function digital()

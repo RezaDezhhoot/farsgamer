@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Morilog\Jalali\Jalalian;
-
+use Dyrynda\Database\Support\CascadeSoftDeletes;
 /**
  * @method static latest(string $string)
  * @method static where(string $string, $status)
@@ -36,7 +36,7 @@ use Morilog\Jalali\Jalalian;
 class Order extends Model
 {
     use HasFactory;
-    use Searchable;
+    use Searchable , SoftDeletes , CascadeSoftDeletes;
 
     const IS_UNCONFIRMED = 'unconfirmed' , IS_CONFIRMED = 'confirmed' ,  IS_NEW = 'new';
     const IS_REJECTED = 'rejected' , IS_REQUESTED = 'requested' , IS_FINISHED = 'finished';
@@ -46,6 +46,7 @@ class Order extends Model
 
     protected $guarded = [];
 
+    protected $cascadeDeletes = ['OrderTransactions','platforms','parameters'];
 
     public function setSlugAttribute($value)
     {
@@ -88,12 +89,12 @@ class Order extends Model
 
     public function getProvinceLabelAttribute()
     {
-        return $this->province ? Setting::getProvince()[$this->province] : '';
+        return !is_null($this->province) ? Setting::getProvince()[$this->province] : '';
     }
 
     public function getCityLabelAttribute()
     {
-        return ($this->province && $this->city) ?  Setting::getCity()[$this->province][$this->city] : '';
+        return (!is_null($this->province) && !is_null($this->city)) ?  Setting::getCity()[$this->province][$this->city] : '';
     }
 
     public function getCommissionAttribute()
@@ -123,7 +124,7 @@ class Order extends Model
 
     public function parameters()
     {
-        return $this->belongsToMany(Parameter::class , 'orders_has_parameters' ,'order_id' ,'parameter_id')->withPivot('value');;
+        return $this->belongsToMany(Parameter::class , 'orders_has_parameters' ,'order_id' ,'parameter_id')->withPivot('value');
     }
 
     public static function getStatus()
@@ -152,4 +153,6 @@ class Order extends Model
     {
         return Jalalian::forge($this->created_at)->format('%A, %d %B %Y');
     }
+
+
 }

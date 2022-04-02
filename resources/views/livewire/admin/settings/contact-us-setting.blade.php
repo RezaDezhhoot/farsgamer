@@ -7,7 +7,7 @@
         <x-admin.forms.validation-errors/>
         <div class="card-body">
             <x-admin.forms.input type="text" id="googleMap" label="شناسه گوگل مپ" wire:model.defer="googleMap"/>
-            <x-admin.forms.input type="text" id="contactText" label="متن" wire:model.defer="contactText"/>
+            <x-admin.forms.full-text-editor type="text" id="contactText" label="متن" wire:model.defer="contactText"/>
         </div>
     </div>
 </div>

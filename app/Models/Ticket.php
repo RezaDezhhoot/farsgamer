@@ -10,6 +10,8 @@ use Morilog\Jalali\Jalalian;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(string $string, string $PENDING)
+ * @method static whereNotNull(string $string)
+ * @method static whereNull(string $string)
  * @property mixed created_at
  * @property mixed status
  * @property mixed priority
@@ -21,11 +23,14 @@ use Morilog\Jalali\Jalalian;
  * @property mixed file
  * @property mixed|string sender_type
  * @property mixed id
+ * @property mixed user
+ * @property mixed status_label
  */
 class Ticket extends Model
 {
     use HasFactory;
 
+    protected $guarded = ['id','user_id'];
 
     const HIGH = 'high';
     const NORMAL = 'normal';
@@ -96,6 +101,14 @@ class Ticket extends Model
         return self::getSenderType()[$this->sender_type];
     }
 
+    public function setFileAttribute($value)
+    {
+        $file = [];
+        foreach (explode(',',$value) as $item)
+            $file[] = str_replace(env('APP_URL'), '', $item);
+
+        $this->attributes['file'] = implode(',',$file);
+    }
 
     public function getPriorityLabelAttribute()
     {

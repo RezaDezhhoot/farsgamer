@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Site\Dashboard\Profile;
 
 use App\Http\Livewire\BaseComponent;
+use App\Models\Category;
 use App\Models\Setting;
 use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\Hash;
@@ -11,14 +12,13 @@ use Livewire\WithFileUploads;
 class IndexProfile extends BaseComponent
 {
     use WithFileUploads;
-    public $user, $first_name , $last_name , $user_name , $profile_image ,$description ,$pass_word , $password_confirmation , $email,
-    $phone , $province , $city , $data = [];
+    public $user, $name  , $user_name , $profile_image ,$description ,$pass_word , $password_confirmation , $email,
+    $phone , $province , $city , $data = [] , $file;
 
     public function mount()
     {
         $this->user = auth()->user();
-        $this->first_name = $this->user->first_name;
-        $this->last_name = $this->user->last_name;
+        $this->name = $this->user->name;
         $this->user_name = $this->user->user_name;
         $this->profile_image = $this->user->profile_image;
         $this->description = $this->user->description;
@@ -38,32 +38,30 @@ class IndexProfile extends BaseComponent
     {
         $location = false;
         $fields = [
-            'first_name' => ['required', 'string','max:70'],
-            'last_name' => ['required','string','max:70'],
+            'name' => ['required', 'string','max:120'],
             'user_name' => ['required', 'string' ,'max:80', 'unique:users,user_name,'. ($this->user->id ?? 0)],
             'email' => ['required','email','max:250','unique:users,email,'. ($this->user->id ?? 0)],
-            'profile_image' => ['nullable','image','mimes:jpg,jpeg,png,svg,gif','max:'.Setting::getSingleRow('max_profile_image_size')],
+            'profile_image' => ['nullable','image','mimes:jpg,jpeg,png','max:'.(Setting::getSingleRow('max_profile_image_size') ?? 2048)],
             'description' => ['nullable','string','max:250'],
         ];
         $message = [
-            'first_name' => 'نام ',
-            'last_name' => 'نام خانوادگی',
+            'name' => 'نام ',
             'user_name' => 'نام کربری',
             'email' => 'ایمیل',
             'profile_image' => 'تصویر پروفایل',
             'description' => 'بایوگرافی',
         ];
-        $open_transactions = OrderTransaction::where(function ($query){
+        $open_transactions = OrderTransaction::with(['order'])->where('status',OrderTransaction::WAIT_FOR_SEND)->
+        where(function ($query){
             $query->where('seller_id',$this->user->id)->orWhere('customer_id',$this->user);
-        })->where(function ($query){
-            $query->where([
-                ['status','!=',OrderTransaction::WAIT_FOR_COMPLETE],
-                ['status','!=',OrderTransaction::IS_CANCELED],
-            ]);
+        })->whereHas('order',function ($query){
+            return $query->whereHas('category',function ($query){
+                return $query->where('type',Category::PHYSICAL);
+            });
         })->count();
 
         if (isset($this->pass_word)) {
-            $fields['pass_word'] = ['required','min:'.Setting::getSingleRow('password_length'),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/','confirmed'];
+            $fields['pass_word'] = ['required','min:'.(Setting::getSingleRow('password_length') ?? 5),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/','confirmed'];
             $message['pass_word'] = 'گذرواژه';
         }
 
@@ -85,13 +83,27 @@ class IndexProfile extends BaseComponent
             $this->user->province = $this->province;
             $this->user->city = $this->city;
         }
-        $this->user->first_name = $this->first_name;
-        $this->user->last_name = $this->last_name;
+
+        $this->uploadFile();
+        if (!is_null($this->file)) {
+            if (!is_null($this->user->profile_image))
+                @unlink($this->user->profile_image);
+
+            $this->user->profile_image  = 'storage/'.$this->file->store('profiles', 'public');
+            $this->imageWatermark($this->user->profile_image);
+
+            unset($this->file);
+        }
+        $this->user->name = $this->name;
         $this->user->user_name = $this->user_name;
         $this->user->email = $this->email;
-        $this->user->profile_image = $this->profile_image->store('files/users', 'public');
         $this->user->description = $this->description;
         $this->user->save();
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
+    }
+
+    public function uploadFile()
+    {
+        // upon form submit, this function till fill your progress bar
     }
 }

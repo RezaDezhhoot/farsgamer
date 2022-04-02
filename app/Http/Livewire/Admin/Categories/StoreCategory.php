@@ -3,28 +3,32 @@
 namespace App\Http\Livewire\Admin\Categories;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Parameter;
-use App\Models\Platform;
-use App\Models\Send;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Category;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
+use App\Repositories\Interfaces\ParameterRepositoryInterface;
+use App\Repositories\Interfaces\PlatformRepositoryInterface;
+use App\Repositories\Interfaces\SendRepositoryInterface;
 use App\Traits\Admin\FormBuilder;
 
 class StoreCategory extends BaseComponent
 {
-    use AuthorizesRequests , FormBuilder;
+    use FormBuilder;
     public $category , $mode , $header , $data = [];
-    public $slug , $title , $logo , $default_image , $slider , $description , $seo_keywords , $seo_description , $guarantee_time,
+    public $slug , $title , $logo , $default_image , $slider , $description , $seo_keywords , $seo_description ,
     $send_time , $pay_time ,$receive_time,$sending_data_time , $parent_id , $status , $is_available , $type , $transfer  , $parameters = [] , $para , $paraID , $platforms = [],
     $commission , $intermediary , $control , $no_receive_time;
 
     public $paraLogo , $paraName , $paraType , $paraField , $paraStatus , $paraMax , $paraMin ;
-    public function mount($action , $id = null)
+    public function mount(
+        CategoryRepositoryInterface $categoryRepository , PlatformRepositoryInterface $platformRepository,
+        SendRepositoryInterface $sendRepository , OrderTransactionRepositoryInterface $orderTransactionRepository ,$action , $id = null
+    )
     {
-        $this->authorize('show_categories');
+        $this->authorizing('show_categories');
         if ($action == 'edit')
         {
-            $this->category = Category::findOrFail($id);
+            $this->category = $categoryRepository->find($id,false);
             $this->header = $this->category->title;
             $this->slug = $this->category->slug;
             $this->title = $this->category->title;
@@ -34,7 +38,6 @@ class StoreCategory extends BaseComponent
             $this->description = $this->category->description;
             $this->seo_keywords = $this->category->seo_keywords;
             $this->seo_description = $this->category->seo_description;
-            $this->guarantee_time = $this->category->guarantee_time;
             $this->send_time = $this->category->send_time;
             $this->pay_time = $this->category->pay_time;
             $this->receive_time = $this->category->receive_time;
@@ -45,37 +48,41 @@ class StoreCategory extends BaseComponent
             $this->status = $this->category->status;
             $this->is_available = $this->category->is_available;
             $this->type = $this->category->type;
-            $this->transfer =  $this->category->sends->pluck('id','id')->toArray();
-            $this->platforms =  $this->category->platforms->pluck('id','id')->toArray();
+            $this->transfer =  $this->category->sends->pluck('id')->toArray();
+            $this->platforms =  $this->category->platforms->pluck('id')->toArray();
             $this->parameters = $this->category->parameters->toArray();
             $this->commission = $this->category->commission;
             $this->intermediary = $this->category->intermediary;
             $this->control = $this->category->control;
-        } elseif($action == 'create') $this->header = 'دسته جدید';
+            $this->data['category'] = $categoryRepository->getByCondition('id','!=',$this->category->id)->pluck('title','id');
+        } elseif($action == 'create') {
+            $this->header = 'دسته جدید';
+            $this->data['category'] = $categoryRepository->getAll()->pluck('title','id');
+        }
         else abort(404);
 
         $this->mode = $action;
-        $this->data['is_available'] = Category::available();
-        $this->data['type'] = Category::type();
-        $this->data['status'] = Category::getStatus();
-        $this->data['category'] = Category::all()->pluck('title','id');
-        $this->data['transfer'] = Send::where('status',Send::AVAILABLE)->get();
-        $this->data['platform'] = Platform::all();
+        $this->data['is_available'] = $categoryRepository->available();
+        $this->data['type'] = $categoryRepository->type();
+        $this->data['status'] = $categoryRepository->getStatus();
+        $this->data['transfer'] = $sendRepository->getByCondition('status','=',$sendRepository->availableStatus());
+        $this->data['platform'] = $platformRepository->getAll();
+        $this->data['for'] = $orderTransactionRepository::getFor();
     }
 
-    public function store()
+    public function store(CategoryRepositoryInterface $categoryRepository , ParameterRepositoryInterface $parameterRepository)
     {
-        $this->authorize('edit_categories');
+        $this->authorizing('edit_categories');
         if ($this->mode == 'edit')
-            $this->saveInDataBase($this->category);
+            $this->saveInDataBase($categoryRepository , $parameterRepository ,$this->category);
         else{
-            $this->saveInDataBase(new Category());
-            $this->reset(['slug','title','logo','default_image','slider','description','seo_keywords','seo_description','guarantee_time',
-                'send_time','parent_id','status','is_available','is_physical','parameters','transfer','platforms','form','control']);
+            $this->saveInDataBase($categoryRepository , $parameterRepository ,$categoryRepository->newCategoryObject());
+            $this->reset(['slug','title','logo','default_image','slider','description','seo_keywords','seo_description',
+                'send_time','parent_id','status','is_available','parameters','transfer','platforms','form','control']);
         }
     }
 
-    public function saveInDataBase(Category $model)
+    public function saveInDataBase($categoryRepository , $parameterRepository , $model)
     {
         $fields = [
             'slug' => ['required','string','max:80','unique:categories,slug,'.($this->category->id ?? 0)],
@@ -87,19 +94,18 @@ class StoreCategory extends BaseComponent
             'seo_keywords' => ['required','string','max:250'],
             'seo_description' => ['required','string','max:250'],
             'send_time' => ['required','numeric','between:0,999999999.9999'],
-            'guarantee_time' => ['required','numeric','between:0,999999999.9999'],
             'pay_time' => ['required','numeric','between:0,999999999.9999'],
             'receive_time' => ['nullable','numeric','between:0,999999999.9999'],
             'sending_data_time' => ['nullable','numeric','between:0,999999999.9999'],
             'no_receive_time' => ['nullable','numeric','between:0,999999999.9999'],
             'parent_id' => ['nullable','exists:categories,id'],
-            'status' => ['required','in:'.Category::UNAVAILABLE.','.Category::AVAILABLE],
-            'is_available' => ['required','in:'.Category::YES.','.Category::NO],
-            'type' => ['required','in:'.Category::DIGITAL.','.Category::PHYSICAL],
+            'status' => ['required','in:'.implode(',',array_keys($categoryRepository->getStatus()))],
+            'is_available' => ['required','in:'.implode(',',array_keys($categoryRepository->available()))],
+            'type' => ['required','in:'.implode(',',array_keys($categoryRepository->type()))],
             'form' => ['nullable','array'],
             'commission' => ['required','numeric','between:0,20'],
             'intermediary' => ['required','numeric','between:0,20'],
-            'control' => ['required','boolean'],
+            'control' => ['nullable','boolean'],
         ];
         $messages = [
             'slug' => 'نام مستعار',
@@ -113,7 +119,6 @@ class StoreCategory extends BaseComponent
             'send_time' => 'زمان لازم برای ارسال توسط فروشنده یا خریردار',
             'pay_time' => 'زمان لازم برای پرداخت',
             'receive_time' => 'زمان ارسال فروشنده یا خریدار',
-            'guarantee_time' => 'زمان تست محصول',
             'no_receive_time' => 'زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار',
             'sending_data_time' => 'زمان لازم برای ارسال اطلاعات توسط خریدار در مرحله مرجوعیت',
             'parent_id' => 'دسته مادر',
@@ -136,7 +141,6 @@ class StoreCategory extends BaseComponent
         $model->description = $this->description;
         $model->seo_keywords = $this->seo_keywords;
         $model->seo_description = $this->seo_description;
-        $model->guarantee_time = $this->guarantee_time;
         $model->send_time = $this->send_time ?? 0;
         $model->pay_time = $this->pay_time ?? 0;
         $model->receive_time = $this->receive_time ?? 0;
@@ -150,29 +154,32 @@ class StoreCategory extends BaseComponent
         $model->type = $this->type;
         $model->control = $this->control ?? 0;
         $model->forms = json_encode($this->form);
-        $model->save();
+        $categoryRepository->save($model);
 
         if (!is_null($this->transfer))
             $this->mode == 'edit' ?
-                $model->sends()->sync(array_filter($this->transfer)) : $model->sends()->attach(array_filter($this->transfer));
+                $categoryRepository->syncSends($model,array_filter($this->transfer)) :
+                $categoryRepository->attachSends($model,array_filter($this->transfer));
 
         if (!is_null($this->platforms))
             $this->mode == 'edit' ?
-                $model->platforms()->sync(array_filter($this->platforms)) : $model->platforms()->attach(array_filter($this->platforms));
+                $categoryRepository->syncPlatforms($model,array_filter($this->platforms)) :
+                $categoryRepository->attachPlatforms($model,array_filter($this->platforms));
 
         if (!is_null($this->parameters)) {
             foreach ($this->parameters as $key => $value)
             {
-                $parameter = $value['id'] == 0 ? new Parameter() : Parameter::find($value['id']);
+                $parameter = $value['id'] == 0 ? $parameterRepository->newParameterObject() :
+                    $parameterRepository->find($value['id']);
+
                 $parameter->category_id  = $model->id;
                 $parameter->logo  = $value['logo'];
                 $parameter->name  = $value['name'];
                 $parameter->type  = $value['type'];
                 $parameter->field  = $value['field'];
-                $parameter->status  = $value['status'];
                 $parameter->max  = $value['max'];
                 $parameter->min  = $value['min'];
-                $parameter->save();
+                $parameter = $parameterRepository->save($parameter);
                 $this->parameters[$key]['id'] = $parameter->id;
             }
         }
@@ -184,13 +191,12 @@ class StoreCategory extends BaseComponent
         return view('livewire.admin.categories.store-category')->extends('livewire.admin.layouts.admin');
     }
 
-    public function deleteItem()
+    public function deleteItem(CategoryRepositoryInterface $categoryRepository)
     {
-        $this->authorize('delete_categories');
-        $this->category->delete();
+        $this->authorizing('delete_categories');
+        $categoryRepository->delete($this->category);
         return redirect()->route('admin.category');
     }
-
 
     public function addParameter($title)
     {
@@ -205,7 +211,6 @@ class StoreCategory extends BaseComponent
             $this->paraName = $this->parameters[$title]['name'];
             $this->paraType = $this->parameters[$title]['type'];
             $this->paraField = $this->parameters[$title]['field'];
-            $this->paraStatus = $this->parameters[$title]['status'];
             $this->paraMax = $this->parameters[$title]['max'];
             $this->paraMin = $this->parameters[$title]['min'];
         }
@@ -220,16 +225,14 @@ class StoreCategory extends BaseComponent
             'paraName' => ['required','string','max:40'],
             'paraType' => ['required','in:number,text'],
             'paraField' => ['required','string','max:250'],
-            'paraStatus' => ['required','in:available,unavailable'],
-            'paraMax' => ['nullable','numeric','max:250'],
-            'paraMin' => ['nullable','numeric','max:100'],
+            'paraMax' => ['nullable','numeric','between:-999999999.99999,999999999999.99999999'],
+            'paraMin' => ['nullable','numeric','between:-999999999.99999,999999999999.99999999'],
         ];
         $messages = [
             'paraLogo' => 'ایکون',
             'paraName' => 'عنوان',
             'paraType' => 'نوع ورودی',
             'paraField' => 'مقدار پیشفرض',
-            'paraStatus' => 'وضعیت',
             'paraMax' => 'حداکثر مقدار',
             'paraMin' => 'حداقل مقدار',
         ];
@@ -240,7 +243,6 @@ class StoreCategory extends BaseComponent
             'name' => $this->paraName,
             'type' => $this->paraType,
             'field' => $this->paraField,
-            'status' => $this->paraStatus,
             'max' => $this->paraMax,
             'min' => $this->paraMin
         ];
@@ -248,16 +250,16 @@ class StoreCategory extends BaseComponent
             array_push($this->parameters,$parameter);
         else
             $this->parameters[$this->paraID] = $parameter;
-        $this->reset(['paraLogo','paraName','paraType','paraField','paraMax','paraMin','paraStatus']);
+        $this->reset(['paraLogo','paraName','paraType','paraField','paraMax','paraMin']);
         $this->emitHideModal('parameter');
     }
 
-    public function deleteParameter($key)
+    public function deleteParameter($key , ParameterRepositoryInterface $parameterRepository)
     {
-        $this->authorize('edit_categories');
-        $para = Parameter::find($this->parameters[$key]['id']);
-        if ($para)
-            $para->delete();
+        $this->authorizing('edit_categories');
+        $para = $parameterRepository->find($this->parameters[$key]['id']);
+        if ($para) $parameterRepository->delete($para);
+
         unset($this->parameters[$key]);
     }
 }

@@ -3,18 +3,17 @@
 namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Setting;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
+
 
 class CreateChatLaw extends BaseComponent
 {
-    use AuthorizesRequests;
     public $header , $law , $title , $mode , $content , $order;
-    public function mount($action , $id = null)
+    public function mount(SettingRepositoryInterface $settingRepository , $action , $id = null)
     {
-        $this->authorize('show_settings_chatLaw');
+        $this->authorizing('show_settings_chatLaw');
         if ($action == 'edit') {
-            $this->law = Setting::where('name','chatLaw')->findOrFail($id);
+            $this->law = $settingRepository->find($id);
             $this->title = $this->law->value['title'];
             $this->content = $this->law->value['content'];
             $this->order = $this->law->value['order'];
@@ -24,18 +23,18 @@ class CreateChatLaw extends BaseComponent
         $this->mode = $action;
     }
 
-    public function store()
+    public function store(SettingRepositoryInterface $settingRepository)
     {
         $this->authorize('edit_settings_chatLaw');
         if ($this->mode == 'edit')
-            $this->saveInDataBase($this->law);
+            $this->saveInDataBase($settingRepository,$this->law);
         elseif ($this->mode == 'create'){
-            $this->saveInDataBase(new Setting());
+            $this->saveInDataBase($settingRepository,$settingRepository->newSettingObject());
             $this->reset(['content','title','order']);
         }
     }
 
-    public function saveInDataBase(Setting $model)
+    public function saveInDataBase($settingRepository , $model)
     {
         $this->validate([
             'content' => ['required','string','max:35000'],
@@ -48,15 +47,15 @@ class CreateChatLaw extends BaseComponent
         ]);
         $model->name = 'chatLaw';
         $model->value = json_encode(['content' => $this->content,'title' => $this->title , 'order' => $this->order]);
-        $model->save();
+        $settingRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
 
-    public function deleteItem()
+    public function deleteItem(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('edit_settings_chatLaw');
-        $this->law->delete();
+        $this->authorizing('edit_settings_chatLaw');
+        $settingRepository->delete($this->law);
         return redirect()->route('admin.setting.law');
     }
 

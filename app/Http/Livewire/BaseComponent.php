@@ -4,11 +4,25 @@ namespace App\Http\Livewire;
 
 use App\Models\Category;
 use App\Models\Setting;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Intervention\Image\Facades\Image;
 use Livewire\Component;
 
 class BaseComponent extends Component
 {
+    use AuthorizesRequests;
+    public $pagination = 10 , $search;
+
+    public function authorizing($ability)
+    {
+        try {
+            $this->authorize($ability);
+        } catch (AuthorizationException $e) {
+            abort(403);
+        }
+    }
+
     public function emitNotify($title, $icon = 'success')
     {
         $data['title'] = $title;
@@ -31,7 +45,7 @@ class BaseComponent extends Component
         if (!is_null(Setting::getSingleRow('waterMark')) && !empty(Setting::getSingleRow('waterMark')))
         {
             $img = Image::make(public_path($image));
-            $logo = $this->resize_image(public_path(Setting::getSingleRow('waterMark')),250,200);
+                $logo = $this->resize_image(public_path(Setting::getSingleRow('waterMark')),1000,100);
             $img->insert($logo, $position, 20, 20);
 
             $img->save(public_path($image));
@@ -97,4 +111,13 @@ class BaseComponent extends Component
         $data['intermediary'] = $price*($category->intermediary/100);
         return $data;
     }
+
+    public static function array_value_recursive($key, array $arr){
+        $val = array();
+        array_walk_recursive($arr, function($v, $k) use($key, &$val){
+            if($k == $key) array_push($val, $v);
+        });
+        return $val;
+    }
+
 }

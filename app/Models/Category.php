@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Traits\Admin\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * @method static where(string $string, string $string1)
@@ -12,6 +14,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static findOrFail($id)
  * @method static withCount(string $string)
  * @method static find(int[] $array)
+ * @method static fineMany(array $sub_categories_id)
+ * @method static findMany(array $sub_categories_id)
+ * @method static active(bool $active)
  * @property mixed title
  * @property mixed slug
  * @property mixed logo
@@ -35,10 +40,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|mixed pay_time
  * @property int|mixed no_receive_time
  * @property mixed intermediary
+ * @property mixed parameters
  */
 class Category extends Model
 {
-    use HasFactory , Searchable;
+    use HasFactory , Searchable , SoftDeletes;
 
     protected $searchAbleColumns = ['title','slug'];
 
@@ -48,9 +54,55 @@ class Category extends Model
 
     const DIGITAL = 'digital' , PHYSICAL = 'physical';
 
+
+    public function setSlugAttribute($value)
+    {
+        $this->attributes['slug'] = Str::slug($value);
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
+    }
+
+    public function getTypeLabelAttribute()
+    {
+        return self::type()[$this->type];
+    }
+
+    public function getAvailableLabelAttribute()
+    {
+        return self::available()[$this->is_available];
+    }
+
+    public function setLogoAttribute($value)
+    {
+        $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function scopeActive($query, $active = false)
+    {
+        return $active ? $query->where('status',self::AVAILABLE) : $query;
+    }
+
+    public function scopeAvailable($query, $available = false)
+    {
+        return $available ? $query->where('is_available',self::YES) : $query;
+    }
+
+    public function setSliderAttribute($value)
+    {
+        $this->attributes['slider'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function setDefaultImageAttribute($value)
+    {
+        $this->attributes['default_image'] = str_replace(env('APP_URL'), '', $value);
+    }
+
     public function parent()
     {
-        return $this->belongsTo(Category::class,'parent_id');
+        return $this->belongsTo(Category::class,'parent_id')->withTrashed();;
     }
 
     public static function getStatus()
@@ -64,7 +116,7 @@ class Category extends Model
     public static function available()
     {
         return [
-            self::YES => ' قابل معامله',
+            self::YES => 'قابل معامله',
             self::NO => 'غیر قابل معامله',
         ];
     }
@@ -105,10 +157,5 @@ class Category extends Model
     public function childrenRecursive()
     {
         return $this->child()->with('childrenRecursive');
-    }
-
-    public function getTypeLabelAttribute()
-    {
-        return self::type()[$this->type];
     }
 }

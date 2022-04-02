@@ -3,24 +3,23 @@
 namespace App\Http\Livewire\Admin\Articles;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Comment;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\ArticleCategoryRepositoryInterface;
+use App\Repositories\Interfaces\ArticleRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
-use App\Models\ArticleCategory;
-use App\Models\Article;
 
 class StoreArticle extends BaseComponent
 {
-    use AuthorizesRequests;
-    public $article , $mode , $header , $data = [] , $categories;
+    public $article , $mode , $header , $data = [] , $categories = [];
     public $slug ,$title,$main_image,$content,$seo_keywords,$seo_description,$score,$status,$commentable,$google_indexing;
 
-    public function mount($action , $id = null)
+    public function mount(
+        ArticleRepositoryInterface $articleRepository , ArticleCategoryRepositoryInterface $articleCategoryRepository , $action , $id = null
+    )
     {
-        $this->authorize('show_articles');
+        $this->authorizing('show_articles');
         if ($action == 'edit')
         {
-            $this->article = Article::findOrFail($id);
+            $this->article = $articleRepository->findArticle($id,false);
             $this->header = $this->article->title;
             $this->slug = $this->article->slug;
             $this->title = $this->article->title;
@@ -32,47 +31,47 @@ class StoreArticle extends BaseComponent
             $this->status = $this->article->status;
             $this->commentable = $this->article->commentable;
             $this->google_indexing = $this->article->google_indexing;
-            $this->categories = $this->article->categories->pluck('id','id')->toArray();
+            $this->categories = $this->article->categories->pluck('id')->toArray();
         } elseif($action == 'create') $this->header = 'مقاله جدید';
         else abort(404);
 
         $this->mode = $action;
-        $this->data['category'] = ArticleCategory::where('status',ArticleCategory::AVAILABLE)->get();
-        $this->data['status'] = Article::getStatus();
+        $this->data['category'] = $articleCategoryRepository->getAll(false);
+        $this->data['status'] = $articleRepository->getStatus();
     }
 
-    public function deleteItem()
+    public function deleteItem(ArticleRepositoryInterface $articleRepository)
     {
-        $this->authorize('delete_articles');
-        Comment::where('case_id',$this->article->id)->delete();
-        $this->article->delete();
+        $this->authorizing('delete_articles');
+        $articleRepository->deleteComments($this->article);
+        $articleRepository->delete($this->article);
         return redirect()->route('admin.article');
     }
 
-    public function store()
+    public function store(ArticleRepositoryInterface $articleRepository)
     {
-        $this->authorize('edit_articles');
+        $this->authorizing('edit_articles');
         if ($this->mode == 'edit')
-            $this->saveInDateBase($this->article);
+            $this->saveInDateBase($articleRepository,$this->article);
         else{
-            $this->saveInDateBase(new Article());
-            $this->reset(['slug','title','main_image','content','seo_keywords','seo_description','score','status','commentable','google_indexing']);
+            $this->saveInDateBase( $articleRepository, $articleRepository->getNewObject());
+            $this->reset(['slug','title','categories','main_image','content','seo_keywords','seo_description','score','status','commentable','google_indexing']);
         }
     }
 
-    public function saveInDateBase(Article $model)
+    public function saveInDateBase($articleRepository,$model)
     {
         $fields = [
             'slug' => ['required','string','unique:articles,slug,'.($this->article->id ?? 0)],
             'title' => ['required','string','max:100'],
             'main_image' => ['nullable','string','max:250'],
-            'content' => ['required','string'],
+            'content' => ['required','string','max:1000000'],
             'seo_keywords' => ['required','string','max:250'],
             'seo_description' => ['required','string','max:250'],
             'score' => ['required','numeric','between:0,5'],
-            'status' => ['required','in:'.Article::SHARED.','.Article::DEMO],
-            'commentable' => ['nullable'],
-            'google_indexing' => ['nullable'],
+            'status' => ['required','in:'.implode(',',array_keys($articleRepository->getStatus()))],
+            'commentable' => ['nullable','boolean'],
+            'google_indexing' => ['nullable','boolean'],
         ];
         $messages = [
             'slug' => 'نام مستعار',
@@ -96,18 +95,19 @@ class StoreArticle extends BaseComponent
         $model->score = $this->score ?? 0;
         $model->status = $this->status;
         $model->commentable = $this->commentable ?? 0;
-        $model->google_indexing = $this->commentable ?? 1;
+        $model->google_indexing = $this->google_indexing ?? 1;
         $model->user_id = Auth::id();
-        $model->save();
+        $articleRepository->save($model);
 
         $this->mode == 'edit' ?
-            $model->categories()->sync(array_filter($this->categories)) : $model->categories()->attach(array_filter($this->categories));
+            $articleRepository->syncCategories($model,array_filter($this->categories)) : $articleRepository->attachCategories($model,array_filter($this->categories));
 
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
     public function render()
     {
-        return view('livewire.admin.articles.store-article')->extends('livewire.admin.layouts.admin');
+        return view('livewire.admin.articles.store-article')
+            ->extends('livewire.admin.layouts.admin');
     }
 }

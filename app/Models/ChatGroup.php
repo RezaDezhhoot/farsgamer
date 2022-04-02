@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static latest(string $string)
  * @method static findOrFail($id)
  * @method static where(\Closure $param)
+ * @method static create(array $array)
  * @property mixed|string slug
  * @property int|mixed|string|null user1
  * @property mixed user2
@@ -20,6 +21,8 @@ class ChatGroup extends Model
     use HasFactory;
     protected $table = 'chats_groups';
     const OPEN = 'open' , CLOSE = 'close';
+
+    protected $guarded = [];
 
     public function user_one()
     {
@@ -47,10 +50,27 @@ class ChatGroup extends Model
         return (!empty($last) && !is_null($last)) ? $last->diffForHumans() : '';
     }
 
+    public function getLastTextAttribute()
+    {
+        $last = $this->chats()->orderByDesc('id')->first()->content ?? null;
+        return (!empty($last) && !is_null($last)) ? $last : '';
+    }
+
+    public function getLastSenderAttribute()
+    {
+        $last = $this->chats()->orderByDesc('id')->first()->sender ?? null;
+        return (!empty($last) && !is_null($last)) ? $last->id : '';
+    }
+
     public static function getStatus(){
         return [
             self::OPEN => 'باز',
             self::CLOSE => 'بسته',
         ];
+    }
+
+    public function getUnreadAttribute()
+    {
+        return $this->chats()->where('is_read',0)->count();
     }
 }

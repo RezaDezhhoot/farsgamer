@@ -2,32 +2,31 @@
 
 namespace App\Http\Livewire\Admin\Articles;
 
-use App\Models\Comment;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\ArticleRepositoryInterface;
 use App\Http\Livewire\BaseComponent;
 use Livewire\WithPagination;
-use App\Models\Article;
 
 class IndexArticle extends BaseComponent
 {
-    use WithPagination , AuthorizesRequests;
+    use WithPagination ;
     protected $queryString = ['status'];
     public $status;
-    public $pagination = 10 , $search , $data = [] , $placeholder = 'عنوان یا نام مستعار';
+    public  $data = [] , $placeholder = 'عنوان یا نام مستعار';
 
-    public function render()
+    public function render(ArticleRepositoryInterface $articleRepository)
     {
-        $this->authorize('show_articles');
-        $articles = Article::latest('id')->when($this->status,function ($query){
-            return $query->where('status',$this->status);
-        })->search($this->search)->paginate($this->pagination);
-        $this->data['status'] = Article::getStatus();
-        return view('livewire.admin.articles.index-article',['articles'=>$articles])->extends('livewire.admin.layouts.admin');
+        $this->authorizing('show_articles');
+        $articles = $articleRepository->getAllAdmin($this->search,$this->status,$this->pagination);
+        $this->data['status'] = $articleRepository->getStatus();
+        return view('livewire.admin.articles.index-article',['articles'=>$articles])
+            ->extends('livewire.admin.layouts.admin');
     }
-    public function delete($id)
+
+    public function delete($id , ArticleRepositoryInterface $articleRepository)
     {
-        $this->authorize('delete_articles');
-        Comment::where('case_id',$id)->delete();
-        Article::findOrFail($id)->delete();
+        $this->authorizing('delete_articles');
+        $article = $articleRepository->findArticle($id,false);
+        $articleRepository->deleteComments($article);
+        $articleRepository->delete($article);
     }
 }

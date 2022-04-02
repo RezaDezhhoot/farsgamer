@@ -18,10 +18,9 @@ class CreateCommentsTable extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('status')->default('new');
             $table->string('content');
-            $table->string('type');
-            $table->integer('case_id')->nullable();
-            $table->string('table');
+            $table->morphs('commentable');
             $table->float('score')->default(2.5);
+            $table->integer('order_transaction_id')->nullable();
             $table->timestamps();
         });
     }

@@ -3,21 +3,18 @@
 namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Setting;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class ContactUsSetting extends BaseComponent
 {
-    use AuthorizesRequests;
-
     public $header , $googleMap  , $contactText;
 
-    public function mount()
+    public function mount(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_settings_contactUs');
+        $this->authorizing('show_settings_contactUs');
         $this->header = 'تنظیمات ارتباط با ما';
-        $this->googleMap = Setting::getSingleRow('googleMap');
-        $this->contactText = Setting::getSingleRow('contactText');
+        $this->googleMap = $settingRepository->getSiteFaq('googleMap');
+        $this->contactText = $settingRepository->getSiteFaq('contactText');
     }
 
     public function render()
@@ -26,9 +23,9 @@ class ContactUsSetting extends BaseComponent
             ->extends('livewire.admin.layouts.admin');
     }
 
-    public function store()
+    public function store(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('edit_settings_contactUs');
+        $this->authorizing('edit_settings_contactUs');
         $this->validate(
             [
                 'googleMap' => ['nullable', 'string','max:10000'],
@@ -38,6 +35,9 @@ class ContactUsSetting extends BaseComponent
                 'contactText' => 'متن',
             ]
         );
+        $settingRepository::updateOrCreate(['name' => 'googleMap'],['value' => $this->googleMap]);
+        $settingRepository::updateOrCreate(['name' => 'contactText'],['value' => $this->contactText]);
+
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 }

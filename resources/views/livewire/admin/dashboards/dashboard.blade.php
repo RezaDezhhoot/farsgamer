@@ -1,5 +1,6 @@
 <div  wire:init="emitEvent()">
-    <div class="subheader py-2 py-lg-6 subheader-solid" id="kt_subheader">
+    @if(auth()->user()->hasPermissionTo('show_dashboard'))
+        <div class="subheader py-2 py-lg-6 subheader-solid" id="kt_subheader">
         <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
             <!--begin::Info-->
             <div class="d-flex align-items-center flex-wrap mr-1">
@@ -29,7 +30,7 @@
             <!--end::Toolbar-->
         </div>
     </div>
-    <div class="card card-custom">
+        <div class="card card-custom">
         <div class="card-body">
             <div class="row">
                 <div class="col-xl-4">
@@ -359,7 +360,7 @@
                                             <!--end::Info-->
                                             <!--begin::Label-->
                                             <span class="label label-lg label-light-primary label-inline font-weight-bold py-4">
-                                                {{ $item->for }}
+                                                {{ $item->commentable->title ??  $item->commentable->fullName }}
                                             </span>
                                             <span class="label label-lg label-light-primary label-inline font-weight-bold py-4">
                                                 {{ $item->statusLabel }}
@@ -442,4 +443,5 @@
             </div>
         </div>
     </div>
+    @endif
 </div>

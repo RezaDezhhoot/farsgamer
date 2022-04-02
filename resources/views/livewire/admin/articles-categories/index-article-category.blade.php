@@ -9,6 +9,7 @@
                     <table class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th> ایکون</th>
                             <th>نام مستعار</th>
                             <th>عنوان</th>
@@ -20,10 +21,11 @@
                         <tbody>
                         @forelse($categories as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td><img style="width: 30px;height: 30px" src="{{ asset($item->logo) }}" alt=""></td>
                                 <td>{{ $item->slug }}</td>
                                 <td>{{ $item->title }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>{{ $item->parent->title ?? '' }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.articleCategory',['edit', $item->id]) }}" />
@@ -31,7 +33,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="6">
+                            <td class="text-center" colspan="7">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

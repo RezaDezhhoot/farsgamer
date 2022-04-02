@@ -3,18 +3,18 @@
         @if($item['status'] == 'normal')
             @continue
         @endif
-            @if($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_SENDING_DATA && $item['for'] == 'customer')
+            @if($transaction->status == $sendingData && $item['for'] == 'customer')
                 @continue
-            @elseif($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_SEND && $item['for'] == 'seller')
+            @elseif($transaction->status == $send && $item['for'] == 'seller')
                 @continue
             @endif
     @else
         @if($item['status'] == 'return')
             @continue
         @endif
-            @if($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_SEND && $item['for'] == 'customer')
+            @if($transaction->status == $send && $item['for'] == 'customer')
                 @continue
-            @elseif($transaction->status == \App\Models\OrderTransaction::WAIT_FOR_PAY && $item['for'] == 'seller')
+            @elseif($transaction->status == $pay && $item['for'] == 'seller')
                 @continue
             @endif
     @endif
@@ -55,7 +55,7 @@
                 <select id="{{$key}}" name="{{$item['name']}}" class="form-control text-field h-auto resize-y" wire:model.defer="transactionData.{{$item['name']}}">
                     <option value="">انتخاب کنید...</option>
                     @foreach($item['options'] as $option)
-                        <option value="{{$option['value2']}}">{{$option['value']}}</option>
+                        <option value="{{$option['value']}}">{{$option['name']}}</option>
                     @endforeach
                 </select>
                 @error('transactionData.'.$item['name'].'.error')
@@ -74,8 +74,8 @@
                 <div class="d-flex row">
                     @foreach($item['options'] as $keyRadio => $radio)
                         <div class="justify-center align-items-center col-3 p-2" dir="ltr">
-                            <label for="{{$key}}-{{$keyRadio}}" class="account-category-btn">{{$radio['value']}}
-                                <input id="{{$key}}-{{$keyRadio}}" class="" type="radio" value="{{ $radio['value2'] }}" name="{{$item['name']}}"
+                            <label for="{{$key}}-{{$keyRadio}}" class="account-category-btn">{{$radio['name']}}
+                                <input id="{{$key}}-{{$keyRadio}}" class="" type="radio" value="{{ $radio['value'] }}" name="{{$item['name']}}"
                                        wire:model.defer="transactionData.{{$item['name']}}">
                             </label>
                         </div>

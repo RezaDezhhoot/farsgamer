@@ -3,40 +3,39 @@
 namespace App\Http\Livewire\Admin\Orders;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Notification;
-use App\Models\OrderParameter;
-use App\Models\Setting;
-use App\Sends\SendMessages;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
+use App\Repositories\Interfaces\ChatRepositoryInterface;
+use App\Repositories\Interfaces\NotificationRepositoryInterface;
+use App\Repositories\Interfaces\OrderRepositoryInterface;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Traits\Admin\ChatList;
-use App\Traits\Admin\Sends;
-use App\Traits\Admin\TextBuilder;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Order;
-use App\Models\Category;
-use App\Models\Parameter;
 
 class StoreOrder extends BaseComponent
 {
-    use AuthorizesRequests , TextBuilder , Sends , ChatList;
+    use ChatList;
     public $mode;
     public $order;
     public $slug , $price , $province , $city , $category , $status , $content , $image , $gallery;
     public $categories , $platforms = [], $platform = [] , $parameters , $parameter = [] , $newMessage , $newMessageStatus;
     public $message;
     public $data;
-    public function mount($action , $id)
+    public function mount(
+        OrderRepositoryInterface $orderRepository, NotificationRepositoryInterface $notificationRepository , ChatRepositoryInterface $chatRepository,
+        CategoryRepositoryInterface $categoryRepository ,
+        UserRepositoryInterface $userRepository , $action , $id)
     {
-        $this->authorize('show_orders');
+        $this->authorizing('show_orders');
         if ($action <> 'edit')
             abort(404);
 
         $this->mode = 'edit';
-        $this->order = Order::findOrFail($id);
+        $this->order = $orderRepository->getOrder($id,false);
         $this->slug = $this->order->slug;
         $this->price = $this->order->price;
         $this->province = $this->order->province;
         $this->city = $this->order->city;
-        if ($this->order->category->status == Category::AVAILABLE && $this->order->category->is_available == Category::YES) {
+        if ($this->order->category->status == $categoryRepository::availableStatus() && $this->order->category->is_available == $categoryRepository::yes()) {
             $this->category = $this->order->category_id;
             $this->parameter = $this->order->parameters()->pluck('value','parameter_id')->toArray();
             $this->platform = $this->order->platforms->pluck('slug','id');
@@ -46,51 +45,51 @@ class StoreOrder extends BaseComponent
         $this->content = $this->order->content;
         $this->image = $this->order->image;
         $this->gallery = $this->order->gallery;
-        $this->message = $this->order->user->alerts()->where([
-            ['subject',Notification::ORDER],
-            ['model_id',$this->order->id],
-        ])->get();
-        $this->data['status'] = Order::getStatus();
-        $this->data['subject'] = Notification::getSubject();
+        $this->message = $userRepository->getUserNotifications($this->order->user,$notificationRepository->orderStatus(),$this->order->id);
+        $this->data['status'] = $orderRepository::getStatus();
+        $this->data['subject'] = $notificationRepository->getSubjects();
 
         $this->chatUserId = $this->order->user->id;
-        $this->chats = \auth()->user()->singleContact($this->order->user->id);
-        $this->newMessageStatus = Notification::ORDER;
+        $this->chats = $chatRepository->singleContact($this->order->user->id);
+        $this->newMessageStatus = $notificationRepository->orderStatus();
+        $this->data['province'] = [];
+        $this->data['city'] = [];
     }
 
-    public function render()
+    public function render(SettingRepositoryInterface $settingRepository , CategoryRepositoryInterface $categoryRepository )
     {
-        $this->data['province'] = Setting::getProvince();
-        $this->data['city'] = Setting::getCity()[$this->province];
-        $this->data['category'] = Category::where([
-            ['status',Category::AVAILABLE],
-            ['is_available',Category::YES]
-        ])->pluck('title','id');
-        $this->parameters = Parameter::where('category_id',$this->category)->where('status','available')->get();
-        $category = Category::findOrFail($this->category);
+        $category = $categoryRepository->find($this->category,true);
+
+        if ($category->type == $categoryRepository::physical()){
+            $this->data['province'] = $settingRepository::getProvince();
+            $this->data['city'] = $settingRepository->getCity($this->province);
+        }
+        $this->data['category'] = $categoryRepository->getAll(true,true)->pluck('title','id');
+
+        $this->parameters = $category->parameters;
         $this->platforms = $category->platforms;
         return view('livewire.admin.orders.store-order' , ['order' => $this->order])
             ->extends('livewire.admin.layouts.admin');
     }
 
-    public function store()
+    public function store(OrderRepositoryInterface $orderRepository)
     {
-        $this->authorize('edit_orders');
+        $this->authorizing('edit_orders');
         if ($this->mode == 'edit')
-            $this->saveInDB($this->order);
+            $this->saveInDB($orderRepository , $this->order);
     }
 
-    public function saveInDB(Order $order)
+    public function saveInDB($orderRepository ,  $order)
     {
         $this->validate(
             [
                 'slug' => ['required', 'string','max:250'],
                 'category' => ['required','exists:categories,id'],
-                'status' => ['required', 'in:'.Order::IS_NEW.','.Order::IS_UNCONFIRMED.','.Order::IS_CONFIRMED.','.Order::IS_REJECTED.','.Order::IS_REQUESTED],
+                'status' => ['required', 'in:'.implode(',',array_keys($orderRepository::getStatus()))],
                 'content' => ['nullable','string','max:65000'],
                 'price' => ['required','numeric', 'between:0,99999999999.99999'],
-                'province' => ['required','string','in:'.implode(',',array_keys($this->data['province']))],
-                'city' => ['required','string','in:'.implode(',',array_keys($this->data['city']))],
+                'province' => ['nullable','string','in:'.implode(',',array_keys($this->data['province']))],
+                'city' => ['nullable','string','in:'.implode(',',array_keys($this->data['city']))],
             ] , [] , [
                 'slug' => 'عنوان',
                 'category' => 'دست بندی',
@@ -102,15 +101,10 @@ class StoreOrder extends BaseComponent
             ]
         );
 
-        if (!in_array($this->order->status , [Order::IS_REQUESTED,Order::IS_FINISHED])) {
-            if ($this->status <> $order->status)
-                $this->notify();
-
+        if (!in_array($this->order->status , [$orderRepository::isRequestedStatus(),$orderRepository::isFinishedStatus()])) {
             $order->status = $this->status;
             $order->category_id = $this->category;
             $order->price = $this->price;
-//            $order->image = $this->image;
-//            $order->gallery = $this->gallery;
             $order->province = $this->province;
             $order->city = $this->city;
             $order->slug = $this->slug;
@@ -138,13 +132,13 @@ class StoreOrder extends BaseComponent
                 }
             }
 
-            OrderParameter::where('order_id',$this->order->id)->delete();
-            $order->parameters()->attach($selectedParameter);
+            $orderRepository->deleteParameters($order);
+            $orderRepository->attachParameters($order,$selectedParameter);
             if (!is_null($this->platform)) {
                 $selectedPlatform = array_keys(array_filter($this->platform->toArray()));
-                $order->platforms()->sync($selectedPlatform);
+                $orderRepository->syncPlatforms($order,$selectedPlatform);
             }
-            $order->save();
+            $orderRepository->save($order);
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
         } else
             $this->emitNotify('برای این اگهی  امکان ویرایش وجود ندارد','warning');
@@ -152,53 +146,35 @@ class StoreOrder extends BaseComponent
 
     }
 
-    public function notify()
+    public function delete(OrderRepositoryInterface $orderRepository)
     {
-        $text = [];
-        switch ($this->status){
-            case Order::IS_CONFIRMED : $text = $this->createText('confirm_order',$this->order);break;
-            case Order::IS_REJECTED : $text = $this->createText('reject_order',$this->order);break;
-            case Order::IS_REQUESTED : $text = $this->createText('request_order',$this->order);break;
-        }
-        $send = new SendMessages();
-        $send->sends($text,$this->order->user,Notification::ORDER,$this->order->id);
-    }
-
-    public function delete()
-    {
-        $this->authorize('delete_orders');
-        if ($this->order->status <> Order::IS_REQUESTED && $this->order->status <> Order::IS_FINISHED )
+        $this->authorizing('delete_orders');
+        if (!in_array($this->order->status,[$orderRepository::isRequestedStatus() ,$orderRepository::isFinishedStatus()]))
         {
-            $this->order->delete();
+            $orderRepository->delete($this->order);
             return redirect()->route('admin.order');
-        } else {
-            $this->emitNotify('برای این سفارش امکان حدف وجود ندارد','warning');
-        }
-        return(false);
+        } else return $this->emitNotify('برای این سفارش امکان حدف وجود ندارد','warning');
     }
 
-    public function sendMessage()
+    public function sendMessage(NotificationRepositoryInterface $notificationRepository)
     {
-        $this->authorize('edit_orders');
         $this->validate([
-            'newMessage' => ['required','string'],
-            'newMessageStatus' => ['required','in:'.implode(',',array_keys(Notification::getSubject()))]
+            'newMessage' => ['required','string','max:255'],
+            'newMessageStatus' => ['required','in:'.implode(',',array_keys($notificationRepository->getSubjects()))]
         ],[],[
             'newMessage'=> 'متن',
             'newMessageStatus' => 'وضعیت پیام'
         ]);
-        $result = new Notification();
-        $result->subject = Notification::ORDER;
-        $result->content = $this->newMessage;
-        $result->type = Notification::PRIVATE;
-        $result->user_id = $this->order->user->id;
-        $result->model = Notification::ORDER;
-        $result->model_id = $this->order->id;
-        $result->save();
-        $text = $this->createText('new_message',$this->order->user);
-        $send = new SendMessages();
-        $send->sends($text,$this->order->user,Notification::ORDER);
-        $this->message->push($result);
+        $notification = [
+            'subject' => $notificationRepository->orderStatus(),
+            'content' =>  $this->newMessage,
+            'type' => $notificationRepository->privateType(),
+            'user_id' => $this->order->user->id,
+            'model' => $notificationRepository->orderStatus(),
+            'model_id' => $this->order->id
+        ];
+        $notification = $notificationRepository->create($notification);
+        $this->message->push($notification);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }

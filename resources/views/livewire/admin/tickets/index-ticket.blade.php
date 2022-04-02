@@ -11,6 +11,7 @@
                     <table  class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>شماره</th>
                             <th> موضوع</th>
                             <th>کاربر هدف</th>
@@ -24,12 +25,13 @@
                         <tbody>
                         @forelse($tickets as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->id }}</td>
                                 <td>{{ $item->subject }}</td>
-                                <td>{{ $item->user->fullName }}</td>
+                                <td>{{ $item->user->name }}</td>
                                 <td>{{ $item->senderTypeLabel }}</td>
-                                <td>{{ $item->statusLabel }}</td>
-                                <td>{{ $item->priorityLabel }}</td>
+                                <td>{{ $item->status_label }}</td>
+                                <td>{{ $item->priority_label }}</td>
                                 <td>{{ $item->date }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.ticket',['edit', $item->id]) }}" />
@@ -37,7 +39,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="8">
+                            <td class="text-center" colspan="9">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

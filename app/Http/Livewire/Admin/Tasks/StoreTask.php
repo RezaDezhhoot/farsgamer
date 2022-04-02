@@ -3,21 +3,19 @@
 namespace App\Http\Livewire\Admin\Tasks;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Setting;
-use App\Models\Task;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 
 class StoreTask extends BaseComponent
 {
-    use AuthorizesRequests;
     public $task , $name , $event = [] , $where , $value ,$data = [] , $header , $mode;
 
-    public function mount($action , $id =null)
+    public function mount(SettingRepositoryInterface $settingRepository , TaskRepositoryInterface $taskRepository ,$action , $id =null)
     {
-        $this->authorize('show_tasks');
+        $this->authorizing('show_tasks');
         if ($action == 'edit')
         {
-            $this->task = Task::findOrFail($id);
+            $this->task = $taskRepository->find($id);
             $this->header = $this->task->name;
             $this->name = $this->task->name;
             $this->event = $this->task->task;
@@ -27,27 +25,27 @@ class StoreTask extends BaseComponent
         else abort(404);
 
         $this->mode = $action;
-        $this->data['task'] = Task::tasks();
-        $this->data['code'] = Setting::codes();
-        $this->data['event'] = Task::event();
+        $this->data['task'] = $taskRepository->tasks();
+        $this->data['code'] = $settingRepository->codes();
+        $this->data['event'] = $taskRepository->event();
     }
 
-    public function store()
+    public function store( TaskRepositoryInterface $taskRepository)
     {
-        $this->authorize('edit_tasks');
+        $this->authorizing('edit_tasks');
         if ($this->mode == 'edit')
-            $this->saveInDateBase($this->task);
+            $this->saveInDateBase($taskRepository,$this->task);
         else {
-            $this->saveInDateBase(new Task());
+            $this->saveInDateBase($taskRepository,$taskRepository->newTaskObject());
             $this->reset(['name','event','where','value']);
         }
     }
 
-    public function saveInDateBase(Task $model)
+    public function saveInDateBase($taskRepository, $model)
     {
         $this->validate([
             'name' => ['required','string','max:250'],
-            'event' => ['required','in:'.implode(',',array_keys(Task::event()))],
+            'event' => ['required','in:'.implode(',',array_keys($taskRepository->event()))],
             'where' => ['required','string','max:250'],
             'value' => ['required','string','max:3600']
         ],[],[
@@ -60,14 +58,14 @@ class StoreTask extends BaseComponent
         $model->task = $this->event;
         $model->where = $this->where;
         $model->value = $this->value;
-        $model->save();
+        $taskRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
-    public function deleteItem()
+    public function deleteItem(TaskRepositoryInterface $taskRepository)
     {
-        $this->authorize('delete_tasks');
-        $this->task->delete();
+        $this->authorizing('delete_tasks');
+        $taskRepository->delete($this->task);
         return redirect()->route('admin.task');
     }
 

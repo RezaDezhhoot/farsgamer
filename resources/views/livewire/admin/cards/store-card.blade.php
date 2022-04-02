@@ -18,6 +18,7 @@
                         <table class="table table-striped">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>موضوع</th>
                                 <th>تاریخ</th>
                                 <th style="width: 70%">توضیحات</th>
@@ -26,6 +27,7 @@
                             <tbody>
                             @foreach($message as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>
                                         {{ $item->subjectLabel }}
                                     </td>

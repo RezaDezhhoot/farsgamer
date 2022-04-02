@@ -9,6 +9,7 @@ use Morilog\Jalali\Jalalian;
 /**
  * @method static findOrFail($id)
  * @method static where(array[] $array)
+ * @method static create(array $data)
  * @property mixed created_at
  * @property mixed subject
  * @property mixed content
@@ -16,6 +17,7 @@ use Morilog\Jalali\Jalalian;
  * @property mixed user_id
  * @property mixed model
  * @property mixed model_id
+ * @property mixed user
  */
 class Notification extends Model
 {
@@ -23,8 +25,10 @@ class Notification extends Model
 
     const PUBLIC = 'public' , PRIVATE = 'private';
 
+    protected $guarded = [];
+
     const TRANSACTION = 'OrderTransaction' , ORDER = 'Order' , AUTH = 'Auth' , ADDRESS = 'Address' , CARD = 'Card' , REQUEST = 'Request';
-    const CHAT = 'Chat' , TICKET = 'Ticket' , ALL = 'All' , NEWS = 'News'  , SECURITY = 'Security' , User = 'User';
+    const CHAT = 'Chat' , TICKET = 'Ticket' , ALL = 'All' , NEWS = 'News'  , SECURITY = 'Security' , User = 'User' , PAYMENT = 'payment';
 
     public static function getSubject()
     {
@@ -39,6 +43,7 @@ class Notification extends Model
             self::CHAT => 'چت',
             self::TICKET => 'تیکت',
             self::SECURITY => 'امنیتی',
+            self::PAYMENT => 'پرداخت',
             self::NEWS => 'اطلاع رسانی',
             self::ALL => 'عمومی',
         ];
@@ -51,7 +56,12 @@ class Notification extends Model
 
     public function getSubjectLabelAttribute()
     {
-        return self::getSubject()[$this->subject];
+        return self::getSubject()[in_array($this->subject,array_keys(self::getSubject())) ? $this->subject : self::ALL];
+    }
+
+    public function getTypeLabelAttribute()
+    {
+        return self::getType()[$this->type];
     }
 
     public static function getType()

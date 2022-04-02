@@ -22,7 +22,7 @@
                     @foreach($data['category'] as $key => $item)
                         <div class="col-lg-2">
                             <x-admin.forms.checkbox label="{{ $item['title'] }}" value="{{ $item['id'] }}" id="{{ $item['id'] }}category"
-                                                    wire:model.defer="categories.{{$item['id']}}" />
+                                                    wire:model.defer="categories" />
                         </div>
                     @endforeach
                 </div>

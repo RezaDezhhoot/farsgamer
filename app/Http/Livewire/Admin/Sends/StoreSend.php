@@ -3,21 +3,19 @@
 namespace App\Http\Livewire\Admin\Sends;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Send;
+use App\Repositories\Interfaces\SendRepositoryInterface;
 
 class StoreSend extends BaseComponent
 {
-    use AuthorizesRequests;
     public $transfer , $mode , $header , $data = [];
     public $slug , $logo , $send_time_inner_city , $send_time_outer_city , $note , $pursuit , $status , $pursuit_web_site;
 
-    public function mount($action  ,$id = null)
+    public function mount(SendRepositoryInterface $sendRepository , $action  ,$id = null)
     {
-        $this->authorize('show_sends');
+        $this->authorizing('show_sends');
         if ($action == 'edit')
         {
-            $this->transfer = Send::findOrFail($id);
+            $this->transfer = $sendRepository->find($id);
             $this->header = $this->transfer->slug;
             $this->slug = $this->transfer->slug;
             $this->logo = $this->transfer->logo;
@@ -31,21 +29,21 @@ class StoreSend extends BaseComponent
         else abort(404);
 
         $this->mode = $action;
-        $this->data['status'] = Send::getStatus();
+        $this->data['status'] = $sendRepository->getStatus();
     }
 
-    public function store()
+    public function store(SendRepositoryInterface $sendRepository)
     {
-        $this->authorize('edit_sends');
+        $this->authorizing('edit_sends');
         if ($this->mode == 'edit')
-            $this->saveInDataBase($this->transfer);
+            $this->saveInDataBase($sendRepository , $this->transfer);
         else{
-            $this->saveInDataBase(new Send());
+            $this->saveInDataBase($sendRepository , $sendRepository->newSendObject());
             $this->reset(['slug','logo','send_time_inner_city','send_time_outer_city','note','pursuit','status','pursuit_web_site']);
         }
     }
 
-    public function saveInDataBase(Send $model)
+    public function saveInDataBase($sendRepository ,  $model)
     {
         $fields = [
             'slug' => ['required','max:150','string','unique:sends,slug,'.($this->transfer->id ?? 0)],
@@ -54,7 +52,7 @@ class StoreSend extends BaseComponent
             'send_time_outer_city' => ['required','numeric','between:0,99999.99999'],
             'note' => ['nullable','string','max:255'],
             'pursuit' => ['required','boolean'],
-            'status' => ['required','in:'.Send::UNAVAILABLE.','.Send::AVAILABLE],
+            'status' => ['required','in:'.implode(',',array_keys($sendRepository->getStatus()))],
             'pursuit_web_site' => ['nullable','url','max:250']
         ];
         $messages = [
@@ -77,15 +75,16 @@ class StoreSend extends BaseComponent
         $model->pursuit = $this->pursuit ?? 0;
         $model->status = $this->status;
         $model->pursuit_web_site = $this->pursuit_web_site;
-        $model->save();
+        $sendRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
 
     }
 
-    public function deleteItem()
+    public function deleteItem(SendRepositoryInterface $sendRepository)
     {
-        $this->authorize('delete_sends');
-        $this->transfer->delete();
+        $this->authorizing('delete_sends');
+        $sendRepository->delete($this->transfer);
+
         return redirect()->route('admin.transfer');
     }
 

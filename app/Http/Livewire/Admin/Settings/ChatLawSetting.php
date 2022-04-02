@@ -3,24 +3,25 @@
 namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
-use App\Models\Setting;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
+
 
 class ChatLawSetting extends BaseComponent
 {
-    use AuthorizesRequests;
-    public $laws = [] , $header;
-    public function delete($id)
+    public  $header;
+    public function delete(SettingRepositoryInterface $settingRepository,$id)
     {
-        $this->authorize('edit_settings_chatLaw');
-        Setting::findOrFail($id)->delete();
+        $this->authorizing('edit_settings_chatLaw');
+        $settings = $settingRepository->find($id);
+        $settingRepository->delete($settings);
     }
-    public function render()
+
+    public function render(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_settings_chatLaw');
+        $this->authorizing('show_settings_chatLaw');
         $this->header = ' تنظیمات قوانین چت';
-        $this->laws = Setting::where('name','chatLaw')->get()->toArray() ?? [];
-        return view('livewire.admin.settings.chat-law-setting')
+        $laws = $settingRepository->getAdminLaw('chatLaw');
+        return view('livewire.admin.settings.chat-law-setting',['laws'=>$laws])
             ->extends('livewire.admin.layouts.admin');
     }
 }

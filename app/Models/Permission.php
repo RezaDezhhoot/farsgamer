@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+/**
+ * @property mixed name
+ * @method static insert(array $data)
+ */
 class Permission extends \Spatie\Permission\Models\Permission
 {
 
@@ -50,6 +54,8 @@ class Permission extends \Spatie\Permission\Models\Permission
             'comments' => 'کامنت ها',
             'transactions' => 'معاملات',
             'cancel' => 'لغو',
+            'offends' => 'تخلفات',
+            'reports'=> 'گزارش ها',
         ];
     }
 

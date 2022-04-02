@@ -33,18 +33,28 @@ class Task extends Model
         ];
     }
 
+    public function getTaskLabelAttribute()
+    {
+        return self::tasks()[$this->where];
+    }
+
+    public function getWhereLabelAttribute()
+    {
+        return self::event()[$this->task];
+    }
+
     public static function tasks()
     {
         return [
             'new_order' => 'اکهی جدید',#ok
             'confirm_order' => 'تایید اگهی',#ok
             'reject_order' => 'رد اگهی',#ok
+            'delete_order' => 'حذف اگهی',#ok
             'confirm_transaction' => 'در انتظار تایید توسط فروشنده',#ok
             'pay_transaction' => 'در انتظار پرداخت ',#ok
             'send_transaction' => 'در انتظار ارسال محصول مورد نظر توسط فروشنده',#ok
             'receive_transaction' => 'در انتظار دریافت محصول مورد نظر توسط خریدار',#ok
             'no_receive_transaction' => 'عدم دریافت محصول مورد نظر توسط خریدار',#ok
-            'test_transaction' => 'زمان تست',#ok
             'complete_transaction' => 'تکمیل معامله',#ok
             'request_to_return_transaction' => 'درخواست مرجوع کردن محصول(مرجوعی)',#ok
             'confirm_returned_transaction' => 'تایید مرجوع شدن محصول(مرجوعی)',#ok
@@ -56,10 +66,9 @@ class Task extends Model
             'cancel_transaction' => 'لفو معامله',#ok
             'control_data' => 'کنترل توسط واسطه',#ok
             'skip_step' => 'رد شدن از مراحل توسط طرف معامله بابت دیر کرد',
-            'confirm_address' => 'تایید ادرس',#ok
-            'reject_address' => 'رد ادرس',#ok
             'confirm_card' => 'تایید حساب بانکی',#ok
             'reject_card' => 'رد حساب بانکی',#ok
+            'delete_card' => 'حذف بانکی',#ok
             'login' => 'ورود به حساب کاربری',
             'signUp'=> 'ثبت نام',
             'auth'=> 'تکمیل احراز هویت',#ok
@@ -71,6 +80,7 @@ class Task extends Model
             'ticket_answer' => 'پاسخ تیکت',#ok
             'new_message' => 'پیام جدید',
             'baned_user' => 'بلاک شدن کاربر',
+            'pay' => 'پرداخت',
         ];
     }
 }

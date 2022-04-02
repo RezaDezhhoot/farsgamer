@@ -4,7 +4,7 @@
     <div class="brand flex-column-auto" id="kt_brand">
         <!--begin::Logo-->
         <a href="{{ route('home') }}" class="brand-logo">
-            <img alt="Logo" style="width: 30px" src="{{asset(\App\Models\Setting::getSingleRow('logo'))}}" />
+            <img alt="Logo"  src="{{asset(\App\Models\Setting::getSingleRow('logo'))}}" />
         </a>
         <!--end::Logo-->
         <!--begin::Toggle-->
@@ -57,7 +57,7 @@
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
                 @can('show_orders')
-                    <x-admin.menu-item href="{{route('admin.order')}}" icon="flaticon2-box"  :active="request()->routeIs(['admin.order','admin.store.order'])" label="اگهی ها({{\App\Models\Order::getNew()}})" />
+                    <x-admin.menu-item href="{{route('admin.order')}}" icon="flaticon2-box"  :active="request()->routeIs(['admin.order','admin.store.order'])" label="اگهی ها ({{$orders}})" />
                 @endcan
                 @can('show_transactions')
                     <x-admin.menu-item href="{{route('admin.transaction')}}" icon="fas fa-exchange-alt" :active="request()->routeIs(['admin.transaction','admin.store.transaction'])" label="معاملات" />
@@ -66,13 +66,16 @@
                     <x-admin.menu-item href="{{route('admin.chat')}}" icon="flaticon-chat" :active="request()->routeIs(['admin.chat','admin.store.chat'])" label="چت ها" />
                 @endcan
                 @can('show_tickets')
-                    <x-admin.menu-item href="{{route('admin.ticket')}}" icon="fas fa-ticket-alt" :active="request()->routeIs(['admin.ticket','admin.store.ticket'])" label="تیکت ها ({{\App\Models\Ticket::getNew()}})" />
+                    <x-admin.menu-item href="{{route('admin.ticket')}}" icon="fas fa-ticket-alt" :active="request()->routeIs(['admin.ticket','admin.store.ticket'])" label="تیکت ها ({{$tickets}})" />
                 @endcan
                 @can('show_notifications')
                     <x-admin.menu-item  href="{{route('admin.notification')}}" icon="flaticon2-notification" :active="request()->routeIs(['admin.notification','admin.store.notification'])" label="اعلان ها" />
                 @endcan
                 @can('show_comments')
-                    <x-admin.menu-item  href="{{route('admin.comment')}}" icon="fa fa-comment-alt" :active="request()->routeIs(['admin.comment','admin.store.comment'])" label="کامنت ها ({{\App\Models\Comment::getNew()}})" />
+                    <x-admin.menu-item  href="{{route('admin.comment')}}" icon="fa fa-comment-alt" :active="request()->routeIs(['admin.comment','admin.store.comment'])" label="کامنت ها ({{$comments}})" />
+                @endcan
+                @can('show_offends')
+                    <x-admin.menu-item  href="{{route('admin.offend')}}" icon="flaticon-danger" :active="request()->routeIs(['admin.offend'])" label="تخلفات" />
                 @endcan
                 <li class="menu-section">
                     <h4 class="menu-text">بخش محتوا</h4>
@@ -88,10 +91,7 @@
                     <x-admin.menu-item href="{{route('admin.category')}}" icon="flaticon2-list-1" :active="request()->routeIs(['admin.category','admin.store.category'])" label="دسته بندی ها " />
                 @endcan
                 @can('show_users')
-                    <x-admin.menu-item href="{{route('admin.user')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user','admin.store.user'])" label="کاربران ({{\App\Models\User::getNew()}})" />
-                @endcan
-                @can('show_addresses')
-                    <x-admin.menu-item href="{{route('admin.address')}}" icon="far fa-address-book" :active="request()->routeIs(['admin.address','admin.store.address'])" label="ادرس ها ({{\App\Models\Address::getNew()}})" />
+                    <x-admin.menu-item href="{{route('admin.user')}}" icon="flaticon-users-1" :active="request()->routeIs(['admin.user','admin.store.user'])" label="کاربران ({{$users}})" />
                 @endcan
                 @can('show_articles' , 'show_article_categories')
                     <x-admin.menu-group icon="fas fa-text-height" :active="request()->routeIs('admin.article','admin.store.article','admin.articleCategory','admin.store.articleCategory')" label="مقالات" >
@@ -108,10 +108,10 @@
                     <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
                 </li>
                 @can('show_cards')
-                    <x-admin.menu-item href="{{route('admin.card')}}" icon="fas fa-credit-card" :active="request()->routeIs(['admin.card','admin.store.card'])" label="حساب های بانکی ({{\App\Models\Card::getNew()}})" />
+                    <x-admin.menu-item href="{{route('admin.card')}}" icon="fas fa-credit-card" :active="request()->routeIs(['admin.card','admin.store.card'])" label="حساب های بانکی ({{$cards}})" />
                 @endcan
                 @can('show_requests')
-                    <x-admin.menu-item href="{{route('admin.request')}}" icon="fas fa-money-bill-alt" :active="request()->routeIs(['admin.request','admin.store.request'])" label="درخواست ها ({{\App\Models\Request::getNew()}})" />
+                    <x-admin.menu-item href="{{route('admin.request')}}" icon="fas fa-money-bill-alt" :active="request()->routeIs(['admin.request','admin.store.request'])" label="درخواست ها ({{$requests}})" />
                 @endcan
                 @can('show_payments')
                     <x-admin.menu-item href="{{route('admin.payment')}}" icon="fab fa-cc-amazon-pay" :active="request()->routeIs(['admin.payment','admin.store.payment'])" label="پرداختی ها " />
@@ -129,10 +129,13 @@
                 @can('show_roles')
                     <x-admin.menu-item href="{{route('admin.role')}}" icon="fas fa-key" :active="request()->routeIs(['admin.role','admin.store.role'])" label="نقش ها  " />
                 @endcan
+                @can('show_reports')
+                    <x-admin.menu-item href="{{route('admin.report')}}" icon="flaticon2-line-chart" :active="request()->routeIs(['admin.report'])" label="گزارش ها  " />
+                @endcan
                 @can('show_settings')
                     <x-admin.menu-group icon="flaticon2-settings" :active="request()->routeIs(
                     ['admin.setting.base','admin.setting.home','admin.setting.aboutUs','admin.setting.contactUs','admin.setting.law',
-                    'admin.setting.chatLaw','admin.setting.fag','admin.setting.transaction'])" label="تنظیمات" >
+                    'admin.setting.chatLaw','admin.setting.fag','admin.setting.fag.create','admin.setting.chatLaw.create','admin.setting.law.create'])" label="تنظیمات" >
                         @can('show_settings_base')
                             <x-admin.menu-item href="{{route('admin.setting.base')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.base')" label="پایه " />
                         @endcan
@@ -146,13 +149,13 @@
                             <x-admin.menu-item href="{{route('admin.setting.contactUs')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.contactUs')" label="ارتباط با ما " />
                         @endcan
                         @can('show_settings_law')
-                            <x-admin.menu-item href="{{route('admin.setting.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.law')" label="قوانین " />
+                            <x-admin.menu-item href="{{route('admin.setting.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.law','admin.setting.law.create'])" label="قوانین " />
                         @endcan
                         @can('show_settings_chatLaw')
-                            <x-admin.menu-item href="{{route('admin.setting.chatLaw')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.chatLaw')" label="قوانین چت " />
+                            <x-admin.menu-item href="{{route('admin.setting.chatLaw')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.chatLaw','admin.setting.chatLaw.create'])" label="قوانین چت " />
                         @endcan
                         @can('show_settings_fag')
-                            <x-admin.menu-item href="{{route('admin.setting.fag')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.fag')" label="سوالات متداول " />
+                            <x-admin.menu-item href="{{route('admin.setting.fag')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.fag','admin.setting.fag.create'])" label="سوالات متداول " />
                         @endcan
                     </x-admin.menu-group>
                 @endcan

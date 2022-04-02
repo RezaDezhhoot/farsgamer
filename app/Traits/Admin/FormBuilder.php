@@ -53,8 +53,8 @@ trait FormBuilder
             'formStatus' => ['required', 'string', 'in:normal,return'],
             'formValue' => ['present', 'string', 'max:250'],
             'formOptions' => ['present', 'array'],
-            'formOptions.*.value' => ['required_with:options', 'string', 'max:250'],
-            'formOptions.*.value2' => ['required_with:options', 'string'],
+            'formOptions.*.name' => ['required_with:options', 'string', 'max:250'],
+            'formOptions.*.value' => ['required_with:options', 'string'],
         ]);
 
         $this->form[$this->formKey]['required'] = $this->formRequired;

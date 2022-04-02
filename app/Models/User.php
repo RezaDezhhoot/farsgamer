@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Traits\Admin\Searchable;
 use Bavix\Wallet\Traits\CanPay;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -25,6 +27,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static orderBy(string $string)
  * @method static whereBetween(string $string, string[] $array)
  * @method static role(string $string)
+ * @method static create(array $array)
  * @property mixed first_name
  * @property mixed last_name
  * @property mixed phone
@@ -40,18 +43,33 @@ use Spatie\Permission\Traits\HasRoles;
  * @property mixed profile_image
  * @property mixed|string pass_word
  * @property mixed id
+ * @property mixed full_name
+ * @property mixed name
+ * @property mixed|string password
+ * @property mixed alerts
+ * @property mixed cards
+ * @property mixed overtimes
+ * @property mixed ban
  */
 class User extends Authenticatable implements Wallet, Confirmable
 {
     use HasApiTokens, HasFactory, Notifiable , HasRoles , HasWallet, CanConfirm;
-    use Searchable;
+    use Searchable , SoftDeletes ;
 
 
     const NOT_CONFIRMED = 'not_confirmed';
     const NEW = 'new';
     const CONFIRMED = 'confirmed';
+    const WAIT_TO_CONFIRM = 'wait_for_confirm';
+
+    protected $guarded = [];
 
     protected $searchAbleColumns = ['user_name','phone'];
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
 
     public static function getStatus()
     {
@@ -59,6 +77,7 @@ class User extends Authenticatable implements Wallet, Confirmable
             self::NEW => 'جدید',
             self::NOT_CONFIRMED => 'تایید نشده',
             self::CONFIRMED => 'تایید شده',
+            self::WAIT_TO_CONFIRM => 'در انتظار تایید',
         ];
     }
 
@@ -67,34 +86,21 @@ class User extends Authenticatable implements Wallet, Confirmable
         return self::getStatus()[$this->status];
     }
 
+    public function payments()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
     public function getProvinceLabelAttribute()
     {
-        return Setting::getProvince()[$this->province];
+        return !empty($this->province) ? Setting::getProvince()[$this->province] : '';
     }
+
 
     public function getCityLabelAttribute()
     {
-        return Setting::getCity()[$this->province][$this->city];
+        return (!empty($this->province) && !empty($this->city)) ? Setting::getCity()[$this->province][$this->city] : '';
     }
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'user_name',
-
-        'email',
-        'province',
-        'city',
-        'phone',
-        'status',
-        'pass_word',
-        'ip',
-    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -104,6 +110,7 @@ class User extends Authenticatable implements Wallet, Confirmable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp',
     ];
 
     /**
@@ -115,9 +122,15 @@ class User extends Authenticatable implements Wallet, Confirmable
         'email_verified_at' => 'datetime',
     ];
 
+    public function getBanedAttribute()
+    {
+        $ban = Carbon::make(now())->diff($this->ban,false)->format('%r%i');
+        return  $ban > 0;
+    }
+
     public function getFullNameAttribute()
     {
-        return $this->first_name .' ' . $this->last_name;
+        return $this->name;
     }
 
 
@@ -131,10 +144,6 @@ class User extends Authenticatable implements Wallet, Confirmable
         return $this->hasMany(Order::class);
     }
 
-    public function saves()
-    {
-        return $this->hasMany(Save::class);
-    }
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
@@ -145,54 +154,18 @@ class User extends Authenticatable implements Wallet, Confirmable
         return $this->hasMany(Request::class);
     }
 
-    public function contacts()
-    {
-        return ChatGroup::where(function ($query){
-            return $query->where('user1',auth()->id())->orWhere('user2',auth()->id());
-        });
-    }
 
     public static function getNew()
     {
-        return User::where('status',self::NEW)->orWhere('status',self::NOT_CONFIRMED)->count();
+        return User::where('status',self::NEW)->orWhere('status',self::NOT_CONFIRMED)->orWhere('status',self::WAIT_TO_CONFIRM)->count();
     }
 
-    public function singleContact($id)
-    {
-        return $this->contacts()->where(function ($query) use ($id) {
-            if ($id == auth()->id())
-                return $query->whereColumn('user1', 'user2');
-            else
-                return $query->where('user1',$id)->orWhere('user2',$id)->first();
-        })->first();
-    }
 
     public function cards()
     {
         return $this->hasMany(Card::class);
     }
 
-    public function startChatWith($id , $is_admin = 0)
-    {
-        if ($id == auth()->id())
-            return(false);
-
-        $group = ChatGroup::where(function ($query){
-            $query->where('user1',auth()->id())->orWhere('user2',auth()->id());
-        })->where(function ($query) use ($id){
-            $query->where('user1',$id)->orWhere('user2',$id);
-        })->first();
-        if (is_null($group)) {
-            $group = new ChatGroup();
-            $group->slug = 'chat'.uniqid();
-            $group->user1 = auth()->id();
-            $group->user2 = $id;
-            $group->status = ChatGroup::OPEN;
-            $group->is_admin = $is_admin;
-            $group->save();
-        }
-        return $group->id;
-    }
 
     public function schedule()
     {
@@ -202,6 +175,41 @@ class User extends Authenticatable implements Wallet, Confirmable
     public function overtimes(){
         return $this->hasMany(Overtime::class);
     }
+
+    public function setProfileImageAttribute($value)
+    {
+        $this->attributes['profile_image'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function setAuthImageAttribute($value)
+    {
+        $this->attributes['auth_image'] = str_replace(env('APP_URL'), '', $value);
+    }
+
+    public function getInventoryBeingTradedAttribute()
+    {
+        return OrderTransaction::with('order:price')->where([
+            ['status','!=',OrderTransaction::IS_REQUESTED],
+            ['status','!=',OrderTransaction::IS_CANCELED],
+            ['status','!=',OrderTransaction::WAIT_FOR_CONFIRM],
+            ['status','!=',OrderTransaction::WAIT_FOR_PAY],
+            ['status','!=',OrderTransaction::WAIT_FOR_COMPLETE],
+        ])->where(function ($query){
+            return $query->where('seller_id',auth()->id())->orWhere('customer_id',auth()->id());
+        })->withSum('order','price')->get()->sum('order_sum_price');
+    }
+
+    public function getOrdersHasTransactionAttribute()
+    {
+        return OrderTransaction::where([
+            ['status','!=',OrderTransaction::IS_REQUESTED],
+            ['status','!=',OrderTransaction::IS_CANCELED],
+            ['status','!=',OrderTransaction::WAIT_FOR_CONFIRM],
+            ['status','!=',OrderTransaction::WAIT_FOR_COMPLETE],
+            ['seller_id',auth()->id()]
+        ])->count();
+    }
+
 }
 
 

@@ -27,6 +27,7 @@
                     <table class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>کد معامله</th>
                             <th>اعضای معامله</th>
                             <th>اگهی</th>
@@ -41,18 +42,19 @@
                         <tbody>
                         @forelse($transactions as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>
                                     <a>{{ $item->code }}</a>
                                 </td>
                                 <td>
                                     <ul class="list-inline">
                                         <li>
-                                            <a title="{{$item->seller->fullName}}" href="{{route('user',$item->seller->user_name)}}" target="_blank">
+                                            <a title="{{$item->seller->name}}" href="{{route('user',$item->seller->user_name)}}" target="_blank">
                                                 فروشنده : {{$item->seller->user_name}}
                                             </a>
                                         </li>
                                         <li>
-                                            <a title="{{$item->customer->fullName}}" href="{{route('user',$item->customer->user_name)}}">
+                                            <a title="{{$item->customer->name}}" href="{{route('user',$item->customer->user_name)}}">
                                                 خریدار : {{$item->customer->user_name}}
                                             </a>
                                         </li>
@@ -62,16 +64,16 @@
                                     <a href="{{route('admin.store.order',[''])}}">{{ $item->order->slug }}</a>
                                 </td>
                                 <td>
-                                    <progress style="width: 100%;background: #fff"  max="100" value="{{ $item->getStatus($item->is_returned)[$item->status]['progress'] }}"></progress>
+                                    <progress style="width: 100%;background: #fff"  max="100" value="{{ $item->progress }}"></progress>
                                     <br>
-                                    <small>{{ $item->getStatus($item->is_returned)[$item->status]['progress'] }}% کامل شده</small>
+                                    <small>{{ $item->progress }}% کامل شده</small>
                                 </td>
                                 <td>
                                     {{ $item['is_returned'] == 0 ? 'عادی' : 'مرجوعی' }}
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-{{ $item->getStatus($item->is_returned)[$item->status]['color'] }} btn-xs">
-                                        {{ $item->getStatus($item->is_returned)[$item->status]['label'] }}
+                                    <button type="button" class="btn btn-link btn-xs">
+                                        {{ $item->status_label }}
                                     </button>
                                 </td>
                                 <td dir="ltr">
@@ -89,7 +91,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="9">
+                            <td class="text-center" colspan="10">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

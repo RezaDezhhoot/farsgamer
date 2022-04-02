@@ -3,48 +3,39 @@
 namespace App\Http\Livewire\Admin\Comments;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Comment;
+use App\Repositories\Interfaces\CommentRepositoryInterface;
 use Livewire\WithPagination;
 
 class IndexComment extends BaseComponent
 {
-    use AuthorizesRequests , WithPagination;
+    use WithPagination;
     protected $queryString = ['for','status'];
-    public $data = [] , $status ,$for , $search , $pagination = 10 , $placeholder = 'نام کاربری یا شماره کاربر';
-    public function render()
+    public $data = [] , $status , $for , $placeholder = 'نام کاربری یا شماره کاربر';
+    public function render(CommentRepositoryInterface $commentRepository)
     {
-        $this->authorize('show_comments');
-        $comments = Comment::latest('id')->with(['user'])->when($this->search,function ($query){
-            return $query->whereHas('user',function ($query){
-                return is_numeric($this->search) ?
-                    $query->where('phone',$this->search) : $query->where('user_name',$this->search);
-            });
-        })->when($this->status,function ($query){
-            return $query->where('status',$this->status);
-        })->when($this->for,function ($query){
-            return $query->where('type',$this->for);
-        })->paginate($this->pagination);
+        $this->authorizing('show_comments');
+        $comments = $commentRepository->getAllAdminList($this->search,$this->status,$this->for,$this->pagination,false);
+        foreach ($commentRepository->getStatus() as $key => $value)
+            $this->data['status'][$key] = $value.' ('.$commentRepository->getByConditionCount('status','=',$key).')';
 
-        $this->data['status'][Comment::CONFIRMED] = Comment::getStatus()[Comment::CONFIRMED].' ('.Comment::where('status',Comment::CONFIRMED)->count().')';
-        $this->data['status'][Comment::UNCONFIRMED] = Comment::getStatus()[Comment::UNCONFIRMED].' ('.Comment::where('status',Comment::UNCONFIRMED)->count().')';
-        $this->data['status'][Comment::NEW] = Comment::getStatus()[Comment::NEW].' ('.Comment::where('status',Comment::NEW)->count().')';
-        $this->data['for'] = Comment::getFor();
-        return view('livewire.admin.comments.index-comment',['comments'=>$comments])->extends('livewire.admin.layouts.admin');
+        $this->data['for'] = $commentRepository->getFor();
+        return view('livewire.admin.comments.index-comment',['comments'=>$comments])
+            ->extends('livewire.admin.layouts.admin');
     }
 
-    public function delete($id)
+    public function delete($id , CommentRepositoryInterface $commentRepository)
     {
-        $this->authorize('delete_comments');
-        Comment::findOrFail($id)->delete();
+        $this->authorizing('delete_comments');
+        $comment = $commentRepository->find($id,false);
+        $commentRepository->delete($comment);
     }
 
-    public function confirm($id)
+    public function confirm($id , CommentRepositoryInterface $commentRepository)
     {
-        $this->authorize('edit_comments');
-        $comment = Comment::findOrFail($id);
-        $comment->status = Comment::CONFIRMED;
-        $comment->save();
+        $this->authorizing('edit_comments');
+        $comment = $commentRepository->find($id,false);
+        $comment->status = $commentRepository::confirmedStatus();
+        $commentRepository->save($comment);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 

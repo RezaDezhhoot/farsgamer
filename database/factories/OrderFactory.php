@@ -24,15 +24,11 @@ class OrderFactory extends Factory
     {
         return [
             'slug' => $this->faker->unique()->name(),
-            'user_id' => 1,
-            'category_id' => $this->faker->numberBetween('1','2'),
-            'status' => 'new',
             'content' => 'test',
             'price' => 1000.2,
-            'image' => 'test',
-            'gallery' => 'test',
-            'province' => 'tehran',
-            'city' => 'tehran',
+            'image' => 'https://png.pngtree.com/element_pic/00/16/09/2057e0eecf792fb.jpg',
+            'status' => Order::IS_CONFIRMED,
+            'gallery' => 'https://png.pngtree.com/element_pic/00/16/09/2057e0eecf792fb.jpg,https://png.pngtree.com/element_pic/00/16/09/2057e0eecf792fb.jpg',
         ];
     }
 }

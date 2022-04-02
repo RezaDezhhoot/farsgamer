@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Morilog\Jalali\Jalalian;
 use App\Traits\Admin\Searchable;
 
@@ -20,22 +21,26 @@ use App\Traits\Admin\Searchable;
  * @property int|mixed|string|null user_id
  * @property mixed card_id
  * @property mixed id
+ * @property mixed status_label
  * @method static latest(string $string)
  * @method static where(string $string, string $NEW)
  * @method static findOrFail($id)
  * @method static whereBetween(string $string, string[] $array)
+ * @method static create(array $data)
  */
 class Request extends Model
 {
-    use HasFactory , Searchable;
+    use HasFactory , Searchable , SoftDeletes;
 
     protected $searchAbleColumns = ['track_id','id'];
+
+    protected $fillable = ['price','card_id','status'];
 
     const SETTLEMENT = 'settlement' , REJECTED = 'rejected' , NEW = 'new';
 
     public function card()
     {
-        return $this->belongsTo(Card::class);
+        return $this->belongsTo(Card::class)->withTrashed();
     }
 
     public static function getNew()
@@ -55,6 +60,20 @@ class Request extends Model
             self::REJECTED => 'رد شده',
             self::NEW => 'جدید',
         ];
+    }
+
+    public function setFileAttribute($value)
+    {
+        $gallery = [];
+        foreach (explode(',',$value) as $item)
+            $gallery[] = str_replace(env('APP_URL'), '', $item);
+
+        $this->attributes['file'] = implode(',',$gallery);
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus()[$this->status];
     }
 
     public function getDateAttribute()

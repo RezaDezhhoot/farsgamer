@@ -15,6 +15,7 @@ use Morilog\Jalali\Jalalian;
  * @method static count()
  * @method static where(string $string, $status)
  * @method static whereBetween(string $string, string[] $array)
+ * @method static create(array $array)
  * @property mixed customer_id
  * @property mixed seller_id
  * @property mixed created_at
@@ -25,12 +26,15 @@ use Morilog\Jalali\Jalalian;
  * @property mixed seller
  * @property mixed order_id
  * @property mixed|string status
+ * @property mixed is_returned
  */
 class OrderTransaction extends Model
 {
     protected $dates = [
         'timer','created_at','updated_at'
     ];
+
+    protected $guarded;
 
     use HasFactory , Searchable;
     const PREFIX = 'FG-';
@@ -42,9 +46,9 @@ class OrderTransaction extends Model
     const WAIT_FOR_PAY = 'wait_for_pay';
     const WAIT_FOR_SEND = 'wait_for_send';
     const WAIT_FOR_RECEIVE = 'wait_for_receive';
-    const WAIT_FOR_NO_RECEIVE = 'wait_for_no_receive';
+    const WAIT_FOR_NO_RECEIVE = 'not_received';
     const WAIT_FOR_TESTING = 'wait_for_testing';
-    const WAIT_FOR_COMPLETE = 'wait_for_complete';
+    const WAIT_FOR_COMPLETE = 'completed';
     const IS_RETURNED = 'returned';
     const IS_CANCELED = 'canceled';
     const WAIT_FOR_SENDING_DATA = 'wait_for_sending_data';
@@ -53,6 +57,24 @@ class OrderTransaction extends Model
     public function getCodeAttribute()
     {
         return self::PREFIX.$this->id;
+    }
+
+    public static function getFor()
+    {
+        return [
+            'seller' => 'فروشنده',
+            'customer' => 'خریدار',
+        ];
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatus($this->is_returned)[$this->status]['label'];
+    }
+
+    public function getProgressAttribute()
+    {
+        return self::getStatus($this->is_returned)[$this->status]['progress'];
     }
 
     public function seller()
@@ -67,7 +89,7 @@ class OrderTransaction extends Model
 
     public function order()
     {
-        return $this->belongsTo(Order::class , 'order_id');
+        return $this->belongsTo(Order::class , 'order_id')->withTrashed();
     }
 
     public function getTimeAttribute()
@@ -112,9 +134,6 @@ class OrderTransaction extends Model
             self::WAIT_FOR_NO_RECEIVE =>
                 ['label' => 'دریافت نشده' ,'icon' => 'flaticon2-delete icon-xl' , 'step' => 0,
                     'desc' => 'دریافت نشده از طرف خریدار', 'timer' => 0],
-            self::WAIT_FOR_TESTING =>
-                ['label' => 'مرحله تست' ,'icon' => 'flaticon2-time icon-xl'  , 'step' => 6,
-                    'desc' => 'تست محصول دریافت شده از طرف خریدار','timer' => self::getTimer(self::WAIT_FOR_TESTING)],
             self::IS_RETURNED =>
                 ['label' => 'درخواست مرجوعیت' ,'icon' => 'flaticon2-refresh-arrow icon-xl'  , 'step' => 6,
                     'desc' => 'درخواست مرجوعیت توسط خریدار','timer' => 0],
@@ -135,6 +154,8 @@ class OrderTransaction extends Model
                 'desc' => 'در انتظار دریافت توسط فروشنده', 'color' => 'link' , 'timer' => self::getTimer(self::WAIT_FOR_RECEIVE)],
             self::WAIT_FOR_NO_RECEIVE => ['label' => 'دریافت نشده '  , 'color' => 'link' , 'progress' => 75 , 'icon' => 'fab fa-get-pocket icon-xl'  , 'step' => 3,
                 'desc' => 'دریافت نشده از طرف فروشنده', 'timer' => self::getTimer(self::WAIT_FOR_RECEIVE)],
+            self::WAIT_FOR_COMPLETE => ['label' => 'تکمیل شده' , 'progress' => 100 , 'color' => 'link', 'step' => 4,'icon' => 'fas fa-check-circle icon-xl',
+                    'timer' => self::getTimer(self::WAIT_FOR_COMPLETE), 'desc' => 'تکمیل شده',],
             self::IS_CANCELED => ['label' =>'تکمیل مرجوعیت', 'color' => 'link' , 'progress' => 100 , 'icon' => 'flaticon2-cancel icon-xl'  , 'step' => 4,
                 'desc' => 'تکمیل مرجوعیت مرجوعیت','timer' => self::getTimer(self::IS_CANCELED)],
         ];
@@ -166,9 +187,6 @@ class OrderTransaction extends Model
             self::WAIT_FOR_NO_RECEIVE =>
                 ['label' => 'دریافت نشده' , 'progress' => 70 , 'color' => 'link' , 'step' => 6,
                      'timer' => 0],
-            self::WAIT_FOR_TESTING =>
-                ['label' => 'مرحله تست' , 'progress' => 90 , 'color' => 'link' , 'step' => 7,
-                    'timer' => self::getTimer(self::WAIT_FOR_TESTING)],
             self::WAIT_FOR_COMPLETE =>
                 ['label' => 'تکمیل شده' , 'progress' => 100 , 'color' => 'link', 'step' => 8,
                     'timer' => self::getTimer(self::WAIT_FOR_COMPLETE)],
@@ -184,14 +202,15 @@ class OrderTransaction extends Model
     public static function receiveStatus()
     {
         return [
-            0 => 'دریافت شده',
-            1 => 'عدم دریافت در زمان مقرر از طرف فروشنده',
+            0 => 'در انتطار دریافت ',
+            1 => 'دریافت شده',
+            2 => 'عدم دریافت در زمان مقرر از طرف فروشنده/خریدار',
         ];
     }
 
     public function getCategoryAttribute()
     {
-        return $this->order()->first()->category();
+        return $this->order()->first()->category;
     }
 
     public function getDateAttribute()
@@ -209,5 +228,10 @@ class OrderTransaction extends Model
             else
                 return $query->where('user1',$this->customer_id)->orWhere('user2',$this->customer_id)->first();
         })->first();
+    }
+
+    public function comment()
+    {
+        return $this->hasOne(Comment::class,'order_transaction_id');
     }
 }

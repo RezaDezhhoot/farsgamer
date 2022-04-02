@@ -13,10 +13,13 @@ use Morilog\Jalali\Jalalian;
  * @property mixed content
  * @property bool|mixed is_admin
  * @property mixed group_id
+ * @method static create(array $data)
  */
 class Chat extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
 
     public function group()
     {

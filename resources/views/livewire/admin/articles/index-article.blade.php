@@ -9,6 +9,7 @@
                     <table  class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>نام مستعار</th>
                             <th>عنوان</th>
                             <th>وضعیت</th>
@@ -20,9 +21,10 @@
                         <tbody>
                         @forelse($articles as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->slug }}</td>
                                 <td>{{ $item->title }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>
                                     @foreach($item->categories->pluck('slug','id') as $value)
                                         <span class="badge-info">
@@ -37,7 +39,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="6">
+                            <td class="text-center" colspan="7">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

@@ -3,18 +3,16 @@
 namespace App\Http\Livewire\Admin\Securities;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Setting;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class IndexSecurity extends BaseComponent
 {
-    use AuthorizesRequests;
     public $header , $max_order_image_size , $data = [] , $boycott = [] , $google , $min_price_to_request,
         $password_length , $dos_count , $max_profile_image_size , $order_images_count , $valid_ticket_files , $valid_order_images , $ticket_per_day,
         $auth_image_pattern , $auth_note;
-    public function mount()
+    public function mount(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_securities');
+        $this->authorizing('show_securities');
         $this->header = 'امنیت';
         $this->data['boycott'] = [
             'A' => [
@@ -274,28 +272,28 @@ class IndexSecurity extends BaseComponent
                 'VN' => 'Viet Nam'
             ],
         ];
-        $this->boycott = Setting::getSingleRow('boycott',[]);
-        $this->google = Setting::getSingleRow('google');
-        $this->password_length = Setting::getSingleRow('password_length');
-        $this->dos_count = Setting::getSingleRow('dos_count');
-        $this->max_profile_image_size = Setting::getSingleRow('max_profile_image_size');
-        $this->max_order_image_size = Setting::getSingleRow('max_order_image_size');
-        $this->valid_order_images = Setting::getSingleRow('valid_order_images');
-        $this->valid_ticket_files = Setting::getSingleRow('valid_ticket_files');
-        $this->ticket_per_day = Setting::getSingleRow('ticket_per_day');
-        $this->min_price_to_request = Setting::getSingleRow('min_price_to_request');
-        $this->auth_image_pattern = Setting::getSingleRow('auth_image_pattern');
-        $this->auth_note = Setting::getSingleRow('auth_note');
-        $this->order_images_count = Setting::getSingleRow('order_images_count');
+        $this->boycott = $settingRepository->getSiteFaq('boycott',[]);
+        $this->google = $settingRepository->getSiteFaq('google');
+        $this->password_length = $settingRepository->getSiteFaq('password_length');
+        $this->dos_count = $settingRepository->getSiteFaq('dos_count');
+        $this->max_profile_image_size = $settingRepository->getSiteFaq('max_profile_image_size');
+        $this->max_order_image_size = $settingRepository->getSiteFaq('max_order_image_size');
+        $this->valid_order_images = $settingRepository->getSiteFaq('valid_order_images');
+        $this->valid_ticket_files = $settingRepository->getSiteFaq('valid_ticket_files');
+        $this->ticket_per_day = $settingRepository->getSiteFaq('ticket_per_day');
+        $this->min_price_to_request = $settingRepository->getSiteFaq('min_price_to_request');
+        $this->auth_image_pattern = $settingRepository->getSiteFaq('auth_image_pattern');
+        $this->auth_note = $settingRepository->getSiteFaq('auth_note');
+        $this->order_images_count = $settingRepository->getSiteFaq('order_images_count');
     }
     public function render()
     {
         return view('livewire.admin.securities.index-security')->extends('livewire.admin.layouts.admin');
     }
 
-    public function store()
+    public function store(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('edit_securities');
+        $this->authorizing('edit_securities');
         $this->validate([
             'boycott' => ['nullable','array'],
             'google' => ['required','string','max:3000'],
@@ -325,19 +323,19 @@ class IndexSecurity extends BaseComponent
             'auth_note' => 'متن توضیح برای احراز هویت',
             'order_images_count' => 'تعداد تصاویر مجاز برای اپلود',
         ]);
-        Setting::updateOrCreate(['name' => 'boycott'], ['value' => json_encode($this->boycott)]);
-        Setting::updateOrCreate(['name' => 'google'], ['value' => $this->google]);
-        Setting::updateOrCreate(['name' => 'password_length'], ['value' => $this->password_length]);
-        Setting::updateOrCreate(['name' => 'dos_count'], ['value' => $this->dos_count]);
-        Setting::updateOrCreate(['name' => 'max_profile_image_size'], ['value' => $this->max_profile_image_size]);
-        Setting::updateOrCreate(['name' => 'max_order_image_size'], ['value' => $this->max_order_image_size]);
-        Setting::updateOrCreate(['name' => 'valid_order_images'], ['value' => $this->valid_order_images]);
-        Setting::updateOrCreate(['name' => 'valid_ticket_files'], ['value' => $this->valid_ticket_files]);
-        Setting::updateOrCreate(['name' => 'ticket_per_day'], ['value' => $this->ticket_per_day]);
-        Setting::updateOrCreate(['name' => 'auth_image_pattern'], ['value' => $this->auth_image_pattern]);
-        Setting::updateOrCreate(['name' => 'min_price_to_request'], ['value' => $this->min_price_to_request]);
-        Setting::updateOrCreate(['name' => 'auth_note'], ['value' => $this->auth_note]);
-        Setting::updateOrCreate(['name' => 'order_images_count'], ['value' => $this->order_images_count]);
+        $settingRepository::updateOrCreate(['name' => 'boycott'], ['value' => json_encode($this->boycott)]);
+        $settingRepository::updateOrCreate(['name' => 'google'], ['value' => $this->google]);
+        $settingRepository::updateOrCreate(['name' => 'password_length'], ['value' => $this->password_length]);
+        $settingRepository::updateOrCreate(['name' => 'dos_count'], ['value' => $this->dos_count]);
+        $settingRepository::updateOrCreate(['name' => 'max_profile_image_size'], ['value' => $this->max_profile_image_size]);
+        $settingRepository::updateOrCreate(['name' => 'max_order_image_size'], ['value' => $this->max_order_image_size]);
+        $settingRepository::updateOrCreate(['name' => 'valid_order_images'], ['value' => $this->valid_order_images]);
+        $settingRepository::updateOrCreate(['name' => 'valid_ticket_files'], ['value' => $this->valid_ticket_files]);
+        $settingRepository::updateOrCreate(['name' => 'ticket_per_day'], ['value' => $this->ticket_per_day]);
+        $settingRepository::updateOrCreate(['name' => 'auth_image_pattern'], ['value' => $this->auth_image_pattern]);
+        $settingRepository::updateOrCreate(['name' => 'min_price_to_request'], ['value' => $this->min_price_to_request]);
+        $settingRepository::updateOrCreate(['name' => 'auth_note'], ['value' => $this->auth_note]);
+        $settingRepository::updateOrCreate(['name' => 'order_images_count'], ['value' => $this->order_images_count]);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 }

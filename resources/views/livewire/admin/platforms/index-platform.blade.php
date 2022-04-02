@@ -9,6 +9,7 @@
                         <table class="table table-striped" id="kt_datatable">
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th> ایکون</th>
                                 <th>نام مستعار</th>
                                 <th>عملیات</th>
@@ -17,6 +18,7 @@
                             <tbody>
                             @forelse($platforms as $item)
                                 <tr>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td><img style="width: 30px;height: 30px" src="{{ asset($item->logo) }}" alt=""></td>
                                     <td>{{ $item->slug }}</td>
                                     <td>
@@ -25,7 +27,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <td class="text-center" colspan="6">
+                                <td class="text-center" colspan="4">
                                     دیتایی جهت نمایش وجود ندارد
                                 </td>
                             @endforelse

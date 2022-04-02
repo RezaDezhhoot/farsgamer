@@ -3,16 +3,14 @@
 namespace App\Http\Livewire\Admin\Settings;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Setting;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
 
 class HomeSetting extends BaseComponent
 {
-    use AuthorizesRequests;
     public $header , $contact = [];
-    public function mount()
+    public function mount(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_settings_home');
+        $this->authorizing('show_settings_home');
         $this->header = 'تنظیمات صفحه اصلی';
     }
     public function render()
@@ -21,9 +19,9 @@ class HomeSetting extends BaseComponent
             ->extends('livewire.admin.layouts.admin');
     }
 
-    public function store()
+    public function store(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorize('show_settings_home');
+        $this->authorizing('edit_settings_home');
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 }

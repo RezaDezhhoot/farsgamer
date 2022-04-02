@@ -23,13 +23,12 @@ class CreateCategoriesTable extends Migration
             $table->text('description')->nullable();
             $table->string('seo_keywords');
             $table->string('seo_description');
-            $table->decimal('guarantee_time',65);
             $table->decimal('send_time',65)->nullable();
             $table->decimal('pay_time',65)->nullable();
             $table->decimal('receive_time',65)->nullable();
             $table->decimal('sending_data_time',65)->nullable();
             $table->decimal('no_receive_time',65)->nullable();
-            $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
+            $table->integer('parent_id')->nullable();
             $table->string('status')->default('available');
             $table->string('is_available')->default('yes');
             $table->string('type')->default('digital');
@@ -37,6 +36,7 @@ class CreateCategoriesTable extends Migration
             $table->longText('forms')->nullable();
             $table->decimal('commission',22,2)->default(0);
             $table->decimal('intermediary',22,2)->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

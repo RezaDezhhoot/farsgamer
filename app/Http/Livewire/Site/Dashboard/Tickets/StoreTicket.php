@@ -128,7 +128,7 @@ class StoreTicket extends BaseComponent
                 $ticket->parent_id = $model->id;
                 $ticket->sender_id = Auth::id();
                 $ticket->priority = $model->priority;
-                $ticket->status = $model->status;
+                $ticket->status = Ticket::USER_ANSWERED;
                 if (!is_null($this->file) && !empty($this->file)){
                     $files = [];
                     foreach ($this->file as $item){

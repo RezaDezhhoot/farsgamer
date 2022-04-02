@@ -14,11 +14,10 @@
             <x-admin.forms.full-text-editor id="description" label="توضیحات*" wire:model.defer="description"/>
             <x-admin.forms.text-area label="کلمات کلیدی*" help="کلمات را با کاما از هم جدا کنید" wire:model.defer="seo_keywords" id="seo_keywords" />
             <x-admin.forms.text-area label="توضیحات سئو*" wire:model.defer="seo_description" id="seo_description" />
-            <x-admin.forms.input type="number" id="send_time" label="زمان لازم برای ارسال توسط فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="send_time"/>
             <x-admin.forms.input type="number" id="pay_time" label="زمان لازم برای پرداخت*" help="بر حسب دقیقه" wire:model.defer="pay_time"/>
-            <x-admin.forms.input type="number" id="receive_time" label="زمان ارسال فروشنده یا خریدار(محصولات دیجیتالی)*" help="بر حسب دقیقه" wire:model.defer="receive_time"/>
+            <x-admin.forms.input type="number" id="send_time" label="زمان لازم برای ارسال توسط فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="send_time"/>
+            <x-admin.forms.input type="number" id="receive_time" label="زمان لازم برای دریافت توسط فروشنده یا خریدار(محصولات دیجیتالی)*" help="بر حسب دقیقه" wire:model.defer="receive_time"/>
             <x-admin.forms.input type="number" id="no_receive_time" label="زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="no_receive_time"/>
-            <x-admin.forms.input type="number" id="guarantee_time" label="زمان تست*" help="بر حسب دقیقه" wire:model.defer="guarantee_time"/>
             <x-admin.forms.input type="number" id="commission" label="کارمزد شبکه *" help="بر حسب درصد" wire:model.defer="commission"/>
             <x-admin.forms.input type="number" id="intermediary" label="حق واسطه گری*" help="بر حسب درصد" wire:model.defer="intermediary"/>
             <x-admin.forms.checkbox id="control" label="نیاز به واسط" wire:model.defer="control" />
@@ -34,7 +33,6 @@
                     <x-admin.forms.input type="text" id="paraName" label="نام *" wire:model.defer="paraName"/>
                     <x-admin.forms.dropdown id="paraType" :data="['number'=>'عددی','text'=>'رشته ای']" label="نوع ورودی*" wire:model.defer="paraType"/>
                     <x-admin.forms.input type="text" id="paraField" label="مقدار پیشفرض" wire:model.defer="paraField"/>
-                    <x-admin.forms.dropdown id="paraStatus" :data="['available'=>'فعال','unavailable'=>'غیر فعال']" label="وضعیت*" wire:model.defer="paraStatus"/>
                     <x-admin.forms.input type="number" id="paraMax" label="حداکثر مقدار" wire:model.defer="paraMax"/>
                     <x-admin.forms.input type="number" id="paraMin" label="حداقل مقدار" wire:model.defer="paraMin"/>
                 </x-admin.modal-page>
@@ -42,6 +40,7 @@
                 <table class="table table-striped">
                     <thead>
                     <tr>
+                        <th>#</th>
                         <th>تصویر</th>
                         <th>عنوان</th>
                         <th>نوع ورودی</th>
@@ -52,10 +51,10 @@
                     <tbody>
                     @foreach($parameters as $key => $value)
                         <tr>
+                            <td>{{ $loop->iteration }}</td>
                             <td><img src="{{ asset($value['logo']) }}" style="width: 30px;height: 30px" alt=""></td>
                             <td>{{ $value['name'] }}</td>
                             <td>{{ $value['type'] }}</td>
-                            <td>{{ $value['status'] }}</td>
                             <td>
                                 <button type="button" wire:click="addParameter({{$key}})" class="btn btn-sm btn-default btn-text-primary btn-hover-primary btn-icon mr-2">
                                     <span class="svg-icon svg-icon-md">
@@ -80,7 +79,7 @@
                 <div class="row" style="display: flex">
                     @foreach($data['transfer'] as $key => $item)
                         <div class="col-lg-2">
-                            <x-admin.forms.checkbox label="{{ $item['slug'] }}" value="{{ $item['id'] }}" id="{{ $item['id'] }}transfer"  wire:model.defer="transfer.{{$item['id']}}" />
+                            <x-admin.forms.checkbox label="{{ $item['slug'] }}" value="{{ $item['id'] }}" id="{{ $item['id'] }}transfer"  wire:model.defer="transfer" />
                         </div>
                     @endforeach
                 </div>
@@ -90,7 +89,7 @@
                 <div class="row" style="display: flex">
                     @foreach($data['platform'] as $key => $item)
                         <div class="col-lg-2">
-                            <x-admin.forms.checkbox label="{{ $item['slug'] }}"  value="{{ $item['id'] }}"  id="{{ $item['id'] }}platforms" wire:model.defer="platforms.{{$item['id']}}" />
+                            <x-admin.forms.checkbox label="{{ $item['slug'] }}"  value="{{ $item['id'] }}"  id="{{ $item['id'] }}platforms" wire:model.defer="platforms" />
                         </div>
                     @endforeach
                 </div>
@@ -104,6 +103,7 @@
                 <table class="table table-striped">
                     <thead>
                     <tr>
+                        <th>#</th>
                         <th>عنوان</th>
                         <th>عملیات</th>
                     </tr>
@@ -111,6 +111,7 @@
                     <tbody wire:sortable="updateFormPosition()">
                     @forelse($form as $key => $item)
                         <tr wire:sortable.item="{{ $item['name'] }}" wire:key="{{ $item['name'] }}">
+                            <td>{{ $loop->iteration }}</td>
                             <td>{!! $item['label'] ?? ''!!}</td>
                             <td>
                                 <button type="button" wire:click="editForm({{$key}})" class="btn btn-sm btn-default btn-text-primary btn-hover-primary btn-icon mr-2">
@@ -149,10 +150,11 @@
                 <x-admin.forms.input type="text" id="text-value" label="مقدار" wire:model.defer="formValue"/>
             </x-admin.modal-page>
             <x-admin.modal-page id="select" title="select" wire:click="setFormData()">
+                <x-admin.forms.validation-errors/>
                 <x-admin.forms.input type="text" id="select-name" label="نام*" wire:model.defer="formName" disabled/>
                 <x-admin.forms.dropdown id="select-required" label="اجباری*" :data="['0' => 'خیر', '1' => 'بله']" wire:model.defer="formRequired"/>
                 <x-admin.forms.dropdown id="select-width" label="عرض*" :data="['6' => '50 درصد', '12' => '100 درصد']"  wire:model.defer="formWidth"/>
-                <x-admin.forms.dropdown id="select-for" label="مخاطب*" :data="['seller'=>'فروشنده','customer'=>'خریدار']"  wire:model.defer="formFor"/>
+                <x-admin.forms.dropdown id="select-for" label="مخاطب*" :data="$data['for']"  wire:model.defer="formFor"/>
                 <x-admin.forms.dropdown id="select-status" label="روال*" :data="['normal'=>'عادی','return'=>'مرجوعی']"  wire:model.defer="formStatus"/>
                 <x-admin.forms.full-text-editor id="select" label="برچسب فیلد*" wire:model.defer="formLabel"/>
                 <x-admin.forms.input type="text" id="select-value" label="مقدار" wire:model.defer="formValue"/>

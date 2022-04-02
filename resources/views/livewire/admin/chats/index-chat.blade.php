@@ -47,7 +47,7 @@
                                                 {{ $group->user_two->user_name }}
                                             </a>
                                             <span class="text-muted font-weight-bold font-size-sm">
-                                               وضیعت :  {{ $group->statusLabel }}
+                                               وضیعت :  {{ $group->status_label }}
                                             </span>
                                         </div>
                                     </div>
@@ -99,7 +99,7 @@
                                 <!--begin::Navigation-->
                                 <ul class="navi navi-hover py-5">
                                     @if(!empty($chatList))
-                                        @if($chatList->status == \App\Models\ChatGroup::OPEN)
+                                        @if($chatList->status == $open)
                                             <li class="navi-item" style="cursor: pointer" wire:click="blockChat()">
                                                 <a class="navi-link">
                                                                     <span class="navi-icon">
@@ -109,7 +109,7 @@
                                                 </a>
                                             </li>
                                         @endif
-                                        @if($chatList->status == \App\Models\ChatGroup::CLOSE)
+                                        @if($chatList->status == $close)
                                             <li class="navi-item"  style="cursor: pointer" wire:click="unBlockChat()">
                                                 <a class="navi-link">
                                                                         <span class="navi-icon">

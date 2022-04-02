@@ -9,8 +9,6 @@ use App\Models\Order;
 use App\Models\OrderParameter;
 use App\Models\Parameter;
 use App\Models\Setting;
-use App\Sends\SendMessages;
-use App\Traits\Admin\TextBuilder;
 use Carbon\Carbon;
 use Livewire\WithFileUploads;
 
@@ -20,7 +18,7 @@ class StoreOrder extends BaseComponent
     public $slug , $category_id , $content , $price , $image , $mainImage , $gallery = [] , $galleries = [] , $province , $city ,$result;
     public $parameters , $parameter = [] , $platforms , $platform = [] , $message , $commission , $intermediary;
     public $data = [];
-    use WithFileUploads , TextBuilder;
+    use WithFileUploads ;
     public function mount($action , $id = null)
     {
         $ban = Carbon::make(now())->diff(\auth()->user()->ban)->format('%r%i');
@@ -49,10 +47,9 @@ class StoreOrder extends BaseComponent
                 ['subject',Notification::ORDER],
                 ['model_id',$this->order->id],
             ])->get();
-        } elseif($action == 'create')
+        } elseif($action == 'create'){
             $this->header = 'اگهی جدید';
-
-        else abort(404);
+        } else abort(404);
 
         $this->data['province'] = Setting::getProvince();
         $this->data['status'] = Order::getStatus();
@@ -65,12 +62,17 @@ class StoreOrder extends BaseComponent
     }
     public function render()
     {
-        $this->data['city'] = Setting::getCity()[$this->province];
-        $this->parameters = Parameter::where('category_id',$this->category_id)->where([
-            ['status','available']
-        ])->get();
-        $category = Category::findOrFail($this->category_id);
-        $this->platforms = $category->platforms;
+        if (isset($this->province))
+            $this->data['city'] = Setting::getCity()[$this->province];
+
+        if (isset($this->category_id)){
+            $this->parameters = Parameter::where('category_id',$this->category_id)->where([
+                ['status','available']
+            ])->get();
+            $category = Category::find($this->category_id);
+            $this->platforms = $category->platforms;
+        }
+
         return view('livewire.site.dashboard.orders.store-order');
     }
 
@@ -168,9 +170,6 @@ class StoreOrder extends BaseComponent
                 $order->platforms()->sync($selectedPlatform);
             }
             $order->save();
-            $text = $this->createText('new_order',$order);
-            $send = new SendMessages();
-            $send->sends($text,$order,Notification::ORDER,$order->id);
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
             $this->resetErrorBag();
 

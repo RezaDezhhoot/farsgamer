@@ -16,6 +16,7 @@
                     <table class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>کاربر</th>
                             <th>وضعیت</th>
                             <th>نوع</th>
@@ -28,10 +29,11 @@
                         <tbody>
                         @forelse($comments as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->user->fullName ?? $item->user->user_name }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
-                                <td>{{ $item::getFor()[$item->type] }}</td>
-                                <td>{{ $item->target }}</td>
+                                <td>{{ $item->status_label }}</td>
+                                <td>{{ $item->for_label }}</td>
+                                <td>{{ $item->commentable->title ??  $item->commentable->user_name }}</td>
                                 <td>{{ $item->score }}</td>
                                 <td style="width: 40%;">{!!  $item->content !!}</td>
                                 <td>
@@ -41,7 +43,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="7">
+                            <td class="text-center" colspan="8">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

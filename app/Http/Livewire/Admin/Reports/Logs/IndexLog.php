@@ -3,11 +3,17 @@
 namespace App\Http\Livewire\Admin\Reports\Logs;
 
 use App\Http\Livewire\BaseComponent;
+use App\Repositories\Interfaces\ReportRepositoryInterface;
+use Livewire\WithPagination;
 
 class IndexLog extends BaseComponent
 {
-    public function render()
+    use WithPagination;
+    public function render(ReportRepositoryInterface $reportRepository)
     {
-        return view('livewire.admin.reports.logs.index-log');
+        $this->authorizing('show_reports');
+        $reports = $reportRepository->getAll();
+        return view('livewire.admin.reports.logs.index-log',['reports' => $reports])
+            ->extends('livewire.admin.layouts.admin');
     }
 }

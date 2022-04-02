@@ -3,21 +3,19 @@
 namespace App\Http\Livewire\Admin\Platforms;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Platform;
+use App\Repositories\Interfaces\PlatformRepositoryInterface;
 
 class StorePlatform extends BaseComponent
 {
-    use AuthorizesRequests;
     public $platform , $mode , $header;
     public $slug , $logo;
 
-    public function mount($action , $id = null)
+    public function mount(PlatformRepositoryInterface $platformRepository,$action , $id = null)
     {
-        $this->authorize('show_platforms');
+        $this->authorizing('show_platforms');
         if ($action == 'edit')
         {
-            $this->platform = Platform::findOrFail($id);
+            $this->platform = $platformRepository->find($id);
             $this->header = $this->platform->slug;
             $this->slug = $this->platform->slug;
             $this->logo = $this->platform->logo;
@@ -27,18 +25,18 @@ class StorePlatform extends BaseComponent
         $this->mode = $action;
     }
 
-    public function store()
+    public function store(PlatformRepositoryInterface $platformRepository)
     {
-        $this->authorize('edit_platforms');
+        $this->authorizing('edit_platforms');
         if ($this->mode == 'edit')
-            $this->saveInDataBase($this->platform);
+            $this->saveInDataBase($platformRepository , $this->platform);
         else {
-            $this->saveInDataBase(new Platform());
+            $this->saveInDataBase($platformRepository,$platformRepository->newPlatformObject());
             $this->reset(['slug','logo']);
         }
     }
 
-    public function saveInDataBase(Platform $model)
+    public function saveInDataBase($platformRepository , $model)
     {
         $fields = [
             'slug' => ['required','max:100','string','unique:platforms,slug,'.($this->platform->id ?? 0)],
@@ -51,13 +49,13 @@ class StorePlatform extends BaseComponent
         $this->validate($fields,[],$messages);
         $model->slug = $this->slug;
         $model->logo = $this->logo ?? '';
-        $model->save();
+        $platformRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
-    public function deleteItem()
+    public function deleteItem(PlatformRepositoryInterface $platformRepository)
     {
-        $this->authorize('delete_platforms');
-        $this->platform->delete();
+        $this->authorizing('delete_platforms');
+        $platformRepository->delete($this->platform);
         return redirect()->route('admin.platform');
     }
 

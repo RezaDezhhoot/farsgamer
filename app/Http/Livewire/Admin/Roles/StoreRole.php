@@ -3,20 +3,18 @@
 namespace App\Http\Livewire\Admin\Roles;
 
 use App\Http\Livewire\BaseComponent;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Repositories\Interfaces\PermissionRepositoryInterface;
+use App\Repositories\Interfaces\RoleRepositoryInterface;
 
 class StoreRole extends BaseComponent
 {
-    use AuthorizesRequests;
     public $role , $permission , $name  , $header , $mode , $permissionSelected = [];
-    public function mount($action , $id = null)
+    public function mount(RoleRepositoryInterface $roleRepository , PermissionRepositoryInterface $permissionRepository, $action , $id = null)
     {
-        $this->authorize('show_roles');
+        $this->authorizing('show_roles');
         if ($action == 'edit')
         {
-            $this->role = Role::whereNotIn('name', ['administrator', 'super_admin', 'admin'])->findOrFail($id);
+            $this->role = $roleRepository->whereNotIn('name', ['administrator', 'super_admin', 'admin'],$id);
             $this->header = $this->role->name;
             $this->name = $this->role->name;
             $this->permissionSelected = $this->role->permissions()->pluck('name')->toArray();
@@ -24,21 +22,21 @@ class StoreRole extends BaseComponent
         else abort(404);
 
         $this->mode = $action;
-        $this->permission = Permission::all();
+        $this->permission = $permissionRepository->getAll();
     }
 
-    public function store()
+    public function store(RoleRepositoryInterface $roleRepository)
     {
-        $this->authorize('edit_roles');
+        $this->authorizing('edit_roles');
         if ($this->mode == 'edit')
-            $this->saveInDateBase($this->role);
+            $this->saveInDateBase($roleRepository,$this->role);
         else {
-            $this->saveInDateBase(new Role());
+            $this->saveInDateBase($roleRepository,$roleRepository->newRoleObject());
             $this->reset(['name','permissionSelected']);
         }
     }
 
-    public function saveInDateBase(Role $model)
+    public function saveInDateBase($roleRepository ,  $model)
     {
         $this->validate(
             [
@@ -47,20 +45,21 @@ class StoreRole extends BaseComponent
                 'permissionSelected.*' => ['required', 'exists:permissions,name'],
             ] , [] , [
                 'name' => 'عنوان',
-                'permissionSelected' => '',
-                'permissionSelected.*' => '',
+                'permissionSelected' => 'دسترسی ها',
+                'permissionSelected.*' => 'دسترسی ها',
             ]
         );
         $model->name = $this->name;
-        $model->save();
-        $model->syncPermissions($this->permissionSelected);
+        $model = $roleRepository->save($model);
+        $roleRepository->syncPermissions($model, $this->permissionSelected);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
     }
 
-    public function deleteItem()
+    public function deleteItem(RoleRepositoryInterface $roleRepository)
     {
-        $this->authorize('delete_roles');
-        Role::whereNotIn('name', ['administrator', 'super_admin', 'admin'])->findOrFail($this->role->id)->delete();
+        $this->authorizing('delete_roles');
+        $role = $roleRepository->whereNotIn('name', ['administrator', 'super_admin', 'admin'] , $this->role->id);
+        $roleRepository->delete($role);
         return redirect()->route('admin.role');
     }
 

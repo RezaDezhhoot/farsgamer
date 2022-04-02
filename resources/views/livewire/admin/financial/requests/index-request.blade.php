@@ -17,6 +17,7 @@
                     <table class="table table-striped" id="kt_datatable">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>شماره درخواست</th>
                             <th>کد پیگیری</th>
                             <th>کاربر</th>
@@ -30,19 +31,20 @@
                         <tbody>
                         @forelse($requests as $item)
                             <tr>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->id }}</td>
                                 <td>{{ $item->track_id ?? '' }}</td>
                                 <td>{{ $item->user->fullName }}</td>
                                 <td>{{ number_format($item->price) }}</td>
-                                <td>{{ \App\Models\Card::bank()[$item->card->bank] }}</td>
-                                <td>{{ $item::getStatus()[$item->status] }}</td>
+                                <td>{{ $item->card->bank_label }}</td>
+                                <td>{{ $item->status_label }}</td>
                                 <td>{{ $item->date }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.request',['edit', $item->id]) }}" />
                                 </td>
                             </tr>
                         @empty
-                            <td class="text-center" colspan="8">
+                            <td class="text-center" colspan="9">
                                 دیتایی جهت نمایش وجود ندارد
                             </td>
                         @endforelse

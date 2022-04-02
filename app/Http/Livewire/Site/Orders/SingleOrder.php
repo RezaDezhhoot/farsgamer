@@ -4,13 +4,9 @@ namespace App\Http\Livewire\Site\Orders;
 
 use App\Cart\Facades\Cart;
 use App\Http\Livewire\BaseComponent;
-use App\Models\Notification;
-use App\Models\Save;
 use App\Models\Setting;
 use App\Models\OrderTransaction;
 use App\Models\OrderTransactionData;
-use App\Sends\SendMessages;
-use App\Traits\Admin\TextBuilder;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\SEOMeta;
@@ -22,14 +18,10 @@ use App\Models\Order;
 
 class SingleOrder extends BaseComponent
 {
-    use TextBuilder;
     public $order , $data = [] , $confirmLaw = false , $law;
     public function mount($userID, $id , $slug)
     {
-        $this->order = Order::where([
-            ['status',Order::IS_CONFIRMED],
-            ['user_id',$userID],
-        ])->findOrFail($id);
+        $this->order = Order::where('user_id',$userID)->active()->findOrFail($id);
 
         Cart::add(\App\Cart\Cart::LAST_VIEW,$this->order);
         $this->order->increment('view_count',1);
@@ -74,9 +66,6 @@ class SingleOrder extends BaseComponent
                     $transaction->intermediary = $commission['intermediary'];
                     $transaction->save();
                     OrderTransactionData::updateOrCreate(['transaction_id'=>$transaction->id],['name'=>uniqid()]);
-                    $texts = $this->createText('confirm_transaction',$transaction);
-                    $send = new SendMessages();
-                    $send->sends($texts,$transaction->seller,Notification::TRANSACTION,$transaction->id);
                     $this->emitNotify('درخواست معامله با موفیت ارسال شد.');
                 } else $this->addError('request','متاسفانه حساب کابری شما به دلیل نقض قوانین برای مدتی محدود شده است.مدتی بعد دوباره تلاش کنید');
             } else $this->addError('request','ین اگهی در دست رس نمی باشد');

@@ -49,4 +49,6 @@ interface OrderRepositoryInterface
     public function create(User $user , array  $data);
 
     public function update(Order $order , array $data);
+
+    public function increment(Order $order , $col , $value);
 }

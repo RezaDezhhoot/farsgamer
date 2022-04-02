@@ -86,10 +86,16 @@ class User extends Authenticatable implements Wallet, Confirmable
         return self::getStatus()[$this->status];
     }
 
+    public function payments()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
     public function getProvinceLabelAttribute()
     {
         return !empty($this->province) ? Setting::getProvince()[$this->province] : '';
     }
+
 
     public function getCityLabelAttribute()
     {
@@ -179,6 +185,31 @@ class User extends Authenticatable implements Wallet, Confirmable
     {
         $this->attributes['auth_image'] = str_replace(env('APP_URL'), '', $value);
     }
+
+    public function getInventoryBeingTradedAttribute()
+    {
+        return OrderTransaction::with('order:price')->where([
+            ['status','!=',OrderTransaction::IS_REQUESTED],
+            ['status','!=',OrderTransaction::IS_CANCELED],
+            ['status','!=',OrderTransaction::WAIT_FOR_CONFIRM],
+            ['status','!=',OrderTransaction::WAIT_FOR_PAY],
+            ['status','!=',OrderTransaction::WAIT_FOR_COMPLETE],
+        ])->where(function ($query){
+            return $query->where('seller_id',auth()->id())->orWhere('customer_id',auth()->id());
+        })->withSum('order','price')->get()->sum('order_sum_price');
+    }
+
+    public function getOrdersHasTransactionAttribute()
+    {
+        return OrderTransaction::where([
+            ['status','!=',OrderTransaction::IS_REQUESTED],
+            ['status','!=',OrderTransaction::IS_CANCELED],
+            ['status','!=',OrderTransaction::WAIT_FOR_CONFIRM],
+            ['status','!=',OrderTransaction::WAIT_FOR_COMPLETE],
+            ['seller_id',auth()->id()]
+        ])->count();
+    }
+
 }
 
 

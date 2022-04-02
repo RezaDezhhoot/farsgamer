@@ -55,7 +55,7 @@
                 <select id="{{$key}}" name="{{$item['name']}}" class="form-control text-field h-auto resize-y" wire:model.defer="transactionData.{{$item['name']}}">
                     <option value="">انتخاب کنید...</option>
                     @foreach($item['options'] as $option)
-                        <option value="{{$option['value2']}}">{{$option['value']}}</option>
+                        <option value="{{$option['value']}}">{{$option['name']}}</option>
                     @endforeach
                 </select>
                 @error('transactionData.'.$item['name'].'.error')
@@ -74,8 +74,8 @@
                 <div class="d-flex row">
                     @foreach($item['options'] as $keyRadio => $radio)
                         <div class="justify-center align-items-center col-3 p-2" dir="ltr">
-                            <label for="{{$key}}-{{$keyRadio}}" class="account-category-btn">{{$radio['value']}}
-                                <input id="{{$key}}-{{$keyRadio}}" class="" type="radio" value="{{ $radio['value2'] }}" name="{{$item['name']}}"
+                            <label for="{{$key}}-{{$keyRadio}}" class="account-category-btn">{{$radio['name']}}
+                                <input id="{{$key}}-{{$keyRadio}}" class="" type="radio" value="{{ $radio['value'] }}" name="{{$item['name']}}"
                                        wire:model.defer="transactionData.{{$item['name']}}">
                             </label>
                         </div>

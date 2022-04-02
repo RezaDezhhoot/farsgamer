@@ -46,9 +46,9 @@ class OrderTransaction extends Model
     const WAIT_FOR_PAY = 'wait_for_pay';
     const WAIT_FOR_SEND = 'wait_for_send';
     const WAIT_FOR_RECEIVE = 'wait_for_receive';
-    const WAIT_FOR_NO_RECEIVE = 'wait_for_no_receive';
+    const WAIT_FOR_NO_RECEIVE = 'not_received';
     const WAIT_FOR_TESTING = 'wait_for_testing';
-    const WAIT_FOR_COMPLETE = 'wait_for_complete';
+    const WAIT_FOR_COMPLETE = 'completed';
     const IS_RETURNED = 'returned';
     const IS_CANCELED = 'canceled';
     const WAIT_FOR_SENDING_DATA = 'wait_for_sending_data';
@@ -134,9 +134,6 @@ class OrderTransaction extends Model
             self::WAIT_FOR_NO_RECEIVE =>
                 ['label' => 'دریافت نشده' ,'icon' => 'flaticon2-delete icon-xl' , 'step' => 0,
                     'desc' => 'دریافت نشده از طرف خریدار', 'timer' => 0],
-            self::WAIT_FOR_TESTING =>
-                ['label' => 'مرحله تست' ,'icon' => 'flaticon2-time icon-xl'  , 'step' => 6,
-                    'desc' => 'تست محصول دریافت شده از طرف خریدار','timer' => self::getTimer(self::WAIT_FOR_TESTING)],
             self::IS_RETURNED =>
                 ['label' => 'درخواست مرجوعیت' ,'icon' => 'flaticon2-refresh-arrow icon-xl'  , 'step' => 6,
                     'desc' => 'درخواست مرجوعیت توسط خریدار','timer' => 0],
@@ -190,9 +187,6 @@ class OrderTransaction extends Model
             self::WAIT_FOR_NO_RECEIVE =>
                 ['label' => 'دریافت نشده' , 'progress' => 70 , 'color' => 'link' , 'step' => 6,
                      'timer' => 0],
-            self::WAIT_FOR_TESTING =>
-                ['label' => 'مرحله تست' , 'progress' => 90 , 'color' => 'link' , 'step' => 7,
-                    'timer' => self::getTimer(self::WAIT_FOR_TESTING)],
             self::WAIT_FOR_COMPLETE =>
                 ['label' => 'تکمیل شده' , 'progress' => 100 , 'color' => 'link', 'step' => 8,
                     'timer' => self::getTimer(self::WAIT_FOR_COMPLETE)],
@@ -208,14 +202,15 @@ class OrderTransaction extends Model
     public static function receiveStatus()
     {
         return [
-            0 => 'دریافت شده',
-            1 => 'عدم دریافت در زمان مقرر از طرف فروشنده',
+            0 => 'در انتطار دریافت ',
+            1 => 'دریافت شده',
+            2 => 'عدم دریافت در زمان مقرر از طرف فروشنده/خریدار',
         ];
     }
 
     public function getCategoryAttribute()
     {
-        return $this->order()->first()->category();
+        return $this->order()->first()->category;
     }
 
     public function getDateAttribute()
@@ -233,5 +228,10 @@ class OrderTransaction extends Model
             else
                 return $query->where('user1',$this->customer_id)->orWhere('user2',$this->customer_id)->first();
         })->first();
+    }
+
+    public function comment()
+    {
+        return $this->hasOne(Comment::class,'order_transaction_id');
     }
 }

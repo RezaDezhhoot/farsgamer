@@ -55,7 +55,6 @@ class Task extends Model
             'send_transaction' => 'در انتظار ارسال محصول مورد نظر توسط فروشنده',#ok
             'receive_transaction' => 'در انتظار دریافت محصول مورد نظر توسط خریدار',#ok
             'no_receive_transaction' => 'عدم دریافت محصول مورد نظر توسط خریدار',#ok
-            'test_transaction' => 'زمان تست',#ok
             'complete_transaction' => 'تکمیل معامله',#ok
             'request_to_return_transaction' => 'درخواست مرجوع کردن محصول(مرجوعی)',#ok
             'confirm_returned_transaction' => 'تایید مرجوع شدن محصول(مرجوعی)',#ok

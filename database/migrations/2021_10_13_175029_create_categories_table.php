@@ -23,7 +23,6 @@ class CreateCategoriesTable extends Migration
             $table->text('description')->nullable();
             $table->string('seo_keywords');
             $table->string('seo_description');
-            $table->decimal('guarantee_time',65);
             $table->decimal('send_time',65)->nullable();
             $table->decimal('pay_time',65)->nullable();
             $table->decimal('receive_time',65)->nullable();

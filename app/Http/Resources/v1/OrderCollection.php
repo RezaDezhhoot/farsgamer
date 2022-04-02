@@ -21,7 +21,6 @@ class OrderCollection extends ResourceCollection
                 'id' => $item->id,
                 'name' => $item->slug,
                 'price' => $item->price,
-                'price_unit' => 'toman',
                 'status_label' => $item->status_label,
                 'image' => asset($item->image),
                 'province' => isset($item->province) ? Setting::getProvince()[$item->province] : null,

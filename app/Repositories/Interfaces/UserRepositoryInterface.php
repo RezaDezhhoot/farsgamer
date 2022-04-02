@@ -59,4 +59,6 @@ interface UserRepositoryInterface
     public function waiting();
 
     public function getLastNotifications(User $user , $count);
+
+    public function registerComment(User $user , array $data );
 }

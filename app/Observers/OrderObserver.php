@@ -28,14 +28,6 @@ class OrderObserver
         $text = [];
         $text = $this->createText('new_order',$order);
         $this->send->sends($text,$order->user,Notification::ADDRESS,$order->id);
-        Report::create([
-            'subject' => Notification::ORDER,
-            'action' => Report::CREATED,
-            'row_status' => $order->status_label,
-            'user_id' => $order->user_id,
-            'actor_id' => auth()->id(),
-            'status' => Report::NEW,
-        ]);
     }
 
     /**
@@ -53,14 +45,6 @@ class OrderObserver
             case Order::IS_REQUESTED : $text = $this->createText('request_order',$order);break;
         }
         $this->send->sends($text,$order->user,Notification::ORDER,$order->id);
-        Report::create([
-            'subject' => Notification::ORDER,
-            'action' => Report::UPDATED,
-            'row_status' => $order->status_label,
-            'user_id' => $order->user_id,
-            'actor_id' => auth()->id(),
-            'status' => Report::NEW,
-        ]);
     }
 
     /**

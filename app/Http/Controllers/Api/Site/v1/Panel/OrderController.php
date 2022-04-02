@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -84,7 +85,6 @@ class OrderController extends Controller
                     'intermediary' => $price['intermediary']/2,
                     'commission' => $price['commission']/2,
                     'total' => $request['price'] - $price['commission']/2 - $price['intermediary']/2,
-                    'unit' => 'toman',
                 ]
             ],
             'status' => 'error'
@@ -143,6 +143,19 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        $rateKey = 'order:' . auth('api')->id() . '|' . request()->ip();
+        if (RateLimiter::tooManyAttempts($rateKey, 25)) {
+            return
+                response([
+                    'data' => [
+                        'message' => [
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
+                        ]
+                    ],
+                    'status' => 'error'
+                ],Response::HTTP_TOO_MANY_REQUESTS);
+        }
+        RateLimiter::hit($rateKey, 24 * 60 * 60);
         if ($request->has('category_id'))
             $category = $this->categoryRepository->findNormal($request['category_id'],true,true);
         else return response([
@@ -152,6 +165,7 @@ class OrderController extends Controller
                 ]
             ], 'status' => 'error'
         ],Response::HTTP_UNPROCESSABLE_ENTITY);
+
         $platforms = $category->platforms->pluck('id')->toArray();
         $parameters = $category->parameters;
         $fields = [
@@ -185,16 +199,18 @@ class OrderController extends Controller
             'text' => 'string',
         ];
         $params = [];
-        foreach ($request['parameters'] as $key => $value) {
-            $param = $this->parameterRepository->find($value['id']);
-            $max = $param->max;
-            $min = $param->min;
-            $type = $param->type;
-            $fields['parameters.'.$key.'.value'] = ['required','min:'.(empty($min) ? 0 : $min),'max:'.(empty($max) ? 255 : $max),$types[$type]];
-            $params[] = [
-                'parameter_id' => $value['id'],
-                'value' => $value['value'],
-            ];
+        if ($request->has('parameters') && gettype($request['parameters']) == 'array'){
+            foreach ($request['parameters'] as $key => $value) {
+                $param = $this->parameterRepository->find($value['id']);
+                $max = $param->max;
+                $min = $param->min;
+                $type = $param->type;
+                $fields['parameters.'.$key.'.value'] = ['required','min:'.(empty($min) ? 0 : $min),'max:'.(empty($max) ? 255 : $max),$types[$type]];
+                $params[] = [
+                    'parameter_id' => $value['id'],
+                    'value' => $value['value'],
+                ];
+            }
         }
         if ($category->type == $this->categoryRepository::physical()){
             if (!isset($request['province']) || empty($request['province']) || !in_array($request['province']
@@ -393,7 +409,7 @@ class OrderController extends Controller
             $messages['city'] = 'شهر';
         }
         if (!empty($request->file('gallery')) || count($old_gallery) < 1){
-            $fields['gallery'] = ['array','min:0','max:'.$this->settingRepository->getSiteFaq('order_images_count')];
+            $fields['gallery'] = ['array','min:0','max:'.($this->settingRepository->getSiteFaq('order_images_count') - count($old_gallery))];
             $fields['gallery.*'] = ['required','mimes:'.$this->settingRepository->getSiteFaq('valid_order_images'),'max:'.$this->settingRepository->getSiteFaq('max_order_image_size')];
         }
         $validator = Validator::make($request->all(),$fields,[],$messages);
@@ -463,9 +479,22 @@ class OrderController extends Controller
             'city'  => $request['city'] ?? null,
             'status' => $this->orderRepository::isNewStatus()
         ];
-        $order = $this->orderRepository->update($order,$data);
-        $this->orderRepository->syncPlatforms($order,$request['platforms']);
-        $this->orderRepository->syncParameters($order,$params);
+        try {
+            DB::beginTransaction();
+            $order = $this->orderRepository->update($order,$data);
+            $this->orderRepository->syncPlatforms($order,$request['platforms']);
+            $this->orderRepository->syncParameters($order,$params);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'data' =>  [
+                    'message' => [
+                        'order' => ['خظار در ویرایش اگهی']
+                    ]
+                ], 'status' => 'error'
+            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
         return response([
             'data' => [
                 'order' => [

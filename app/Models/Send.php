@@ -47,4 +47,9 @@ class Send extends Model
             self::UNAVAILABLE => 'غیر فال',
         ];
     }
+
+    public function setLogoAttribute($value)
+    {
+        $this->attributes['logo'] = str_replace(env('APP_URL'), '', $value);
+    }
 }

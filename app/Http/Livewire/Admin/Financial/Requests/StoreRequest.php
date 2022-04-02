@@ -76,15 +76,15 @@ class StoreRequest extends BaseComponent
         ]);
 
         if ($this->status == $requestRepository::rejectedStatus() && $model->status == $requestRepository::newStatus()) {
-            $model->user->deposit($model->price, ['description' =>  $model->result , 'from_admin'=> true]);
+            $model->user->deposit($model->price, ['description' =>  $this->result , 'from_admin'=> true]);
         } elseif ($this->status == $requestRepository::settlementStatus() && $model->status == $requestRepository::rejectedStatus()) {
             try {
-                $this->user->forceWithdraw($this->price, ['description' => $this->result, 'from_admin'=> true]);
+                $model->user->withdraw((float)$model->price, ['description' => $this->result, 'from_admin'=> true]);
             } catch (BalanceIsEmpty | InsufficientFunds $exception) {
                 return $this->addError('walletAmount', $exception->getMessage());
             }
         } elseif ($this->status == $requestRepository::rejectedStatus() && $model->status == $requestRepository::settlementStatus()) {
-            $model->user->deposit($model->price, ['description' =>  $model->result , 'from_admin'=> true]);
+            $model->user->deposit($model->price, ['description' =>  $this->result , 'from_admin'=> true]);
         }
 
         $model->status = $this->status;

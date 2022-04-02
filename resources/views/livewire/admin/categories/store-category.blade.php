@@ -18,7 +18,6 @@
             <x-admin.forms.input type="number" id="send_time" label="زمان لازم برای ارسال توسط فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="send_time"/>
             <x-admin.forms.input type="number" id="receive_time" label="زمان لازم برای دریافت توسط فروشنده یا خریدار(محصولات دیجیتالی)*" help="بر حسب دقیقه" wire:model.defer="receive_time"/>
             <x-admin.forms.input type="number" id="no_receive_time" label="زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="no_receive_time"/>
-            <x-admin.forms.input type="number" id="guarantee_time" label="زمان تست*" help="بر حسب دقیقه" wire:model.defer="guarantee_time"/>
             <x-admin.forms.input type="number" id="commission" label="کارمزد شبکه *" help="بر حسب درصد" wire:model.defer="commission"/>
             <x-admin.forms.input type="number" id="intermediary" label="حق واسطه گری*" help="بر حسب درصد" wire:model.defer="intermediary"/>
             <x-admin.forms.checkbox id="control" label="نیاز به واسط" wire:model.defer="control" />
@@ -151,6 +150,7 @@
                 <x-admin.forms.input type="text" id="text-value" label="مقدار" wire:model.defer="formValue"/>
             </x-admin.modal-page>
             <x-admin.modal-page id="select" title="select" wire:click="setFormData()">
+                <x-admin.forms.validation-errors/>
                 <x-admin.forms.input type="text" id="select-name" label="نام*" wire:model.defer="formName" disabled/>
                 <x-admin.forms.dropdown id="select-required" label="اجباری*" :data="['0' => 'خیر', '1' => 'بله']" wire:model.defer="formRequired"/>
                 <x-admin.forms.dropdown id="select-width" label="عرض*" :data="['6' => '50 درصد', '12' => '100 درصد']"  wire:model.defer="formWidth"/>

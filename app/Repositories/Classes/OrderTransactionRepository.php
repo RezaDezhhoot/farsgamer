@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderTransactionRepository implements OrderTransactionRepositoryInterface
@@ -82,7 +83,7 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
     public static function receiveStatus()
     {
         // TODO: Implement receiveStatus() method.
-        return OrderTransaction::returnedStatus();
+        return OrderTransaction::receiveStatus();
     }
 
     public static function confirm()
@@ -181,7 +182,8 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
     public function updateData(OrderTransaction $orderTransaction, array $data)
     {
         // TODO: Implement updateData() method.
-        return $orderTransaction->data()->update($data);
+        $orderTransaction->data()->update($data);
+        return $orderTransaction->data;
     }
 
     public static function hasPayment()
@@ -213,5 +215,49 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
             });
         })->count();
         // TODO: Implement getUserTransactions() method.
+    }
+
+    public function getMyTransactions($use_id, Request $request)
+    {
+        return OrderTransaction::latest('id')->where('seller_id',$use_id)->orWhere('customer_id',$use_id)
+            ->when($request['tab'],function ($query) use ($request , $use_id){
+                if ($request['tab'] == 'seller')
+                    return $query->where('seller_id',$use_id);
+                elseif ($request['tab'] == 'customer')
+                    return $query->where('customer_id',$use_id);
+                else return $query;
+        })->paginate(10);
+        // TODO: Implement getMyTransactions() method.
+    }
+
+    public function getMyTransaction($use_id, $id)
+    {
+        return OrderTransaction::latest('id')->where('seller_id',$use_id)->orWhere('customer_id',$use_id)
+            ->findOrfail($id);
+        // TODO: Implement getMyTransaction() method.
+    }
+
+    public function update(array $condition , array $data,$orderTransaction = null)
+    {
+        if (!is_null($orderTransaction)){
+            $orderTransaction->where($condition)->update($data);
+            return $orderTransaction;
+        } else
+            OrderTransaction::where($condition)->update($data);
+
+        return true;
+        // TODO: Implement update() method.
+    }
+
+    public function newPayment(array $data)
+    {
+        return OrderTransactionPayment::create($data);
+        // TODO: Implement newPayment() method.
+    }
+
+    public static function successPayment()
+    {
+        return OrderTransactionPayment::SUCCESS;
+        // TODO: Implement successPayment() method.
     }
 }

@@ -112,4 +112,4 @@ Route::get('/orders/{userID}/{id}/{slug}',\App\Http\Livewire\Site\Orders\SingleO
 Route::get('/users/{user}',\App\Http\Livewire\Site\Users\SingleUser::class)->name('user');
 
 // checkout
-Route::middleware(['auth'])->get('/verify/{gateway}',\App\Http\Livewire\Cart\CallBack::class);
+Route::get('/verify/{gateway}',\App\Http\Livewire\Cart\CallBack::class);

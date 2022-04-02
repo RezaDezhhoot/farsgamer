@@ -4,6 +4,7 @@
 namespace App\Repositories\Classes;
 
 use App\Models\Request;
+use App\Models\User;
 use App\Repositories\Interfaces\RequestRepositoryInterface;
 
 class RequestRepository implements RequestRepositoryInterface
@@ -98,5 +99,23 @@ class RequestRepository implements RequestRepositoryInterface
     {
         // TODO: Implement getNew() method.
         return Request::getNew();
+    }
+
+    public function getUserRequests(User $user)
+    {
+        return $user->requests()->latest('id')->paginate(12);
+        // TODO: Implement getUserRequests() method.
+    }
+
+    public function getUserRequest(User $user , $id)
+    {
+        return $user->requests()->findOrFail($id);
+        // TODO: Implement getUserRequests() method.
+    }
+
+    public function create(User $user , array $data)
+    {
+        return $user->requests()->create($data);
+        // TODO: Implement create() method.
     }
 }

@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Api\Site\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Group;
-use App\Http\Resources\v1\Transaction;
+use App\Http\Resources\v1\Panel\Transaction;
 use App\Repositories\Interfaces\ChatRepositoryInterface;
 use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Http\Resources\v1\Order as OrderResource;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
-use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -35,6 +34,7 @@ class OrderController extends Controller
     public function show($order_id)
     {
         $order = $this->orderRepository->getOrder($order_id);
+        $this->orderRepository->increment($order,'view_count',1);
         return response([
             'data' => [
                 'order' => [

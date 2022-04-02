@@ -23,8 +23,7 @@ class PlatformFactory extends Factory
     {
         return [
             'slug' => $this->faker->unique()->name(),
-            'logo' => 'admin/build/images/img.jpg',
-            'category_id' => rand(1,5)
+            'logo' => 'https://img.favpng.com/13/19/0/macintosh-apple-logo-scalable-vector-graphics-png-favpng-18KZGUdb1hwJJZyPnSHhzTRGu.jpg',
         ];
     }
 }

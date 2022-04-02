@@ -15,7 +15,7 @@ class StoreCategory extends BaseComponent
 {
     use FormBuilder;
     public $category , $mode , $header , $data = [];
-    public $slug , $title , $logo , $default_image , $slider , $description , $seo_keywords , $seo_description , $guarantee_time,
+    public $slug , $title , $logo , $default_image , $slider , $description , $seo_keywords , $seo_description ,
     $send_time , $pay_time ,$receive_time,$sending_data_time , $parent_id , $status , $is_available , $type , $transfer  , $parameters = [] , $para , $paraID , $platforms = [],
     $commission , $intermediary , $control , $no_receive_time;
 
@@ -38,7 +38,6 @@ class StoreCategory extends BaseComponent
             $this->description = $this->category->description;
             $this->seo_keywords = $this->category->seo_keywords;
             $this->seo_description = $this->category->seo_description;
-            $this->guarantee_time = $this->category->guarantee_time;
             $this->send_time = $this->category->send_time;
             $this->pay_time = $this->category->pay_time;
             $this->receive_time = $this->category->receive_time;
@@ -78,7 +77,7 @@ class StoreCategory extends BaseComponent
             $this->saveInDataBase($categoryRepository , $parameterRepository ,$this->category);
         else{
             $this->saveInDataBase($categoryRepository , $parameterRepository ,$categoryRepository->newCategoryObject());
-            $this->reset(['slug','title','logo','default_image','slider','description','seo_keywords','seo_description','guarantee_time',
+            $this->reset(['slug','title','logo','default_image','slider','description','seo_keywords','seo_description',
                 'send_time','parent_id','status','is_available','parameters','transfer','platforms','form','control']);
         }
     }
@@ -95,7 +94,6 @@ class StoreCategory extends BaseComponent
             'seo_keywords' => ['required','string','max:250'],
             'seo_description' => ['required','string','max:250'],
             'send_time' => ['required','numeric','between:0,999999999.9999'],
-            'guarantee_time' => ['required','numeric','between:0,999999999.9999'],
             'pay_time' => ['required','numeric','between:0,999999999.9999'],
             'receive_time' => ['nullable','numeric','between:0,999999999.9999'],
             'sending_data_time' => ['nullable','numeric','between:0,999999999.9999'],
@@ -121,7 +119,6 @@ class StoreCategory extends BaseComponent
             'send_time' => 'زمان لازم برای ارسال توسط فروشنده یا خریردار',
             'pay_time' => 'زمان لازم برای پرداخت',
             'receive_time' => 'زمان ارسال فروشنده یا خریدار',
-            'guarantee_time' => 'زمان تست محصول',
             'no_receive_time' => 'زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار',
             'sending_data_time' => 'زمان لازم برای ارسال اطلاعات توسط خریدار در مرحله مرجوعیت',
             'parent_id' => 'دسته مادر',
@@ -144,7 +141,6 @@ class StoreCategory extends BaseComponent
         $model->description = $this->description;
         $model->seo_keywords = $this->seo_keywords;
         $model->seo_description = $this->seo_description;
-        $model->guarantee_time = $this->guarantee_time;
         $model->send_time = $this->send_time ?? 0;
         $model->pay_time = $this->pay_time ?? 0;
         $model->receive_time = $this->receive_time ?? 0;

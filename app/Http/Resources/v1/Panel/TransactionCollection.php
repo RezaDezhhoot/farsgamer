@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\Panel;
 
+use App\Http\Resources\v1\User;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class TransactionCollection extends ResourceCollection
@@ -14,6 +15,20 @@ class TransactionCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($item){
+            return [
+                'id' => $item->id,
+                'customer' => new User($item->customer),
+                'seller' => new User($item->seller),
+                'status_label' => $item->status_label,
+                'referred' => $item->is_returned,
+                'timer' => $item->timer->diffForHumans(),
+                'date' => $item->date,
+                'order' => [
+                    'name' => $item->order->slug,
+                    'image' => asset($item->order->image),
+                ]
+            ];
+        });
     }
 }

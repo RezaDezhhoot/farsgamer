@@ -18,6 +18,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed status
  * @property mixed baned
  * @property mixed ban
+ * @property mixed balance
  */
 class User extends JsonResource
 {
@@ -41,6 +42,7 @@ class User extends JsonResource
             'user_name' => $this->user_name,
             'phone' => $this->phone,
             'email' => $this->email,
+            'wallet' => $this->balance,
             'status' => $this->status,
             'status_label' => $this->status_label,
             'profile_image' => asset($this->profile_image),

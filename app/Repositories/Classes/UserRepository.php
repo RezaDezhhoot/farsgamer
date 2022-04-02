@@ -199,6 +199,12 @@ class UserRepository implements UserRepositoryInterface
 
     public function getLastNotifications(User $user, $count)
     {
-        return $user->alerts()->latest('id')->take($count)->get();
+        return $count != 'all' ? $user->alerts()->latest('id')->take($count)->get() : $user->alerts()->latest('id')->get();
+    }
+
+    public function registerComment(User $user, array $data)
+    {
+        return $user->comments()->create($data);
+        // TODO: Implement registerComment() method.
     }
 }

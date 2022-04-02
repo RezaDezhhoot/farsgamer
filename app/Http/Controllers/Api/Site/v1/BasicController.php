@@ -66,6 +66,7 @@ class BasicController extends Controller
                     'logo' => asset($this->settingRepository->getSiteFaq('logo')),
                     'tel' => $this->settingRepository->getSiteFaq('tel'),
                     'notification' => $this->settingRepository->getSiteFaq('notification'),
+                    'price_unit' => 'toman',
                 ]
             ]
             ,'status' => 'success'

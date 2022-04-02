@@ -24,24 +24,14 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'first_name' => $this->faker->name(),
-            'last_name' => $this->faker->name(),
+            'name' => $this->faker->name(),
             'user_name' => $this->faker->unique()->name(),
             'email' => $this->faker->unique()->safeEmail(),
-            'province' => $this->faker->name(),
-            'city' => $this->faker->name(),
-            'phone' => $this->faker->randomNumber(),
-            'code_id' => Str::random(10),
-            'token' => Str::random(10),
-            'pass_word' => Hash::make('test'),
-            'description' => 'test',
-            'ip' => 'test',
-            'score' => 0,
-            'rate' => 0,
-            'order-transactions' => 0,
-            'orders' => 0,
-            'remember_token' => Str::random(10),
-
+            'province' => null,
+            'city' => null,
+            'phone' => $this->faker->numberBetween(12345678981,99999999999),
+            'code_id' => null,
+            'password' => Hash::make('test'),
         ];
     }
 

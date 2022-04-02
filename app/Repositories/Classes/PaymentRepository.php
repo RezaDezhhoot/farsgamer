@@ -4,11 +4,12 @@
 namespace App\Repositories\Classes;
 
 use App\Models\Payment;
+use App\Models\User;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
-
+    public $payment;
     /**
      * @param $ip
      * @param $user
@@ -58,5 +59,22 @@ class PaymentRepository implements PaymentRepositoryInterface
     public function delete(Payment $payment)
     {
         return $payment->delete();
+    }
+
+    public function create(User $user, array $data)
+    {
+        return $user->payments()->create($data);
+        // TODO: Implement create() method.
+    }
+
+    public function whereCause(array $where)
+    {
+        return $this->payment->where([$where]);
+        // TODO: Implement where() method.
+    }
+
+    public function newObject()
+    {
+        return $this->payment =  new Payment();
     }
 }

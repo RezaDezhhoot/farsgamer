@@ -4,6 +4,7 @@ namespace App\Repositories\Interfaces;
 use App\Models\OrderTransaction;
 use App\Models\OrderTransactionData;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 interface OrderTransactionRepositoryInterface
 {
@@ -60,4 +61,14 @@ interface OrderTransactionRepositoryInterface
     public static function getFor();
 
     public function getUserTransactions( $user);
+
+    public function getMyTransactions($use_id , Request $request);
+
+    public function getMyTransaction($use_id , $id);
+
+    public function update(array $condition , array $data , $model = null);
+
+    public function newPayment(array $data);
+
+    public static function successPayment();
 }

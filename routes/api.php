@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +14,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function (){
-
     Route::prefix('/basic')->group(function (){
         Route::get('/base',[App\Http\Controllers\Api\Site\v1\BasicController::class,'base']);
         Route::get('/sidebar',[App\Http\Controllers\Api\Site\v1\BasicController::class,'sidebar']);
@@ -72,16 +70,27 @@ Route::prefix('v1')->group(function (){
             Route::post('orders/calculator',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'calculate']);
             Route::apiResource('orders',App\Http\Controllers\Api\Site\v1\Panel\OrderController::class);
 
-            Route::apiResource('transactions',App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class);
-
             Route::prefix('chat')->group(function (){
-                Route::get('/list',[\App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'list']);
-                Route::get('/list/{group_id}',[\App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'open']);
-                Route::post('/send-message/{group_id}',[\App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'send']);
+                Route::get('/list',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'list']);
+                Route::get('/list/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'open']);
+                Route::post('/send-message/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'send']);
             });
+
+            Route::prefix('accounting')->group(function (){
+                Route::get('/list',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'index']);
+                Route::get('/list/{id}',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'show']);
+                Route::post('/charge',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'charge']);
+                Route::post('',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'request']);
+            });
+
+            Route::get('transactions',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'index']);
+            Route::get('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'show']);
+            Route::post('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'update']);
+            Route::delete('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'cancel']);
+
         });
 
-        Route::get('/dashboard',function (){return auth()->user();});
+        Route::get('/dashboard',App\Http\Controllers\Api\Site\v1\Panel\DashboardController::class);
 
         Route::get('/auth',App\Http\Controllers\Api\Site\v1\Panel\AuthController::class);
         Route::post('/auth',[App\Http\Controllers\Api\Site\v1\Panel\AuthController::class,'auth']);

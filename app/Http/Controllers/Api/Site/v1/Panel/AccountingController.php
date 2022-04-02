@@ -3,62 +3,200 @@
 namespace App\Http\Controllers\Api\Site\v1\Panel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\Panel\RequestCollection;
+use App\Repositories\Interfaces\CardRepositoryInterface;
+use App\Repositories\Interfaces\PaymentRepositoryInterface;
+use App\Repositories\Interfaces\RequestRepositoryInterface;
+use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
+use Bavix\Wallet\Exceptions\BalanceIsEmpty;
+use Bavix\Wallet\Exceptions\InsufficientFunds;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Shetabit\Multipay\Exceptions\PurchaseFailedException;
+use Shetabit\Multipay\Invoice;
+use Shetabit\Payment\Facade\Payment;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Validation\Rule;
+use App\Http\Resources\v1\Panel\Request as RequestResource;
 class AccountingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    private $requestRepository , $cardRepository , $userRepository , $settingRepository , $paymentRepository;
+    public function __construct(
+        RequestRepositoryInterface $requestRepository ,
+        CardRepositoryInterface $cardRepository ,
+        UserRepositoryInterface $userRepository ,
+        SettingRepositoryInterface $settingRepository ,
+        PaymentRepositoryInterface $paymentRepository
+    )
     {
-        //
+        $this->requestRepository = $requestRepository;
+        $this->cardRepository = $cardRepository;
+        $this->userRepository = $userRepository;
+        $this->settingRepository = $settingRepository;
+        $this->paymentRepository = $paymentRepository;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function index(Request $request)
     {
-        //
+        $requests = $this->requestRepository->getUserRequests(Auth::user());
+        return response([
+            'data' => [
+                'requests' => [
+                    'records' => new RequestCollection($requests),
+                    'paginate' => [
+                        'total' => $requests->total(),
+                        'count' => $requests->count(),
+                        'per_page' => $requests->perPage(),
+                        'current_page' => $requests->currentPage(),
+                        'total_pages' => $requests->lastPage()
+                    ],
+                ],
+                'details' => [
+                    'total_inventory' => Auth::user()->inventory_being_traded + Auth::user()->balance,
+                    'inventory_being_traded' => Auth::user()->inventory_being_traded,
+                    'removable_inventory' => Auth::user()->balance,
+                    'gateway' => [
+                        'payir' => 'پی',
+                        'zarinpal' => 'زرین پال'
+                    ]
+                ]
+            ],
+            'status' => 'success',
+        ],Response::HTTP_OK);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
+    public function charge(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+            'price' => 'required|numeric|min:1000|max:999999999999999999999999.99999999999999',
+            'gateway' => ['required','in:payir,zarinpal'],
+            'call_back_address' => ['nullable','string','max:255'],
+        ],[],[
+            'price' => 'مبلغ',
+            'gateway' => 'درگاه',
+        ]);
+        if ($validator->fails()){
+            return response([
+                'data' => [
+                    'message' => $validator->errors()
+                ],
+                'status' => 'error'
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        try {
+            $payment = Payment::via($request['gateway'])->callbackUrl(env('APP_URL') . '/verify/'. $request['gateway'])
+                ->purchase((new Invoice)
+                    ->amount($request['price']), function ($driver,$transactionId) use ($request) {
+                    $this->store($request,$request['gateway'] ,$transactionId);
+                })->pay()->toJson();
+            $payment = json_decode($payment);
+
+            return response([
+                'data' => [
+                    'gateway' => [
+                        'link' => $payment->action
+                    ]
+                ],
+                'status' => 'success'
+            ],Response::HTTP_OK);
+        } catch (PurchaseFailedException $exception) {
+            return response([
+                'data' => [
+                    'message' => [
+                        'gateway' => [$exception->getMessage()]
+                    ]
+                ],
+                'status' => 'error'
+            ],Response::HTTP_NOT_ACCEPTABLE);
+        }
+    }
+
+    private function store($request,$gateway, $transactionId = null)
+    {
+        return  DB::transaction(function () use ($gateway, $transactionId , $request) {
+            $pay = $this->paymentRepository->create(Auth::user(),[
+                'amount' => $request['price'],
+                'payment_gateway' => $gateway,
+                'payment_token' => $transactionId,
+                'model_type' => 'user',
+                'model_id' => Auth::id(),
+                'status_code' => 8,
+                'call_back_url' => $request['call_back_address'],
+            ]);
+            return $pay->id;
+        });
+    }
+
+    public function request(Request $request)
+    {
+        $user = $this->userRepository->find(Auth::id());
+        $max = $user->balance;
+        $validator = Validator::make($request->all(),[
+            'price' => 'required|numeric|min:'.($this->settingRepository->getSiteFaq('min_price_to_request')??1000).'|max:'.$max,
+            'card' => ['required',Rule::exists('cards','id')->where(function ($query) {
+                return $query->where([
+                    ['user_id',Auth::id()],
+                    ['status',$this->cardRepository::confirmStatus()],
+                ]);
+            })]
+        ],[],[
+            'price' => 'مبلغ',
+            'card' => 'حساب بانکی'
+        ]);
+        if ($validator->fails()){
+            return response([
+                'data' => [
+                    'message' => $validator->errors()
+                ],
+                'status' => 'error'
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $my_request = [
+            'price' => $request['price'],
+            'card_id' => $request['card'],
+            'status' => $this->requestRepository::newStatus(),
+        ];
+        try {
+            $user->withdraw($request['price'], ['description' => 'درخواست تسویه حساب', 'from_admin'=> true]);
+            $new_request = $this->requestRepository->create($user,$my_request);
+        } catch (BalanceIsEmpty | InsufficientFunds $exception) {
+            return response([
+                'data' => [
+                    'wallet' => [$exception->getMessage()]
+                ],
+                'status' => 'error'
+            ],Response::HTTP_NOT_ACCEPTABLE);
+        }
+        return response([
+            'data' => [
+                'request' => [
+                    'record' => new RequestResource($new_request)
+                ],
+                'message' => [
+                    'request' => ['درخواست تسویه حساب با موفقیت ثبت شد.']
+                ]
+            ],
+            'status' => 'success',
+        ],Response::HTTP_OK);
+    }
+
     public function show($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $request = $this->requestRepository->getUserRequest(Auth::check(),$id);
+        return response([
+            'data' => [
+                'request' => [
+                    'record' => new RequestResource($request)
+                ],
+                'message' => [
+                    'request' => ['درخواست تسویه حساب با موفقیت ثبت شد.']
+                ]
+            ],
+            'status' => 'success',
+        ],Response::HTTP_OK);
     }
 }

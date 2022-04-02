@@ -30,7 +30,7 @@ class ArticleRepository implements ArticleRepositoryInterface
     public function registerComment(Article $article, array $data )
     {
         $data['user_id'] = auth('api')->id();
-        $article->comments()->create($data);
+        return $article->comments()->create($data);
     }
 
     public function getAllAdmin($search, $status, $pagination)

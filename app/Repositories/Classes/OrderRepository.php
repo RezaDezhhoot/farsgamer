@@ -187,4 +187,10 @@ class OrderRepository implements OrderRepositoryInterface
         // TODO: Implement update() method.
     }
 
+    public function increment(Order $order, $col, $value)
+    {
+        $order->increment($col,$value);
+        // TODO: Implement increment() method.
+    }
+
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Cart;
 
 use App\Http\Livewire\BaseComponent;
+use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use Shetabit\Multipay\Exceptions\InvalidPaymentException;
 use Shetabit\Multipay\Invoice;
 use Shetabit\Payment\Facade\Payment;
@@ -15,11 +16,11 @@ class CallBack extends BaseComponent
     public $data;
     public $isSuccessful, $message;
     public $gateway , $user;
-    public $Authority, $Status, $status, $token, $tracking;
+    public $Authority, $Status, $status, $token, $tracking , $link;
     protected $queryString = ['gateway', 'Authority', 'Status', 'token', 'status', 'tracking'];
-    public function mount($gateway)
+    public function mount(PaymentRepositoryInterface $paymentRepository , $gateway)
     {
-        $this->getData();
+        $this->getData($paymentRepository);
         if (!is_null($this->gateway)&&!empty($this->gateway)){
             try {
                 if ($this->gateway == 'payir') {
@@ -27,7 +28,7 @@ class CallBack extends BaseComponent
                 } else {
                     $payment = Payment::via($this->gateway)->amount($this->data->amount)->transactionId($this->Authority)->verify();
                 }
-                $this->success($payment);
+                $this->success($paymentRepository,$payment);
 
             } catch (InvalidPaymentException $exception) {
                 $pay = '';
@@ -43,13 +44,12 @@ class CallBack extends BaseComponent
                     ]);
                 }
                 $this->isSuccessful = false;
-                return redirect()->to($pay->call_back_url.'?code='.(isset($pay->id) ?  $pay->id : 0));
+                $this->link = $pay->call_back_url.'?status='.(isset($pay->id) ?  $pay->id : 0);
             }
-        } else
-            return redirect()->to('user.request');
+        } abort(404);
     }
 
-    private function success($payment = null)
+    private function success(PaymentRepositoryInterface $paymentRepository,$payment = null)
     {
         $this->isSuccessful = true;
         $pay = '';
@@ -70,7 +70,7 @@ class CallBack extends BaseComponent
             }
         }
         $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
-        return redirect()->to($pay->call_back_url.'?code='.(isset($pay->id) ?  $pay->id : 0));
+        $this->link = $pay->call_back_url.'?status='.(isset($pay->id) ?  $pay->id : 0);
     }
 
 
@@ -79,13 +79,12 @@ class CallBack extends BaseComponent
         return view('livewire.cart.call-back');
     }
 
-    private function getData()
+    private function getData(PaymentRepositoryInterface $paymentRepository)
     {
         if ($this->gateway == 'zarinpal') {
             $transaction = Pay::where('payment_gateway', 'zarinpal')
                 ->where('payment_token', $this->Authority)
                 ->where('model_type', 'user')
-                ->where('user_id', auth()->id())
                 ->firstOrFail();
 
             $this->data = $transaction;

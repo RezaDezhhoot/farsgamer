@@ -38,16 +38,15 @@
                     <x-admin.form-section label="اطلاعات">
                         @include('livewire.admin.order-transactions.forms')
                     </x-admin.form-section>
-                    @if($transaction->status == $noReceiveStatus)
-                        <div class="form-group">
-                            <x-admin.form-section label="وضعیت دریافت توسط خریدار">
-                                <p>
-                                    <span>توضیحات :</span>
-                                    {!! $transaction->received_result !!}
-                                </p>
-                            </x-admin.form-section>
-                        </div>
-                    @endif
+                    <div class="form-group">
+                        <x-admin.form-section label="وضعیت دریافت توسط خریدار|فروشنده">
+                            <p>
+                                <x-admin.forms.dropdown id="receivedStatus" :data="$data['received_status']" label="وضعیت" wire:model.defer="receivedStatus"/>
+                                <span>توضیحات :</span>
+                                {!! $transaction->received_result !!}
+                            </p>
+                        </x-admin.form-section>
+                    </div>
                     @if($transaction->status == $returnStatus)
                         <x-admin.form-section label="مرجوعیت">
                             <x-admin.forms.basic-text-editor id="return_cause" label="علت مرجوعیت*" wire:model.defer="return_cause"/>

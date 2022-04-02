@@ -3,6 +3,7 @@ namespace App\Repositories\Interfaces;
 
 
 use App\Models\Request;
+use App\Models\User;
 
 interface RequestRepositoryInterface
 {
@@ -23,4 +24,10 @@ interface RequestRepositoryInterface
     public static function settlementStatus();
 
     public static function getNew();
+
+    public function getUserRequests(User $user);
+
+    public function getUserRequest(User $user , $id);
+
+    public function create(User $user , array $data);
 }

@@ -26,12 +26,15 @@ use App\Traits\Admin\Searchable;
  * @method static where(string $string, string $NEW)
  * @method static findOrFail($id)
  * @method static whereBetween(string $string, string[] $array)
+ * @method static create(array $data)
  */
 class Request extends Model
 {
     use HasFactory , Searchable , SoftDeletes;
 
     protected $searchAbleColumns = ['track_id','id'];
+
+    protected $fillable = ['price','card_id','status'];
 
     const SETTLEMENT = 'settlement' , REJECTED = 'rejected' , NEW = 'new';
 
@@ -61,7 +64,11 @@ class Request extends Model
 
     public function setFileAttribute($value)
     {
-        $this->attributes['file'] = str_replace(env('APP_URL'), '', $value);
+        $gallery = [];
+        foreach (explode(',',$value) as $item)
+            $gallery[] = str_replace(env('APP_URL'), '', $item);
+
+        $this->attributes['file'] = implode(',',$gallery);
     }
 
     public function getStatusLabelAttribute()

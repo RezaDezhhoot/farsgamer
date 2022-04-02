@@ -9,6 +9,7 @@ use App\Repositories\Interfaces\CardRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Rules\ChekCardNumber;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -58,6 +59,19 @@ class CardController extends Controller
      */
     public function store(Request $request)
     {
+        $rateKey = 'card:' . auth('api')->id() . '|' . request()->ip();
+        if (RateLimiter::tooManyAttempts($rateKey, 3)) {
+            return
+                response([
+                    'data' => [
+                        'message' => [
+                            'user' => ['زیادی تلاش کردی لطفا پس از مدتی دوباره سعی کنید.']
+                        ]
+                    ],
+                    'status' => 'error'
+                ],Response::HTTP_TOO_MANY_REQUESTS);
+        }
+        RateLimiter::hit($rateKey, 24 * 60 * 60);
         $request['card_sheba'] = preg_replace('/\s/','',$request['card_sheba']);
         $request['card_number'] = preg_replace('/\D/','',$request['card_number']);
 

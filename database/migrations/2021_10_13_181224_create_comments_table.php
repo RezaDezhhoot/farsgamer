@@ -20,6 +20,7 @@ class CreateCommentsTable extends Migration
             $table->string('content');
             $table->morphs('commentable');
             $table->float('score')->default(2.5);
+            $table->integer('order_transaction_id')->nullable();
             $table->timestamps();
         });
     }

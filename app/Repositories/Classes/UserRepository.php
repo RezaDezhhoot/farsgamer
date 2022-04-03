@@ -4,6 +4,7 @@
 namespace App\Repositories\Classes;
 
 use App\Models\Notification;
+use App\Models\OrderTransaction;
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 
@@ -11,7 +12,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function getUser($col, $value)
     {
-        return User::where($col,$value)->first();
+        return User::where($col,$value)->firstOrFail();
     }
 
     public function find($id)
@@ -206,5 +207,15 @@ class UserRepository implements UserRepositoryInterface
     {
         return $user->comments()->create($data);
         // TODO: Implement registerComment() method.
+    }
+
+    public function hasTransaction($order_id)
+    {
+        return !is_null(OrderTransaction::where([
+            ['order_id',$order_id],
+            ['customer_id',auth()->id()],
+            ['status','!=',OrderTransaction::IS_CANCELED]
+        ])->first());
+        // TODO: Implement hasTransaction() method.
     }
 }

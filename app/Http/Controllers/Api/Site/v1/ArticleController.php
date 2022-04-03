@@ -59,7 +59,7 @@ class ArticleController extends Controller
      */
     public function show($slug)
     {
-        $article = $this->articleRepository->getArticle('slug',$slug);
+        $article = $this->articleRepository->getArticle('slug',$slug,true);
         return response([
             'data' => [
                 'article' => [
@@ -100,7 +100,7 @@ class ArticleController extends Controller
                 'status' => 'error'
             ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        $this->articleRepository->registerComment($article,$request->all());
+        $this->articleRepository->registerComment($article,['content' => $request['content']]);
         return response([
             'data' =>  [
                 'message' => [

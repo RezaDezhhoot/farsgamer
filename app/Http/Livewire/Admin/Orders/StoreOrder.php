@@ -63,6 +63,8 @@ class StoreOrder extends BaseComponent
         if ($category->type == $categoryRepository::physical()){
             $this->data['province'] = $settingRepository::getProvince();
             $this->data['city'] = $settingRepository->getCity($this->province);
+        } else {
+            $this->reset(['province','city']);
         }
         $this->data['category'] = $categoryRepository->getAll(true,true)->pluck('title','id');
 
@@ -81,6 +83,8 @@ class StoreOrder extends BaseComponent
 
     public function saveInDB($orderRepository ,  $order)
     {
+        $this->province = $this->emptyStringToNull($this->province);
+        $this->city = $this->emptyStringToNull($this->city);
         $this->validate(
             [
                 'slug' => ['required', 'string','max:250'],
@@ -177,5 +181,17 @@ class StoreOrder extends BaseComponent
         $this->message->push($notification);
         $this->reset(['newMessage','newMessageStatus']);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');
+    }
+
+    public function emptyStringToNull($string)
+    {
+        //trim every value
+        $string = trim($string);
+
+        if ($string === ''){
+            return null;
+        }
+
+        return $string;
     }
 }

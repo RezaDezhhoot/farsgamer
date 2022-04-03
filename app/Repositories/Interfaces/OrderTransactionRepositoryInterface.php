@@ -60,7 +60,7 @@ interface OrderTransactionRepositoryInterface
 
     public static function getFor();
 
-    public function getUserTransactions( $user);
+    public function getUserTransactions($user);
 
     public function getMyTransactions($use_id , Request $request);
 

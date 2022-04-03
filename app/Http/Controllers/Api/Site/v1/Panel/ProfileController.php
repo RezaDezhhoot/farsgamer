@@ -80,7 +80,7 @@ class ProfileController extends Controller
                         'city' => ['ویرایش استان و شهر به دلیل داشتن معاملات باز امکان پذیر نمی باشد'],
                     ]
                 ], 'status' => 'error'
-            ],Response::HTTP_UNPROCESSABLE_ENTITY);
+            ],Response::HTTP_NOT_ACCEPTABLE);
         } else if (isset($request['province']) || isset($request['city'])) {
             if (!in_array($request['province'],array_keys($this->settingRepository::getProvince())))
                 return response([

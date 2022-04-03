@@ -23,16 +23,14 @@ Route::prefix('v1')->group(function (){
     Route::prefix('/orders')->group(function (){
         Route::get('/{order_id}',[App\Http\Controllers\Api\Site\v1\OrderController::class,'show']);
         Route::middleware(['auth:sanctum','userAuth'])
-            ->post('/start/{order_id}',[App\Http\Controllers\Api\Site\v1\OrderController::class,'startTransaction']);
-        Route::middleware(['auth:sanctum','userAuth'])
-            ->post('/chat/{user_id}',[App\Http\Controllers\Api\Site\v1\OrderController::class,'startChat']);
+            ->post('/start-transaction/{order_id}',[App\Http\Controllers\Api\Site\v1\OrderController::class,'startTransaction']);
     });
 
     Route::prefix('/articles')->group(function (){
         Route::get('',[App\Http\Controllers\Api\Site\v1\ArticleController::class,'index']);
         Route::get('/{slug}',[App\Http\Controllers\Api\Site\v1\ArticleController::class,'show']);
         Route::middleware(['auth:sanctum','userAuth'])
-            ->post('/comment/{slug}',[App\Http\Controllers\Api\Site\v1\ArticleController::class,'storeComment']);
+            ->post('/new-comment/{slug}',[App\Http\Controllers\Api\Site\v1\ArticleController::class,'storeComment']);
     });
 
     Route::prefix('/auth')->group(function (){
@@ -47,13 +45,16 @@ Route::prefix('v1')->group(function (){
             ->post('/offend/{user}',[App\Http\Controllers\Api\Site\v1\UserController::class,'sendOffend']);
     });
 
-    Route::get('/home',App\Http\Controllers\Api\Site\v1\HomeController::class);
+    Route::prefix('home')->group(function (){
+        Route::get('/',App\Http\Controllers\Api\Site\v1\HomeController::class);
+        Route::get('/categories',[App\Http\Controllers\Api\Site\v1\HomeController::class,'categories']);
+    });
 
     Route::get('/about-us',[App\Http\Controllers\Api\Site\v1\FagController::class,'about']);
 
     Route::get('/contact-us',[App\Http\Controllers\Api\Site\v1\FagController::class,'contact']);
 
-    Route::get('/law',[App\Http\Controllers\Api\Site\v1\FagController::class,'law']);
+    Route::get('/laws',[App\Http\Controllers\Api\Site\v1\FagController::class,'law']);
 
     Route::get('/fag',[App\Http\Controllers\Api\Site\v1\FagController::class,'fag']);
 
@@ -74,6 +75,7 @@ Route::prefix('v1')->group(function (){
                 Route::get('/list',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'list']);
                 Route::get('/list/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'open']);
                 Route::post('/send-message/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'send']);
+                Route::post('/start-chat/{user_id}',[App\Http\Controllers\Api\Site\v1\OrderController::class,'startChat']);
             });
 
             Route::prefix('accounting')->group(function (){
@@ -86,8 +88,9 @@ Route::prefix('v1')->group(function (){
             Route::get('transactions',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'index']);
             Route::get('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'show']);
             Route::post('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'update']);
+            Route::post('transactions/refund/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'requestToReturn']);
+            Route::post('transactions/receive/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'no_receive']);
             Route::delete('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'cancel']);
-
         });
 
         Route::get('/dashboard',App\Http\Controllers\Api\Site\v1\Panel\DashboardController::class);

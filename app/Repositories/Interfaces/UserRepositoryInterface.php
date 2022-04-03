@@ -61,4 +61,6 @@ interface UserRepositoryInterface
     public function getLastNotifications(User $user , $count);
 
     public function registerComment(User $user , array $data );
+
+    public function hasTransaction($order_id);
 }

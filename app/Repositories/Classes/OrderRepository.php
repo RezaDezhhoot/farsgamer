@@ -28,7 +28,7 @@ class OrderRepository implements OrderRepositoryInterface
             return $query->whereIn('category_id',$sub_categories_id);
         })->when($request['platform'],function ($query) use ($request){
             return $query->whereHas('platforms',function ($query) use ($request) {
-                return $query->where('slug',$request['category']);
+                return $query->where('slug',$request['platform']);
             });
         })->orderBy($request['view'] == 1 ? 'view_count' : 'id' , 'desc')->paginate(35);
 

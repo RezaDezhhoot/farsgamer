@@ -26,6 +26,6 @@ class UserAuth
                 'message' => 'نیاز به احراز هویت'
             ],
             'status' => 'error'
-        ],Response::HTTP_UNPROCESSABLE_ENTITY);
+        ],Response::HTTP_UNAUTHORIZED);
     }
 }

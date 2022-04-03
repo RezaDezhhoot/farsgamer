@@ -18,6 +18,7 @@ class TransactionCollection extends ResourceCollection
         return $this->collection->map(function ($item){
             return [
                 'id' => $item->id,
+                'code' => $item->code,
                 'customer' => new User($item->customer),
                 'seller' => new User($item->seller),
                 'status_label' => $item->status_label,

@@ -22,6 +22,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed category
  * @property mixed data
  * @property mixed code
+ * @property mixed id
  */
 class Transaction extends JsonResource
 {
@@ -42,6 +43,7 @@ class Transaction extends JsonResource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'code' => $this->code,
             'seller' => new User($this->seller),
             'customer' => new User($this->customer),
@@ -53,7 +55,7 @@ class Transaction extends JsonResource
             'commission' => $this->commission,
             'intermediary' => $this->intermediary,
             'timer' => $this->timer,
-            'received_status' => $this->orderTransactionRepository::receiveStatus()[$this->received_status],
+            'received_status' => $this->orderTransactionRepository::receiveStatus()[$this->received_status ?? 0],
             'received_result' => $this->received_result,
             'data' => [
                 'id' => $this->data->id,

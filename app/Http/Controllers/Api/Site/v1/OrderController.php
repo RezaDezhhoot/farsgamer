@@ -10,25 +10,28 @@ use App\Repositories\Interfaces\OrderRepositoryInterface;
 use App\Http\Resources\v1\Order as OrderResource;
 use App\Repositories\Interfaces\OrderTransactionRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    private $orderRepository , $orderTransactionRepository , $settingRepository , $chatRepository;
+    private $orderRepository , $orderTransactionRepository , $settingRepository , $chatRepository  , $userRepository;
 
     public function __construct(
         OrderRepositoryInterface $orderRepository ,
         OrderTransactionRepositoryInterface $orderTransactionRepository ,
         SettingRepositoryInterface $settingRepository ,
-        ChatRepositoryInterface $chatRepository
+        ChatRepositoryInterface $chatRepository ,
+        UserRepositoryInterface $userRepository
     )
     {
         $this->orderRepository = $orderRepository;
         $this->orderTransactionRepository = $orderTransactionRepository;
         $this->settingRepository = $settingRepository;
         $this->chatRepository = $chatRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function show($order_id)
@@ -53,6 +56,16 @@ class OrderController extends Controller
         $order = $this->orderRepository->getOrder($order_id);
         if ($order->user->id != auth('api')->id()) {
             if (!auth()->user()->baned) {
+                if ($this->userRepository->hasTransaction($order_id))
+                    return response([
+                        'data' => [
+                            'message' => [
+                                'transaction' => ['کاربر قبلا برای این اگهی درخواست فرستاده است.']
+                            ]
+                        ],
+                        'status' => 'error'
+                    ],Response::HTTP_TOO_MANY_REQUESTS);
+
                 $validator = Validator::make($request->all(),[
                     'confirmLaw' => 'required|boolean',
                 ],[],[
@@ -70,15 +83,15 @@ class OrderController extends Controller
                 $transaction = $this->orderTransactionRepository->start($order,$commission);
                 return response([
                     'data' => [
-                        'transaction' => $transaction == 0 ? [] : new Transaction($transaction),
+                        'transaction' => gettype($transaction) == 'integer' ? [] : new Transaction($transaction,[],$this->orderTransactionRepository),
                         'message' =>  [
                             'transaction' => [
-                                $transaction == 0 ? 'خطا در هنگام ایجاد معامله.' : 'معامله با موفقیت ایجاد شد. '
+                                gettype($transaction) == 'integer' ? 'خطا در هنگام ایجاد معامله.' : 'معامله با موفقیت ایجاد شد. '
                             ]
                         ]
                     ],
-                    'status' => $transaction == 0 ? 'error' : 'success',
-                ],$transaction == 0 ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK);
+                    'status' => gettype($transaction) == 'integer' ? 'error' : 'success',
+                ],gettype($transaction) == 'integer' ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK);
             } else {
                 return response([
                     'data' => [
@@ -97,7 +110,7 @@ class OrderController extends Controller
                     ]
                 ],
                 'status' => 'error',
-            ],Response::HTTP_FORBIDDEN);
+            ],Response::HTTP_NOT_ACCEPTABLE);
         }
     }
 

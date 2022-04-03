@@ -24,7 +24,7 @@ class ArticleRepository implements ArticleRepositoryInterface
 
     public function getArticle($col, $value, $active = true)
     {
-        return Article::active($active)->where($col,$value)->first();
+        return Article::active($active)->where($col,$value)->firstOrFail();
     }
 
     public function registerComment(Article $article, array $data )

@@ -65,7 +65,7 @@ class FagController extends Controller
             'data' => [
                 'laws' => [
                     'laws' => $this->settingRepository->getSiteLaw('law'),
-                    'chatLaws' => $this->settingRepository->getSiteLaw('chatLaw'),
+                    'chat_laws' => $this->settingRepository->getSiteLaw('chatLaw'),
                 ]
             ],
             'status' => 'success'

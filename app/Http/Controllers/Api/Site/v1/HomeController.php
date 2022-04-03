@@ -32,7 +32,6 @@ class HomeController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $most_used_categories = $this->categoryRepository->getMostUsedCategories();
         $orders = $this->orderRepository->getHomeOrders($request);
         return response([
             'data' => [
@@ -45,7 +44,16 @@ class HomeController extends Controller
                         'current_page' => $orders->currentPage(),
                         'total_pages' => $orders->lastPage()
                     ],
-                ],
+                ]
+            ],'status' => 'success'
+        ],Response::HTTP_OK);
+    }
+
+    public function categories()
+    {
+        $most_used_categories = $this->categoryRepository->getMostUsedCategories();
+        return response([
+            'data' => [
                 'most_used_categories' => [
                     'record' => new CategoryCollection($most_used_categories)
                 ],

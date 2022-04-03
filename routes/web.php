@@ -16,6 +16,9 @@ use Spatie\Permission\Models\Permission;
 Route::get('/welcome', function (){
     return view('welcome');
 });
+Route::get('/welcome', function (){
+    return view('welcome');
+})->name('home');
 // admin
 Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
 {
@@ -88,28 +91,5 @@ Route::get('/logout', function (){
 Route::middleware('guest')->group(function () {
     Route::get('/auth', \App\Http\Livewire\Site\Auth\Auth::class)->name('auth');
 });
-
-// api:
-
-// user
-Route::middleware(['auth'])->namespace('App\Http\Livewire\Site')->prefix('/user')->group(function (){
-    Route::get('/dashboard', Dashboard\Dashboards\IndexDashboard::class)->name('user.dashboard')->middleware('userAuth');
-    Route::get('/profile', Dashboard\Profile\IndexProfile::class)->name('user.profile')->middleware('userAuth');
-    Route::get('/auth', Dashboard\Profile\AuthComponent::class)->name('user.auth');
-    Route::get('/marks', Dashboard\Others\IndexSaved::class)->name('user.mark');
-    Route::get('/chats', Dashboard\Chats\IndexChat::class)->name('user.chat')->middleware('userAuth');
-    Route::get('/orders', Dashboard\Orders\IndexOrder::class)->name('user.order')->middleware('userAuth');
-    Route::get('/orders/{action}/{id?}', Dashboard\Orders\StoreOrder::class)->name('user.store.order')->middleware('userAuth');
-    Route::get('/requests', Dashboard\Accounting\IndexAccounting::class)->name('user.accounting')->middleware('userAuth');
-    Route::get('/requests/{action}/{id?}', Dashboard\Accounting\StoreAccounting::class)->name('user.store.accounting')->middleware('userAuth');
-    Route::get('/order-transactions', Dashboard\Transactions\IndexTransaction::class)->name('user.transaction')->middleware('userAuth');
-    Route::get('/order-transactions/{action}/{id?}', Dashboard\Transactions\StoreTransaction::class)->name('user.store.transaction')->middleware('userAuth');
-});
-// home
-Route::get('/',\App\Http\Livewire\Site\Home\IndexHome::class)->name('home');
-Route::get('/saved',\App\Http\Livewire\Site\Dashboard\Others\IndexSaved::class)->name('save');
-Route::get('/orders/{userID}/{id}/{slug}',\App\Http\Livewire\Site\Orders\SingleOrder::class)->name('order');
-Route::get('/users/{user}',\App\Http\Livewire\Site\Users\SingleUser::class)->name('user');
-
 // checkout
 Route::get('/verify/{gateway}',\App\Http\Livewire\Cart\CallBack::class);

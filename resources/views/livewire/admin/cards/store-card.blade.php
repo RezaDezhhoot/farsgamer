@@ -11,7 +11,6 @@
             <x-admin.forms.input type="text" id="card_sheba" help="همراه با IR" label="شماره شبا*" wire:model.defer="card_sheba"/>
             <x-admin.forms.dropdown id="status" :data="$data['status']" label="وضعیت*" wire:model.defer="status"/>
             <x-admin.forms.dropdown id="bank" :data="$data['bank']" label="بانک*" wire:model.defer="bank"/>
-            <x-admin.forms.lfm-standalone id="bank_logo" label="لوگو*" :file="$bank_logo" type="image" required="true" wire:model="bank_logo"/>
             <x-admin.form-section label="پیام ها">
                 <div class="row">
                     <div class="col-12 table-responsive">

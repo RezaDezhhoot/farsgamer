@@ -7,10 +7,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
-use Artesaos\SEOTools\Facades\JsonLd;
-use Artesaos\SEOTools\Facades\OpenGraph;
-use Artesaos\SEOTools\Facades\SEOMeta;
-use Artesaos\SEOTools\Facades\TwitterCard;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Livewire\BaseComponent;
 use Illuminate\Support\Facades\RateLimiter;
@@ -23,34 +19,23 @@ class Auth extends BaseComponent
     public $phone , $password , $name, $otp , $mode = self::MODE_LOGIN;
     public $logo , $authImage , $sms = false , $data = [] ;
     public $passwordLabel = 'رمز عبور';
-    public $email , $phone_number , $user_name;
+    public $email , $sent = false , $user_name;
 
     public function mount()
     {
-        SEOMeta::setTitle('احراز هویت',false);
-        SEOMeta::setDescription(Setting::getSingleRow('seoDescription'));
-        SEOMeta::addKeyword(explode(',',Setting::getSingleRow('seoKeyword')));
-        OpenGraph::setUrl(url()->current());
-        OpenGraph::setTitle('احراز هویت');
-        OpenGraph::setDescription(Setting::getSingleRow('seoDescription'));
-        TwitterCard::setTitle('احراز هویت');
-        TwitterCard::setDescription(Setting::getSingleRow('seoDescription'));
-        JsonLd::setTitle('احراز هویت');
-        JsonLd::setDescription(Setting::getSingleRow('seoDescription'));
-        JsonLd::addImage(Setting::getSingleRow('logo'));
         $this->logo = Setting::getSingleRow('logo');
         $this->authImage = Setting::getSingleRow('authImage');
     }
 
     public function render()
     {
-        return view('livewire.site.auth.auth')->extends('livewire.site.layouts.auth.auth');
+        return view('livewire.site.auth.login')->extends('livewire.site.auth.app');
     }
 
     public function login()
     {
         $rateKey = 'verify-attempt:' . $this->phone . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count') ?? 5)) {
+        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count') ?? 10)) {
             $this->resetInputs();
             return
                 $this->addError('phone', 'زیادی تلاش کردید. لطفا پس از مدتی دوباره تلاش کنید.');
@@ -68,17 +53,17 @@ class Auth extends BaseComponent
         $user = User::where('phone', $this->phone)->orWhere('user_name',$this->phone)->first();
 
         if (!is_null($user)) {
-            if (Hash::check($this->password, $user->password) || (Hash::check($this->password, $user->otp) && $this->sms === true)) {
+            if (Hash::check($this->password, $user->password) || ( !is_null($user->otp) && Hash::check($this->password, $user->otp) && $this->sms === true)) {
                 \Illuminate\Support\Facades\Auth::login($user,true);
                 request()->session()->regenerate();
+                $user->otp = null;
+                $user->save();
                 RateLimiter::clear($rateKey);
                 $send = new SendMessages();
                 $message = $this->createText('login',$user);
                 $send->sends($message,$user,Notification::AUTH,$user->id);
                 if ( \Illuminate\Support\Facades\Auth::user()->hasRole('admin'))
                     return redirect()->intended(route('admin.dashboard'));
-                else
-                    return redirect()->intended(route('user.dashboard'));
             } else
                 return $this->addError('password','گذواژه یا شماره همراه اشتباه می باشد.');
         }
@@ -113,6 +98,7 @@ class Auth extends BaseComponent
             $user->save();
             $send = new SendMessages();
             $send->sendCode($rand,$user);
+            $this->sent = true;
         } else
             return $this->addError('phone','این شماره همراه یافت نشد.');
     }

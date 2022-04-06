@@ -13,6 +13,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed date
  * @property mixed result
  * @property mixed card
+ * @property mixed id
  */
 class Request extends JsonResource
 {
@@ -25,6 +26,7 @@ class Request extends JsonResource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'price' => $this->price,
             'status_label' => $this->status_label,
             'link' => $this->link,

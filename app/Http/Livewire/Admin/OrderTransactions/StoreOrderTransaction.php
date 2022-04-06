@@ -82,6 +82,7 @@ class StoreOrderTransaction extends BaseComponent
         foreach ($orderTransactionRepository::getStatus($this->return) as $key => $item)
             $this->data['status'][$key] = $item['label'];
 
+
         $standardStatus = $orderTransactionRepository::standardStatus();
         $returnedStatus = $orderTransactionRepository::returnedStatus();
         $returnStatus = $orderTransactionRepository::isReturned();
@@ -103,7 +104,7 @@ class StoreOrderTransaction extends BaseComponent
 
     public function setTimer()
     {
-        $this->emit('timer',['data' => $this->transaction->timer->toDateTimeString()]);
+        $this->emit('timer',['data' => $this->transaction->timer ? $this->transaction->timer->toDateTimeString() : '']);
     }
 
     public function store(
@@ -118,10 +119,6 @@ class StoreOrderTransaction extends BaseComponent
                 $orderTransactionRepository::isReturned(),$orderTransactionRepository::cancel(),
                 $orderTransactionRepository::receive()
             ])) {
-//            if ($this->transaction->is_returned){
-//                $this->emitNotify('برای این معامله امکان تغییر وجود ندارد','warning');
-//                return (false);
-//            }
             $this->transaction->order->status = $orderRepository::isConfirmedStatus();
             $orderTransactionRepository->updateData($this->transaction,['value'=> null]);
 
@@ -146,6 +143,7 @@ class StoreOrderTransaction extends BaseComponent
         $timer = $carbon;
         $data = $this->transaction->data;
         $this->resetErrorBag();
+        $this->transaction->received_status = $this->receivedStatus;
         if (!in_array($this->transaction->status,[$orderTransactionRepository::cancel(),$orderTransactionRepository::complete()])){
             if ($this->transaction->status <> $this->status) {
                 $this->transaction->order->OrderTransactions()->where('id','!=',$this->transaction->id)->update([
@@ -208,6 +206,7 @@ class StoreOrderTransaction extends BaseComponent
                                 ['description' => $this->transaction->code.'واربز هزینه بابت معامله به کد ', 'from_admin'=> true]);
 
                             $this->transaction->received_status = 1;
+                            $this->transaction->received_result = null;
                         }
                     }
                 } elseif ($this->transaction->is_returned == 1){
@@ -237,18 +236,18 @@ class StoreOrderTransaction extends BaseComponent
                 elseif ($this->status == $orderTransactionRepository::noReceive()){
                     $timer = (float)$this->transaction->order->category->no_receive_time;
                     $this->transaction->received_status = 0;
+                    $this->transaction->received_result = null;
                 }
-
                 $timer = $carbon->addMinutes($timer);
-
                 $this->transaction->timer = $timer;
                 $this->emit('timer',['data' => $timer->toDateTimeString()]);
                 $this->transaction->status = $this->status;
                 $this->nowStatus = $this->status;
-                $orderTransactionRepository->save($this->transaction);
-                $orderRepository->save($this->transaction->order);
+
                 $this->notify($notificationRepository , $orderTransactionRepository);
             }
+            $orderTransactionRepository->save($this->transaction);
+            $orderRepository->save($this->transaction->order);
             $this->emitNotify('اطلاعات با موفقیت ثبت شد');
         } else{
             $this->emitNotify('برای این معامله امکان تغییر وجود ندارد','warning');

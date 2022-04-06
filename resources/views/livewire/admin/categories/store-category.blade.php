@@ -18,6 +18,7 @@
             <x-admin.forms.input type="number" id="send_time" label="زمان لازم برای ارسال توسط فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="send_time"/>
             <x-admin.forms.input type="number" id="receive_time" label="زمان لازم برای دریافت توسط فروشنده یا خریدار(محصولات دیجیتالی)*" help="بر حسب دقیقه" wire:model.defer="receive_time"/>
             <x-admin.forms.input type="number" id="no_receive_time" label="زمان پیگیری در صورت عدم دریافت فروشنده یا خریردار*" help="بر حسب دقیقه" wire:model.defer="no_receive_time"/>
+            <x-admin.forms.input type="number" id="sending_data_time" label="زمان لازم برای ارسال اطلاعات فروشنده(مرجوعی)*" help="بر حسب دقیقه" wire:model.defer="sending_data_time"/>
             <x-admin.forms.input type="number" id="commission" label="کارمزد شبکه *" help="بر حسب درصد" wire:model.defer="commission"/>
             <x-admin.forms.input type="number" id="intermediary" label="حق واسطه گری*" help="بر حسب درصد" wire:model.defer="intermediary"/>
             <x-admin.forms.checkbox id="control" label="نیاز به واسط" wire:model.defer="control" />

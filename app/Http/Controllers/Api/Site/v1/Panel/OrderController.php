@@ -87,8 +87,8 @@ class OrderController extends Controller
                     'total' => $request['price'] - $price['commission']/2 - $price['intermediary']/2,
                 ]
             ],
-            'status' => 'error'
-        ],Response::HTTP_UNPROCESSABLE_ENTITY);
+            'status' => 'success'
+        ],Response::HTTP_OK);
     }
 
     public function details()
@@ -144,7 +144,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $rateKey = 'order:' . auth('api')->id() . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, 25)) {
+        if (RateLimiter::tooManyAttempts($rateKey, 50)) {
             return
                 response([
                     'data' => [
@@ -169,7 +169,7 @@ class OrderController extends Controller
         $platforms = $category->platforms->pluck('id')->toArray();
         $parameters = $category->parameters;
         $fields = [
-            'name' => ['required','string','max:55'],
+            'name' => ['required','string','max:75'],
             'content' => ['required','string','max:4200'],
             'price' => ['required','numeric', 'between:0,9999999999999999999999999999.99999'],
             'image' => ['required','mimes:'.$this->settingRepository->getSiteFaq('valid_order_images'),'max:'.$this->settingRepository->getSiteFaq('max_order_image_size')],
@@ -201,6 +201,15 @@ class OrderController extends Controller
         $params = [];
         if ($request->has('parameters') && gettype($request['parameters']) == 'array'){
             foreach ($request['parameters'] as $key => $value) {
+                if (!isset($value['value']) || !isset($value['id']))
+                    return response([
+                        'data' => [
+                            'message' => [
+                                'parameters.'.$key.'.value' => ['فیلد پارامتر معتبر نمی باشد'],
+                            ]
+                        ], 'status' => 'error'
+                    ],Response::HTTP_UNPROCESSABLE_ENTITY);
+
                 $param = $this->parameterRepository->find($value['id']);
                 $max = $param->max;
                 $min = $param->min;
@@ -212,6 +221,7 @@ class OrderController extends Controller
                 ];
             }
         }
+
         if ($category->type == $this->categoryRepository::physical()){
             if (!isset($request['province']) || empty($request['province']) || !in_array($request['province']
                     ,array_keys($this->settingRepository::getProvince()))) {
@@ -270,7 +280,7 @@ class OrderController extends Controller
             'content' => $request['content'],
             'price' => $request['price'],
             'image' => $image,
-            'gallery' => implode(',',$gallery),
+            'gallery' => trim(implode(',',$gallery),','),
             'province' => $request['province'] ?? null,
             'city' => $request['city'] ?? null,
         ];
@@ -333,10 +343,10 @@ class OrderController extends Controller
             return response([
                 'data' => [
                     'message' => [
-                        'order' => 'برای این اگهی امکان حذف وجود ندارد.'
+                        'order' => ['برای این اگهی امکان حذف وجود ندارد.']
                     ]
                 ],'status' => 'error'
-            ],Response::HTTP_FORBIDDEN);
+            ],Response::HTTP_NOT_ACCEPTABLE);
         }
         if ($request->has('category_id'))
             $category = $this->categoryRepository->findNormal($request['category_id'],true,true);
@@ -382,6 +392,14 @@ class OrderController extends Controller
         ];
         $params = [];
         foreach ($request['parameters'] as $key => $value) {
+            if (!isset($value['value']) || !isset($value['id']))
+                return response([
+                    'data' => [
+                        'message' => [
+                            'parameters.'.$key.'.value' => ['فیلد پارامتر معتبر نمی باشد'],
+                        ]
+                    ], 'status' => 'error'
+                ],Response::HTTP_UNPROCESSABLE_ENTITY);
             $param = $this->parameterRepository->find($value['id']);
             $max = $param->max;
             $min = $param->min;
@@ -474,7 +492,7 @@ class OrderController extends Controller
             'category_id' => $category->id,
             'content' => $request['content'],
             'image' =>  $image,
-            'gallery' => implode(',',$galleries),
+            'gallery' => trim(implode(',',$galleries),','),
             'province'  => $request['province'] ?? null,
             'city'  => $request['city'] ?? null,
             'status' => $this->orderRepository::isNewStatus()
@@ -501,7 +519,7 @@ class OrderController extends Controller
                     'record' => new Order($order)
                 ],
                 'message' => [
-                    'order' => ['اگهی با موفقیت ثبت شد']
+                    'order' => ['اگهی با موفقیت ویرایش شد']
                 ]
             ],'status' => 'success'
         ],Response::HTTP_OK);
@@ -532,7 +550,7 @@ class OrderController extends Controller
                     'order' => 'برای این اگهی امکان حذف وجود ندارد.'
                 ]
             ],'status' => 'error'
-        ],Response::HTTP_FORBIDDEN);
+        ],Response::HTTP_NOT_ACCEPTABLE);
     }
 
     public function deleteImage($order_id , Request $request)
@@ -552,14 +570,14 @@ class OrderController extends Controller
                 'status' => 'error'
             ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        if (!in_array($order->status,[$this->orderRepository::isNewStatus(),$this->orderRepository::isConfirmedStatus()])){
+        if (in_array($order->status,[$this->orderRepository::isNewStatus(),$this->orderRepository::isConfirmedStatus()])){
             return response([
                 'data' => [
                     'message' => [
-                        'order' => 'برای این اگهی امکان حذف وجود ندارد.'
+                        'order' => 'برای این اگهی امکان ویرایش وجود ندارد.'
                     ]
                 ],'status' => 'error'
-            ],Response::HTTP_FORBIDDEN);
+            ],Response::HTTP_NOT_ACCEPTABLE);
         }
 
         $gallery = explode(',',$order->gallery);

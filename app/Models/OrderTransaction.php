@@ -154,8 +154,8 @@ class OrderTransaction extends Model
                 'desc' => 'در انتظار دریافت توسط فروشنده', 'color' => 'link' , 'timer' => self::getTimer(self::WAIT_FOR_RECEIVE)],
             self::WAIT_FOR_NO_RECEIVE => ['label' => 'دریافت نشده '  , 'color' => 'link' , 'progress' => 75 , 'icon' => 'fab fa-get-pocket icon-xl'  , 'step' => 3,
                 'desc' => 'دریافت نشده از طرف فروشنده', 'timer' => self::getTimer(self::WAIT_FOR_RECEIVE)],
-            self::WAIT_FOR_COMPLETE => ['label' => 'تکمیل شده' , 'progress' => 100 , 'color' => 'link', 'step' => 4,'icon' => 'fas fa-check-circle icon-xl',
-                    'timer' => self::getTimer(self::WAIT_FOR_COMPLETE), 'desc' => 'تکمیل شده',],
+//            self::WAIT_FOR_COMPLETE => ['label' => 'تکمیل شده' , 'progress' => 100 , 'color' => 'link', 'step' => 4,'icon' => 'fas fa-check-circle icon-xl',
+//                    'timer' => self::getTimer(self::WAIT_FOR_COMPLETE), 'desc' => 'تکمیل شده',],
             self::IS_CANCELED => ['label' =>'تکمیل مرجوعیت', 'color' => 'link' , 'progress' => 100 , 'icon' => 'flaticon2-cancel icon-xl'  , 'step' => 4,
                 'desc' => 'تکمیل مرجوعیت مرجوعیت','timer' => self::getTimer(self::IS_CANCELED)],
         ];

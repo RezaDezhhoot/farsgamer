@@ -11,7 +11,7 @@
     <link href="{{asset('admin/css/themes/layout/header/menu/light.rtl.css?v=7.0.6')}}" rel="stylesheet" type="text/css"/>
     <link href="{{asset('admin/css/themes/layout/brand/dark.rtl.css?v=7.0.6')}}" rel="stylesheet" type="text/css"/>
     <link href="{{asset('admin/css/themes/layout/aside/dark.rtl.css?v=7.0.6')}}" rel="stylesheet" type="text/css"/>
-    <link href="{{asset('admin//css/pages/wizard/wizard-2.rtl.css')}}" rel="stylesheet" type="text/css" />
+    <link href="{{asset('admin/css/pages/wizard/wizard-2.rtl.css')}}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="{{asset('admin/plugins/custom/datepicker/persian-datepicker.min.css')}}"/>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="{{ asset(\App\Models\Setting::getSingleRow('logo')) }}">

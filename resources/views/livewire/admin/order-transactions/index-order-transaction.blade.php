@@ -49,12 +49,12 @@
                                 <td>
                                     <ul class="list-inline">
                                         <li>
-                                            <a title="{{$item->seller->name}}" href="{{route('user',$item->seller->user_name)}}" target="_blank">
+                                            <a title="{{$item->seller->name}}" href="{{route('admin.store.user',$item->seller->user_name)}}" target="_blank">
                                                 فروشنده : {{$item->seller->user_name}}
                                             </a>
                                         </li>
                                         <li>
-                                            <a title="{{$item->customer->name}}" href="{{route('user',$item->customer->user_name)}}">
+                                            <a title="{{$item->customer->name}}" href="{{route('admin.store.user',$item->customer->user_name)}}">
                                                 خریدار : {{$item->customer->user_name}}
                                             </a>
                                         </li>

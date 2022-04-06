@@ -114,34 +114,4 @@ class OrderController extends Controller
         }
     }
 
-    public function startChat(Request $request)
-    {
-        $validator = Validator::make($request->all(),[
-            'confirmLaw' => 'required|boolean',
-            'user_target' => 'required|exists:users,id'
-        ],[],[
-            'confirmLaw' => 'تایید قوانین',
-            'user_target' => 'کاربر مورد نظر'
-        ]);
-        if ($validator->fails()) {
-            return response([
-                'data' => [
-                    'message' => $validator->errors()
-                ],
-                'status' => 'error'
-            ],Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-        $group = $this->chatRepository->startChat($request['user_target']);
-        return response([
-            'data' => [
-                'group' => [
-                    'record' => new Group($group)
-                ],
-                'message' => [
-                    'group_chats' => ['چت با موفقیت ایجاد شد']
-                ]
-            ],
-            'status' => 'success'
-        ],Response::HTTP_OK);
-    }
 }

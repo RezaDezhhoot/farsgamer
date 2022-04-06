@@ -131,7 +131,7 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
     public static function isReturned()
     {
         // TODO: Implement isReturned() method.
-        return OrderTransaction::IS_REQUESTED;
+        return OrderTransaction::IS_RETURNED;
     }
 
     public static function sendingData()
@@ -169,7 +169,7 @@ class OrderTransactionRepository implements OrderTransactionRepositoryInterface
     public static function returnedStatus()
     {
         // TODO: Implement returnedStatus() method.
-        OrderTransaction::returnedStatus();
+        return OrderTransaction::returnedStatus();
     }
 
     public static function getTimer($status)

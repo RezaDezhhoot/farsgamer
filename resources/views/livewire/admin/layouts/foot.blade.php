@@ -61,7 +61,7 @@
 <script src="{{asset('admin/plugins/global/plugins.bundle.js?v=7.0.6')}}"></script>
 <script src="{{asset('admin/plugins/custom/prismjs/prismjs.bundle.js?v=7.0.6')}}"></script>
 <script src="{{asset('admin/js/scripts.bundle.js?v=7.0.6')}}"></script>
-<script src="https://keenthemes.com/metronic/assets/js/engage_code.js"></script>
+{{--<script src="https://keenthemes.com/metronic/assets/js/engage_code.js"></script>--}}
 <script src="{{asset('admin/plugins/custom/fullcalendar/fullcalendar.bundle.js')}}"></script>
 <script src="{{asset('admin/js/pages/custom/chat/chat.js') }}"></script>
 <script src="{{ asset('vendor/laravel-filemanager/js/stand-alone-button.js') }}"></script>

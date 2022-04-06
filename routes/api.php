@@ -66,31 +66,32 @@ Route::prefix('v1')->group(function (){
             Route::get('tickets/details',[App\Http\Controllers\Api\Site\v1\Panel\TicketController::class,'details']);
             Route::apiResource('tickets',App\Http\Controllers\Api\Site\v1\Panel\TicketController::class);
 
-            Route::delete('orders/delete-image/{order_id}',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'deleteImage']);
             Route::get('orders/details',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'details']);
             Route::post('orders/calculator',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'calculate']);
+            Route::delete('orders/delete-image/{order_id}',[App\Http\Controllers\Api\Site\v1\Panel\OrderController::class,'deleteImage']);
             Route::apiResource('orders',App\Http\Controllers\Api\Site\v1\Panel\OrderController::class);
 
             Route::prefix('chat')->group(function (){
                 Route::get('/list',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'list']);
                 Route::get('/list/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'open']);
-                Route::post('/send-message/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'send']);
-                Route::post('/start-chat/{user_id}',[App\Http\Controllers\Api\Site\v1\OrderController::class,'startChat']);
+                Route::post('/list/{group_id}',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'send']);
+                Route::post('/new',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'startChat']);
             });
 
             Route::prefix('accounting')->group(function (){
-                Route::get('/list',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'index']);
-                Route::get('/list/{id}',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'show']);
-                Route::post('/charge',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'charge']);
+                Route::get('',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'index']);
                 Route::post('',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'request']);
+                Route::get('/show/{id}',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'show']);
+                Route::get('/details',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'details']);
+                Route::post('/charge',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'charge']);
             });
 
             Route::get('transactions',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'index']);
             Route::get('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'show']);
             Route::post('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'update']);
-            Route::post('transactions/refund/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'requestToReturn']);
-            Route::post('transactions/receive/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'no_receive']);
             Route::delete('transactions/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'cancel']);
+            Route::post('transaction-options/refund/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'requestToReturn']);
+            Route::post('transaction-options/receive/{id}',[App\Http\Controllers\Api\Site\v1\Panel\TransactionController::class,'no_receive']);
         });
 
         Route::get('/dashboard',App\Http\Controllers\Api\Site\v1\Panel\DashboardController::class);

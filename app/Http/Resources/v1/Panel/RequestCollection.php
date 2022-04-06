@@ -26,6 +26,7 @@ class RequestCollection extends ResourceCollection
     {
         return $this->collection->map(function ($item){
             return [
+                'id' => $item->id,
                 'price' => $item->price,
                 'status_label' => $item->status_label,
                 'link' => $item->link,

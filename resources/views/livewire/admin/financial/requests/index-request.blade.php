@@ -36,8 +36,8 @@
                                 <td>{{ $item->track_id ?? '' }}</td>
                                 <td>{{ $item->user->fullName }}</td>
                                 <td>{{ number_format($item->price) }}</td>
-                                <td>{{ $item->card->bank_label }}</td>
-                                <td>{{ $item->status_label }}</td>
+                                <td>{{ $item->card->bank_label ?? '' }}</td>
+                                <td>{{ $item->status_label ?? '' }}</td>
                                 <td>{{ $item->date }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.request',['edit', $item->id]) }}" />

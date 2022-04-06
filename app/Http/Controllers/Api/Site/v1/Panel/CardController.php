@@ -60,7 +60,7 @@ class CardController extends Controller
     public function store(Request $request)
     {
         $rateKey = 'card:' . auth('api')->id() . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, 3)) {
+        if (RateLimiter::tooManyAttempts($rateKey, 9)) {
             return
                 response([
                     'data' => [
@@ -139,12 +139,12 @@ class CardController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request['card_sheba'] = preg_replace('/\D/','',$request['card_sheba']);
-        $request['card_number'] = preg_replace('/\s/','',$request['card_number']);
+        $request['card_sheba'] = preg_replace('/\s/','',$request['card_sheba']);
+        $request['card_number'] = preg_replace('/\D/','',$request['card_number']);
         $card = $this->userRepository->getUserCard(auth()->user(),$id);
         $validator = Validator::make($request->all(),[
             'card_number' => ['required',new ChekCardNumber(),'unique:cards,card_number,'.($card->id ?? 0)],
-            'card_sheba' => ['required','string','regex:/\b^(ir|IR)(\:|\-|\s)?(\d|\s|\-){23,30}\b$/','unique:cards,card_sheba,'.($card->id ?? 0)],
+            'card_sheba' => ['required','size:26','string','regex:/\b^(ir|IR)(\:|\-|\s)?(\d|\s|\-){23,30}\b$/','unique:cards,card_sheba,'.($card->id ?? 0)],
         ],[],[
             'card_number' => 'شماره کارت',
             'card_sheba' => 'شماره شبا',
@@ -164,7 +164,6 @@ class CardController extends Controller
             'card_sheba' => $request['card_sheba'],
             'bank' => $bank_code,
             'status' => $this->cardRepository::newStatus(),
-            'first' => 0
         ];
         $card = $this->cardRepository->update($card,$card_data);
         return response([
@@ -193,7 +192,7 @@ class CardController extends Controller
         return response([
             'data' => [
                 'message' => [
-                    'card' => 'حساب بانکی با موفقیت حذف شد.'
+                    'card' => ['حساب بانکی با موفقیت حذف شد.']
                 ]
             ],
             'status' => 'success'

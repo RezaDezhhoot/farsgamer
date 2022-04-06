@@ -3,6 +3,7 @@
 namespace App\Http\Resources\v1\Panel;
 
 use App\Http\Resources\v1\User;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class TransactionCollection extends ResourceCollection
@@ -11,7 +12,7 @@ class TransactionCollection extends ResourceCollection
      * Transform the resource collection into an array.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     * @return array|Arrayable|\JsonSerializable
      */
     public function toArray($request)
     {

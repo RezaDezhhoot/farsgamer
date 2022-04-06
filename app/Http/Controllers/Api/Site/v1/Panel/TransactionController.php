@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Site\v1\Panel;
 
+use App\Helper\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Panel\Transaction;
 use App\Http\Resources\v1\Panel\TransactionCollection;
@@ -15,11 +16,10 @@ use App\Repositories\Interfaces\SettingRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Sends\SendMessages;
 use App\Traits\Admin\TextBuilder;
-use Bavix\Wallet\Exceptions\BalanceIsEmpty;
-use Bavix\Wallet\Exceptions\InsufficientFunds;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +56,7 @@ class TransactionController extends Controller
      * Display a listing of the resource.
      *
      * @param Request $request
-     * @return Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return Application|ResponseFactory|\Illuminate\Http\Response
      */
     public function index(Request $request)
     {
@@ -154,7 +154,8 @@ class TransactionController extends Controller
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
                                 ->where('for','seller'),
-                            'transfer_methods' => $transaction->category->sends->map(function ($item2){
+                            'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
+                                $transaction->category->sends->map(function ($item2){
                                 return [
                                     'name'=> $item2->id,
                                     'type'=> 'radio',
@@ -165,7 +166,7 @@ class TransactionController extends Controller
                                     'description'=> $item2->note,
                                     'web_site'=> $item2->pursuit_web_site,
                                 ];
-                            }),
+                            }) : [],
                             'message' => "لطفا تا {$transaction->timer->diffForHumans()} دیگر اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -253,7 +254,7 @@ class TransactionController extends Controller
                                     'name' => 'refunded_images',
                                     'required' => true,
                                     'width' => 12,
-                                    'label' => 'اسناد.',
+                                    'label' => 'تصاویر محصول به عنوان سند مرجوعیت.',
                                     'placeholder' => '',
                                     'value' => '',
                                     'options' => [],
@@ -278,7 +279,8 @@ class TransactionController extends Controller
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
                                 ->where('for','seller'),
-                            'transfer_methods' => $transaction->category->sends->map(function ($item2){
+                            'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
+                                $transaction->category->sends->map(function ($item2){
                                 return [
                                     'name'=> $item2->id,
                                     'type'=> 'radio',
@@ -289,7 +291,7 @@ class TransactionController extends Controller
                                     'description'=> $item2->note,
                                     'web_site'=> $item2->pursuit_web_site,
                                 ];
-                            }),
+                            }) : [],
                             'message' => "لطفا تا {$transaction->timer->diffForHumans()} دیگر اطلاعات محصول را مجدد وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -404,7 +406,8 @@ class TransactionController extends Controller
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
                                 ->where('for','seller'),
-                            'transfer_methods' => $transaction->category->sends->map(function ($item2){
+                            'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
+                                $transaction->category->sends->map(function ($item2){
                                 return [
                                     'name'=> $item2->id,
                                     'type'=> 'radio',
@@ -415,7 +418,7 @@ class TransactionController extends Controller
                                     'description'=> $item2->note,
                                     'web_site'=> $item2->pursuit_web_site,
                                 ];
-                            }),
+                            }) : [],
                             'message' => "لطفا تا{$transaction->timer->diffForHumans()} دیگر اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -478,7 +481,8 @@ class TransactionController extends Controller
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
                                 ->where('for','seller'),
-                            'transfer_methods' => $transaction->category->sends->map(function ($item2){
+                            'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
+                                $transaction->category->sends->map(function ($item2){
                                 return [
                                     'name'=> $item2->id,
                                     'type'=> 'radio',
@@ -489,7 +493,7 @@ class TransactionController extends Controller
                                     'description'=> $item2->note,
                                     'web_site'=> $item2->pursuit_web_site,
                                 ];
-                            }),
+                            }) : [],
                             'message' => "لطفا تا{$transaction->timer->diffForHumans()} دیگر مجدد اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -551,11 +555,30 @@ class TransactionController extends Controller
     public function update(Request $request, $id)
     {
         $transaction = $this->orderTransactionRepository->getMyTransaction(Auth::id(),$id);
-        if (in_array($transaction->status,[$this->orderTransactionRepository::complete(),$this->orderTransactionRepository::cancel()]))
+        if (in_array($transaction->status,[$this->orderTransactionRepository::cancel()]))
             return response([
-                'data' => [],
                 'status' => 'error'
             ] , Response::HTTP_NOT_ACCEPTABLE);
+
+        if (in_array($transaction->status,[$this->orderTransactionRepository::control()]))
+            return response([
+                'data' => [
+                    'message' => [
+                        'transaction' => ['در حال بررسی اطلاعات ارسالی هستیم لطفا تا اعلام نتجه منتظر بمانید']
+                    ],
+                ],
+                'status' => 'success',
+            ] , Response::HTTP_OK);
+
+        if (in_array($transaction->status,[$this->orderTransactionRepository::isReturned()]))
+            return response([
+                'data' => [
+                    'message' => [
+                        'transaction' => ['در حال بررسی درخواست مرجوعیت هستیم لطفا تا اعلام نتجه منتظر بمانید']
+                    ],
+                ],
+                'status' => 'success',
+            ] , Response::HTTP_OK);
 
         $sms = new SendMessages();
         $data = $transaction->data;
@@ -631,20 +654,31 @@ class TransactionController extends Controller
                         $old_data = json_decode($data->value);
                         if (!empty($forms) && !is_null($forms)){
                             foreach ($forms as $key => $item) {
-                                if ($item['required'] && (!$request->has($item['name'])))
+                                if ($item->required && (!$request->has($item->name))){
                                     return response([
-                                        'data' => [],
                                         'message' => [
-                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item['label'])])]
+                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item->label)])]
                                         ],
                                         'status' => 'error'
                                     ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                                }
 
-                                $old_data[$item['name']] = $request[$item['name']];
+                                if ($item->type == 'customRadio' && !in_array($request->{$item->name},collect($item->options)->map(function ($item2) {
+                                        return $item2->value;
+                                    })->toArray())) {
+                                    return response([
+                                        'message' => [
+                                            'transaction' => [__('validation.in', ['attribute' => strip_tags($item->label)])]
+                                        ],
+                                        'status' => 'error'
+                                    ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                                }
+
+                                $old_data->{$item->name} = $request[$item->name];
                             }
                         }
                         $this->orderTransactionRepository->updateData($transaction,['value' => json_encode($old_data)]);
-                        if ($price <= $transaction->customer->wallet->ballance){
+                        if ($price <= $transaction->customer->balance){
                             try {
                                 DB::beginTransaction();
                                 $this->orderTransactionRepository->newPayment([
@@ -714,15 +748,27 @@ class TransactionController extends Controller
                         $old_data = json_decode($data->value);
                         if (!empty($forms) && !is_null($forms)){
                             foreach ($forms as $key => $item) {
-                                if ($item['required'] && (!$request->has($item['name'])))
+                                if ($item->required && (!$request->has($item->name))) {
                                     return response([
-                                        'data' => [],
                                         'message' => [
-                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item['label'])])]
+                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item->label)])]
                                         ],
                                         'status' => 'error'
                                     ],Response::HTTP_UNPROCESSABLE_ENTITY);
-                                $old_data[$item['name']] = $request[$item['name']];
+                                }
+
+                                if ($item->type == 'customRadio' && !in_array($request->{$item->name},collect($item->options)->map(function ($item2) {
+                                        return $item2->value;
+                                    })->toArray())) {
+                                    return response([
+                                        'message' => [
+                                            'transaction' => [__('validation.in', ['attribute' => strip_tags($item->label)])]
+                                        ],
+                                        'status' => 'error'
+                                    ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                                }
+
+                                $old_data->{$item->name} = $request[$item->name];
                             }
                         }
                         if ($transaction->order->category->type == $this->categoryRepository::physical()) {
@@ -742,25 +788,26 @@ class TransactionController extends Controller
                                 ],Response::HTTP_UNPROCESSABLE_ENTITY);
                             }
                         }
+
                         $transaction->data = $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
                             'send_id' => $request['send_id'],
                             'transfer_result' => $request['transfer_result']
                         ]);
                         if ($transaction->category->control){
-                            $transaction->status = $this->orderTransactionRepository::control();
-                            $transaction->timer = '';
+                            $status = $this->orderTransactionRepository::control();
+                            $timer = null;
                             $sms->sends($this->createText('control_data',$transaction)
                                 ,$transaction->customer,"$subject",$transaction->id);
                         } else {
-                            $transaction->status = $this->orderTransactionRepository::receive();
-                            $timer = 0;
+                            $status = $this->orderTransactionRepository::receive();
+                            $timer = null;
                             if ($transaction->category->type == $this->categoryRepository::digital())
                                 $timer = Carbon::make(now())->addMinutes(
                                     (float)$transaction->category->receive_time
                                 );
                             elseif ($transaction->category->type == $this->categoryRepository::physical()) {
-                                if ($transaction->order->city == $transaction->customer->city && $transaction->order->province == $transaction->customer->province)
+                                if (@$transaction->order->city == @$transaction->customer->city && @$transaction->order->province == @$transaction->customer->province)
                                     $timer = Carbon::make(now())->addMinutes(
                                         (float)$transaction->data->send->send_time_inner_city
                                     );
@@ -769,7 +816,6 @@ class TransactionController extends Controller
                                         (float)$transaction->data->send->send_time_outer_city
                                     );
                             }
-                            $transaction->timer = $timer;
                             $sms->sends(
                                 $this->createText('receive_transaction',$transaction),
                                 $transaction->customer,
@@ -777,7 +823,9 @@ class TransactionController extends Controller
                                 $transaction->id
                             );
                         }
-                        $transaction = $this->orderTransactionRepository->save($transaction);
+                        $this->orderTransactionRepository->update([],
+                            ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
+                            $transaction);
                         return response([
                             'data' => [
                                 'message' => [
@@ -800,7 +848,7 @@ class TransactionController extends Controller
                 }
                 case $this->orderTransactionRepository::receive():{
                     if ((auth()->id() == $transaction->customer_id) || (auth()->id() == $transaction->seller_id && $timerStatus < 0)) {
-                        if ($transaction->received_status == 2)
+                        if ($transaction->received_status == 2 && auth()->id() == $transaction->seller_id)
                             return response([
                                 'data' => [
                                     'message' => [
@@ -814,7 +862,9 @@ class TransactionController extends Controller
                             DB::beginTransaction();
                             $transaction->status = $this->orderTransactionRepository::complete();
                             $transaction->received_status = 1;
+                            $transaction->received_result = null;
                             $transaction->order->status = $this->orderRepository::isFinishedStatus();
+                            $this->orderRepository->save($transaction->order);
                             $this->orderTransactionRepository->save($transaction);
                             DB::commit();
                         } catch (Exception $e) {
@@ -839,14 +889,7 @@ class TransactionController extends Controller
                                 $transaction->id
                             );
                         }
-                        if (!empty($transaction->payment) && $transaction->payment->status == $this->orderTransactionRepository::successPayment()){
-                            $price = $transaction->payment->price;
-                            $commission = $transaction->commission;
-                            $intermediary = $transaction->intermediary;
-                            $final_price = ($price - ($commission) - ($intermediary));
-                            $transaction->seller->deposit($final_price,
-                                ['description' => $transaction->code.'واریز هزینه بابت معامله به کد ', 'from_admin'=> true]);
-                        }
+                        $this->sendMoney($transaction);
                         return response([
                             'data' => [
                                 'message' => [
@@ -873,15 +916,27 @@ class TransactionController extends Controller
                             ->where('for','seller');
                         $old_data = json_decode($data->value);
                         foreach ($forms as $key => $item) {
-                            if ($item['required'] && (!$request->has($item['name'])))
+                            if ($item->required && (!$request->has($item->name))) {
                                 return response([
-                                    'data' => [],
                                     'message' => [
-                                        'transaction' => [__('validation.required', ['attribute' => strip_tags($item['label'])])]
+                                        'transaction' => [__('validation.required', ['attribute' => strip_tags($item->label)])]
                                     ],
                                     'status' => 'error'
                                 ],Response::HTTP_UNPROCESSABLE_ENTITY);
-                            $old_data[$item['name']] = $request[$item['name']];
+                            }
+
+                            if ($item->type == 'customRadio' && !in_array($request->{$item->name},collect($item->options)->map(function ($item2) {
+                                    return $item2->value;
+                                })->toArray())) {
+                                return response([
+                                    'message' => [
+                                        'transaction' => [__('validation.in', ['attribute' => strip_tags($item->label)])]
+                                    ],
+                                    'status' => 'error'
+                                ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                            }
+
+                            $old_data->{$item->name} = $request[$item->name];
                         }
                         if ($transaction->order->category->type == $this->categoryRepository::physical()) {
                             $validator = Validator::make($request->all(),[
@@ -906,19 +961,19 @@ class TransactionController extends Controller
                             'transfer_result' => $request['transfer_result']
                         ]);
                         if ($transaction->category->control){
-                            $transaction->status = $this->orderTransactionRepository::control();
-                            $transaction->timer = '';
+                            $status = $this->orderTransactionRepository::control();
+                            $timer = null;
                             $sms->sends($this->createText('control_data',$transaction)
                                 ,$transaction->customer,"$subject",$transaction->id);
                         } else {
-                            $transaction->status = $this->orderTransactionRepository::receive();
-                            $timer = 0;
+                            $status = $this->orderTransactionRepository::receive();
+                            $timer = null;
                             if ($transaction->category->type == $this->categoryRepository::digital())
                                 $timer = Carbon::make(now())->addMinutes(
                                     (float)$transaction->category->receive_time
                                 );
                             elseif ($transaction->category->type == $this->categoryRepository::physical()) {
-                                if ($transaction->order->city == $transaction->customer->city && $transaction->order->province == $transaction->customer->province)
+                                if (@$transaction->order->city == @$transaction->customer->city && @$transaction->order->province == @$transaction->customer->province)
                                     $timer = Carbon::make(now())->addMinutes(
                                         (float)$transaction->data->send->send_time_inner_city
                                     );
@@ -927,8 +982,6 @@ class TransactionController extends Controller
                                         (float)$transaction->data->send->send_time_outer_city
                                     );
                             }
-                            $transaction->timer = $timer;
-                            $transaction->received_status = 0;
                             $sms->sends(
                                 $this->createText('receive_transaction',$transaction),
                                 $transaction->customer,
@@ -936,7 +989,9 @@ class TransactionController extends Controller
                                 $transaction->id
                             );
                         }
-                        $this->orderTransactionRepository->save($transaction);
+                        $this->orderTransactionRepository->update([],
+                            ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
+                            $transaction);
                         return response([
                             'data' => [
                                 'message' => [
@@ -979,7 +1034,8 @@ class TransactionController extends Controller
                                 'status' => $this->commentRepository::newStatus(),
                                 'content' => $request['comment'],
                                 'commentable_id'=> $transaction->seller_id,
-                                'score' => $request['rate']
+                                'score' => $request['rate'],
+                                'order_transaction_id' => $transaction->id
                             ];
                             $this->userRepository->registerComment(Auth::user(),$comment);
                             return response([
@@ -1023,22 +1079,36 @@ class TransactionController extends Controller
                         $old_data = json_decode($data->value);
                         if (!empty($forms) && !is_null($forms)){
                             foreach ($forms as $key => $item) {
-                                if ($item['required'] && (!$request->has($item['name'])))
+                                if ($item->required && (!$request->has($item->name)))
                                     return response([
                                         'data' => [],
                                         'message' => [
-                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item['label'])])]
+                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item->label)])]
                                         ],
                                         'status' => 'error'
                                     ],Response::HTTP_UNPROCESSABLE_ENTITY);
-                                $old_data[$item['name']] = $request[$item['name']];
+
+                                if ($item->type == 'customRadio' && !in_array($request->{$item->name},collect($item->options)->map(function ($item2) {
+                                        return $item2->value;
+                                    })->toArray())) {
+                                    return response([
+                                        'message' => [
+                                            'transaction' => [__('validation.in', ['attribute' => strip_tags($item->label)])]
+                                        ],
+                                        'status' => 'error'
+                                    ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                                }
+                                $old_data->{$item->name} = $request[$item->name];
                             }
                         }
                         $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
                         ]);
-                        $transaction->status = $this->orderTransactionRepository::send();
-                        $this->orderTransactionRepository->save($transaction);
+                        $timer = Carbon::make(now())->addMinutes(
+                            (float)$transaction->category->send_time
+                        );
+                        $status = $this->orderTransactionRepository::send();
+                        $this->orderTransactionRepository->update([],['status' => $status,'timer' => $timer],$transaction);
                         $text = $this->createText('returned_send_transaction',$transaction);
                         $model = $transaction->customer;
                         $sms->sends($text,$model,"$subject",$transaction->id);
@@ -1100,20 +1170,19 @@ class TransactionController extends Controller
                         $transaction->data = $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
                         ]);
-                        $timer = 0;
+                        $timer = null;
                         if ($transaction->category->control){
-                            $transaction->status = $this->orderTransactionRepository::control();
-                            $transaction->timer = 0;
+                            $status = $this->orderTransactionRepository::control();
                             $sms->sends($this->createText('control_data',$transaction)
                                 ,$transaction->seller,"$subject",$transaction->id);
                         } else {
-                            $transaction->status = $this->orderTransactionRepository::receive();
+                            $status = $this->orderTransactionRepository::receive();
                             if ($transaction->category->type == $this->categoryRepository::digital())
                                 $timer = Carbon::make(now())->addMinutes(
                                     (float)$transaction->category->receive_time
                                 );
                             elseif ($transaction->order->category->type == $this->categoryRepository::physical()) {
-                                if ($transaction->order->city == $transaction->customer->city && $transaction->order->province == $transaction->customer->province)
+                                if (@$transaction->order->city == @$transaction->customer->city && @$transaction->order->province == @$transaction->customer->province)
                                     $timer = Carbon::make(now())->addMinutes(
                                         (float)$transaction->data->send->send_time_inner_city
                                     );
@@ -1122,9 +1191,9 @@ class TransactionController extends Controller
                                         (float)$transaction->data->send->send_time_outer_city
                                     );
                             }
-                            $transaction->timer = $timer;
-                            $transaction->received_status = 0;
-                            $transaction = $this->orderTransactionRepository->save($transaction);
+                            $this->orderTransactionRepository->update([],
+                                ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
+                                $transaction);
                             $sms->sends(
                                 $this->createText('returned_receive_transaction',$transaction),
                                 $transaction->seller,
@@ -1152,8 +1221,8 @@ class TransactionController extends Controller
                     }
                 }
                 case $this->orderTransactionRepository::receive():{
-                    if ((auth()->id() == $transaction->customer_id) || (auth()->id() == $transaction->seller_id && $timerStatus < 0)) {
-                        if ($transaction->received_status == 2)
+                    if ((auth()->id() == $transaction->seller_id) || (auth()->id() == $transaction->customer_id && $timerStatus < 0)) {
+                        if ($transaction->received_status == 2 && auth()->id() == $transaction->customer_id)
                             return response([
                                 'data' => [
                                     'message' => [
@@ -1162,10 +1231,10 @@ class TransactionController extends Controller
                                 ],
                                 'status' => 'error'
                             ],Response::HTTP_NOT_ACCEPTABLE);
-
                         $transaction->status = $this->orderTransactionRepository::cancel();
-                        $transaction->timer = 0;
+                        $transaction->timer = null;
                         $transaction->received_status = 1;
+                        $transaction->received_result = null;
                         $text = $this->createText('cancel_transaction',$transaction);
                         $transaction->order->status = $this->orderRepository::isConfirmedStatus();
                         try {
@@ -1184,6 +1253,7 @@ class TransactionController extends Controller
                                 'status' => 'error'
                             ],Response::HTTP_INTERNAL_SERVER_ERROR);
                         }
+                        $this->backMoney($transaction);
                         $sms->sends($text, $transaction->seller, "$subject", $transaction->id);
                         $sms->sends($text, $transaction->customer, "$subject", $transaction->id);
                         if (auth()->id() == $transaction->customer_id){
@@ -1216,19 +1286,21 @@ class TransactionController extends Controller
                 }
                 case $this->orderTransactionRepository::noReceive():{
                     if ((auth()->id() == $transaction->customer_id)) {
-                        $forms = collect(json_decode($transaction->category->forms))->where('status','normal')
+                        $forms = collect(json_decode($transaction->category->forms))->where('status','return')
                             ->where('for','customer');
                         $old_data = json_decode($data->value);
-                        foreach ($forms as $key => $item) {
-                            if ($item['required'] && (!$request->has($item['name'])))
-                                return response([
-                                    'data' => [],
-                                    'message' => [
-                                        'transaction' => [__('validation.required', ['attribute' => strip_tags($item['label'])])]
-                                    ],
-                                    'status' => 'error'
-                                ],Response::HTTP_UNPROCESSABLE_ENTITY);
-                            $old_data[$item['name']] = $request[$item['name']];
+                        if (!empty($forms) && !is_null($forms)){
+                            foreach ($forms as $key => $item) {
+                                if ($item['required'] && !$request->has($item['name']))
+                                    return response([
+                                        'data' => [],
+                                        'message' => [
+                                            'transaction' => [__('validation.required', ['attribute' => strip_tags($item['label'])])]
+                                        ],
+                                        'status' => 'error'
+                                    ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                                $old_data[$item['name']] = $request[$item['name']];
+                            }
                         }
                         if ($transaction->order->category->type == $this->categoryRepository::physical()) {
                             $validator = Validator::make($request->all(),[
@@ -1247,25 +1319,23 @@ class TransactionController extends Controller
                                 ],Response::HTTP_UNPROCESSABLE_ENTITY);
                             }
                         }
-                        $this->orderTransactionRepository->updateData($transaction,[
+                        $transaction->data = $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
-                            'send_id' => $request['send_id'],
-                            'transfer_result' => $request['transfer_result']
                         ]);
+                        $timer = null;
                         if ($transaction->category->control){
-                            $transaction->status = $this->orderTransactionRepository::control();
-                            $transaction->timer = '';
+                            $status = $this->orderTransactionRepository::control();
+                            $timer = null;
                             $sms->sends($this->createText('control_data',$transaction)
-                                ,$transaction->customer,"$subject",$transaction->id);
+                                ,$transaction->seller,"$subject",$transaction->id);
                         } else {
-                            $transaction->status = $this->orderTransactionRepository::receive();
-                            $timer = 0;
+                            $status = $this->orderTransactionRepository::receive();
                             if ($transaction->category->type == $this->categoryRepository::digital())
                                 $timer = Carbon::make(now())->addMinutes(
                                     (float)$transaction->category->receive_time
                                 );
-                            elseif ($transaction->category->type == $this->categoryRepository::physical()) {
-                                if ($transaction->order->city == $transaction->customer->city && $transaction->order->province == $transaction->customer->province)
+                            elseif ($transaction->order->category->type == $this->categoryRepository::physical()) {
+                                if (@$transaction->order->city == @$transaction->customer->city && @$transaction->order->province == @$transaction->customer->province)
                                     $timer = Carbon::make(now())->addMinutes(
                                         (float)$transaction->data->send->send_time_inner_city
                                     );
@@ -1274,8 +1344,9 @@ class TransactionController extends Controller
                                         (float)$transaction->data->send->send_time_outer_city
                                     );
                             }
-                            $transaction->timer = $timer;
-                            $transaction->received_status = 0;
+                            $this->orderTransactionRepository->update([],
+                                ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
+                                $transaction);
                             $sms->sends(
                                 $this->createText('returned_receive_transaction',$transaction),
                                 $transaction->customer,
@@ -1283,7 +1354,6 @@ class TransactionController extends Controller
                                 $transaction->id
                             );
                         }
-                        $this->orderTransactionRepository->save($transaction);
                         return response([
                             'data' => [
                                 'message' => [
@@ -1492,7 +1562,7 @@ class TransactionController extends Controller
             $texts = $this->createText('complete_transaction',$transaction);
             switch ($transaction->status){
                 case $this->orderTransactionRepository::sendingData():{
-                    if ((auth()->id() == $transaction->customer && $timerStatus < 0)) {
+                    if ((auth()->id() == $transaction->customer_id && $timerStatus < 0)) {
                         $transaction->status = $cancel;
                         $transaction->order->status = $orderStatus;
                         try {
@@ -1539,6 +1609,7 @@ class TransactionController extends Controller
                     if ((auth()->id() == $transaction->seller_id && $timerStatus < 0)) {
                         $transaction->status = $complete;
                         $transaction->received_status = 0;
+                        $transaction->is_returned = 0;
                         $transaction->order->status = $orderStatusFinished;
                         try {
                             DB::beginTransaction();
@@ -1584,6 +1655,7 @@ class TransactionController extends Controller
                     if (auth()->id() == $transaction->seller_id && $timerStatus < 0) {
                         $transaction->status = $complete;
                         $transaction->received_status = 0;
+                        $transaction->is_returned = 0;
                         $transaction->order->status = $orderStatusFinished;
                         try {
                             DB::beginTransaction();
@@ -1690,7 +1762,7 @@ class TransactionController extends Controller
         {
             $validator = Validator::make($request->all(),[
                 'refunded_cause' => 'required|string|max:250',
-                'refunded_images' => 'array|max:4|min:1|',
+                'refunded_images' => 'array|max:4|min:1|required',
                 'refunded_images.*' => 'required|mimes:png,jpg,jpeg,mp4|max:2048',
             ],[],[
                 'refunded_cause' => 'علت مرجوعیت',
@@ -1766,6 +1838,4 @@ class TransactionController extends Controller
                 ['description' => $transaction->code.'واریز هزینه بابت معامله به کد ', 'from_admin'=> true]);
         }
     }
-
-
 }

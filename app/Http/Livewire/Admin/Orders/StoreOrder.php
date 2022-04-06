@@ -60,7 +60,7 @@ class StoreOrder extends BaseComponent
     {
         $category = $categoryRepository->find($this->category,true);
 
-        if ($category->type == $categoryRepository::physical()){
+        if ($category->type == $categoryRepository::physical() && isset($this->province)){
             $this->data['province'] = $settingRepository::getProvince();
             $this->data['city'] = $settingRepository->getCity($this->province);
         } else {

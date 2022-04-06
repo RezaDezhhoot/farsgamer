@@ -13,7 +13,7 @@ class StoreCard extends BaseComponent
 {
     use ChatList;
     public $card , $header , $mode , $data = [];
-    public $card_number , $card_sheba , $bank , $bank_logo , $status , $newMessageStatus , $message , $newMessage;
+    public $card_number , $card_sheba , $bank  , $status , $newMessageStatus , $message , $newMessage;
 
     public function mount(
         CardRepositoryInterface $cardRepository , ChatRepositoryInterface $chatRepository ,
@@ -28,7 +28,6 @@ class StoreCard extends BaseComponent
             $this->card_number = $this->card->card_number;
             $this->card_sheba = $this->card->card_sheba;
             $this->bank = $this->card->bank;
-            $this->bank_logo = $this->card->bank_logo;
             $this->status = $this->card->status;
         } else abort(404);
 
@@ -67,18 +66,15 @@ class StoreCard extends BaseComponent
             'card_number' => ['required','size:16','regex:/(^([0-9]+)$)/u','unique:cards,card_number,'.($this->card->id ?? 0)],
             'card_sheba' => ['required','size:26','regex:/(^(IR)([0-9]+)$)/u','unique:cards,card_sheba,'.($this->card->id ?? 0)],
             'bank' => ['required','string'],
-            'bank_logo' => ['required','string'],
             'status' => ['required','in:'.implode(',',array_keys($cardRepository->getStatus()))],
         ], [],[
             'card_number' => 'شماره کارت',
             'card_sheba' => 'شماره شبا',
             'bank' => 'بانک',
-            'bank_logo' => 'لوگو بانک',
         ]);
         $model->card_number = $this->card_number;
         $model->card_sheba = $this->card_sheba;
         $model->bank = $this->bank;
-        $model->bank_logo = $this->bank_logo;
         $model->status = $this->status;
         $cardRepository->save($model);
         $this->emitNotify('اطلاعات با موفقیت ثبت شد');

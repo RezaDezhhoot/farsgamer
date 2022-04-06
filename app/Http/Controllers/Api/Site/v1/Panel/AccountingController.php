@@ -39,6 +39,24 @@ class AccountingController extends Controller
         $this->paymentRepository = $paymentRepository;
     }
 
+    public function details()
+    {
+        return response([
+            'data' => [
+                'details' => [
+                    'total_inventory' => Auth::user()->inventory_being_traded + Auth::user()->balance,
+                    'inventory_being_traded' => Auth::user()->inventory_being_traded,
+                    'removable_inventory' => Auth::user()->balance,
+                    'gateways' => [
+                        'payir' => 'پی',
+                        'zarinpal' => 'زرین پال'
+                    ]
+                ]
+            ],
+            'status' => 'success'
+        ] , Response::HTTP_OK);
+    }
+
     public function index(Request $request)
     {
         $requests = $this->requestRepository->getUserRequests(Auth::user());
@@ -54,15 +72,6 @@ class AccountingController extends Controller
                         'total_pages' => $requests->lastPage()
                     ],
                 ],
-                'details' => [
-                    'total_inventory' => Auth::user()->inventory_being_traded + Auth::user()->balance,
-                    'inventory_being_traded' => Auth::user()->inventory_being_traded,
-                    'removable_inventory' => Auth::user()->balance,
-                    'gateway' => [
-                        'payir' => 'پی',
-                        'zarinpal' => 'زرین پال'
-                    ]
-                ]
             ],
             'status' => 'success',
         ],Response::HTTP_OK);
@@ -72,7 +81,7 @@ class AccountingController extends Controller
     public function charge(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'price' => 'required|numeric|min:1000|max:999999999999999999999999.99999999999999',
+            'price' => 'required|numeric|min:10000|max:999999999999999999999999.99999999999999',
             'gateway' => ['required','in:payir,zarinpal'],
             'call_back_address' => ['nullable','string','max:255'],
         ],[],[
@@ -111,7 +120,7 @@ class AccountingController extends Controller
                     ]
                 ],
                 'status' => 'error'
-            ],Response::HTTP_NOT_ACCEPTABLE);
+            ],Response::HTTP_BAD_GATEWAY);
         }
     }
 
@@ -136,14 +145,16 @@ class AccountingController extends Controller
         $user = $this->userRepository->find(Auth::id());
         $max = $user->balance;
         $validator = Validator::make($request->all(),[
-            'price' => 'required|numeric|min:'.($this->settingRepository->getSiteFaq('min_price_to_request')??1000).'|max:'.$max,
-            'card' => ['required',Rule::exists('cards','id')->where(function ($query) {
+            'price' => 'required|numeric|min:'.($this->settingRepository->getSiteFaq('min_price_to_request') ?? 10000).'|max:'.$max,
+            'card' => ['required', 'test' => Rule::exists('cards','id')->where(function ($query) {
                 return $query->where([
                     ['user_id',Auth::id()],
                     ['status',$this->cardRepository::confirmStatus()],
                 ]);
             })]
-        ],[],[
+        ],[
+            'exists' => 'حساب انتخابی تایید نشده است.'
+        ],[
             'price' => 'مبلغ',
             'card' => 'حساب بانکی'
         ]);
@@ -186,7 +197,7 @@ class AccountingController extends Controller
 
     public function show($id)
     {
-        $request = $this->requestRepository->getUserRequest(Auth::check(),$id);
+        $request = $this->requestRepository->getUserRequest(Auth::user(),$id);
         return response([
             'data' => [
                 'request' => [

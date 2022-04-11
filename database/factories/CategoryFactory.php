@@ -30,7 +30,6 @@ class CategoryFactory extends Factory
             'slider' => 'https://png.pngtree.com/element_pic/00/16/09/2057e0eecf792fb.jpg',
             'seo_keywords' => $this->faker->name(),
             'seo_description' => $this->faker->sentence(),
-            'guarantee_time' => $this->faker->numberBetween(1,5.2),
             'send_time' => $this->faker->numberBetween(1,5.2),
             'pay_time' => $this->faker->numberBetween(1,5.2),
             'receive_time' => $this->faker->numberBetween(1,5.2),

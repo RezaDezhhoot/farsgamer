@@ -5,7 +5,7 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0|^8.1.2|^8.1.3",
+        "php": "^7.3|^8.0|^8.1.2|^8.1.3|^8.1.4",
         "ext-gd": "*",
         "ext-json": "*",
         "artesaos/seotools": "^0.20.2",

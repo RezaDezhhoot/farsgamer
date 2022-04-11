@@ -72,7 +72,7 @@ class Auth extends BaseComponent
 
     private function resetInputs()
     {
-        $this->reset(['username', 'phone', 'password']);
+        $this->reset(['phone', 'password']);
     }
 
     public function sendSMS()

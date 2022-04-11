@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use App\Repositories\Interfaces\PermissionRepositoryInterface;
 use App\Repositories\Interfaces\RoleRepositoryInterface;
 use App\Repositories\Interfaces\UserRepositoryInterface;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class SetPermissionsAndRoles extends Command
@@ -70,15 +72,8 @@ class SetPermissionsAndRoles extends Command
             ['name' => 'show_settings_chatLaw', 'guard_name'=> 'web'], ['name' => 'edit_settings_chatLaw', 'guard_name'=> 'web'], ['name' => 'show_settings_fag', 'guard_name'=> 'web'],
             ['name' => 'edit_settings_fag', 'guard_name'=> 'web'],['name' => 'show_offends','guard_name'=> 'web'],['name' => 'show_reports','guard_name'=> 'web']
         ];
-        $permissionRepository->insert($permissions);
-        $admin = $roleRepository->create(['name' => 'admin']);
-        $super_admin = $roleRepository->create(['name' => 'super_admin']);
-        $administrator = $roleRepository->create(['name' => 'administrator']);
-        $super_admin->syncPermissions($permissionRepository->getAll());
-        $administrator->syncPermissions($permissionRepository->getAll());
         $user = [
-            'first_name'=> 'admin',
-            'last_name'=> 'admin',
+            'name'=> 'admin',
             'user_name' => 'admin',
             'email' => 'admin@gmail.com',
             'province' => 'Tehran',
@@ -88,8 +83,21 @@ class SetPermissionsAndRoles extends Command
             'pass_word' => Hash::make('admin'),
             'ip' => 1,
         ];
-        $user = $userRepository->create($user);
-        $userRepository->syncRoles($user,[$admin,$super_admin,$administrator]);
+        try {
+            DB::beginTransaction();
+            $permissionRepository->insert($permissions);
+            $admin = $roleRepository->create(['name' => 'admin']);
+            $super_admin = $roleRepository->create(['name' => 'super_admin']);
+            $administrator = $roleRepository->create(['name' => 'administrator']);
+            $super_admin->syncPermissions($permissionRepository->getAll());
+            $administrator->syncPermissions($permissionRepository->getAll());
+            $user = $userRepository->create($user);
+            $userRepository->syncRoles($user,[$admin,$super_admin,$administrator]);
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $e->getMessage();
+        }
         return 0;
     }
 }

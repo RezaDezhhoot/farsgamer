@@ -71,6 +71,7 @@
                         </table>
                     </div>
                 </div>
+                {{$orders->links('livewire.admin.layouts.paginate')}}
             </div>
         </div>
     </div>

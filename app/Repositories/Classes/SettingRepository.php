@@ -21,7 +21,7 @@ class SettingRepository implements SettingRepositoryInterface
         return Setting::where('name',$name)->get()->toArray() ?? [];
     }
 
-    public function getSiteFaq($name , $default = '')
+    public function getSiteFaq($name , $default = null)
     {
         return Setting::getSingleRow($name , $default);
     }

@@ -7,7 +7,7 @@ interface SettingRepositoryInterface
 {
     public function getSiteLaw($name);
 
-    public function getSiteFaq($name , $default = '');
+    public function getSiteFaq($name , $default = null);
 
     public function getSubjects($name , $default = []);
 

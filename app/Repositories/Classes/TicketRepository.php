@@ -112,7 +112,7 @@ class TicketRepository implements TicketRepositoryInterface
 
     public function getUserTickets(User $user)
     {
-        return Ticket::latest('id')->whereNull('parent_id')->paginate(25);
+        return $user->tickets()->latest('id')->whereNull('parent_id')->paginate(25);
         // TODO: Implement getUserTickets() method.
     }
 

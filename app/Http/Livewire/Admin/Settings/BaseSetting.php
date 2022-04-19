@@ -56,7 +56,7 @@ class BaseSetting extends BaseComponent
 
     public function store(SettingRepositoryInterface $settingRepository)
     {
-        $this->authorizing('show_settings_base');
+        $this->authorizing('edit_settings_base');
         $this->validate(
             [
                 'name' => ['required', 'string','max:120'],

@@ -16,9 +16,7 @@ use Spatie\Permission\Models\Permission;
 Route::get('/welcome', function (){
     return view('welcome');
 });
-Route::get('/welcome', function (){
-    return view('welcome');
-})->name('home');
+Route::middleware(['auth','role:admin','schedule'])->get('/',\App\Http\Livewire\Admin\Dashboards\Dashboard::class)->name('home');
 // admin
 Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
 {

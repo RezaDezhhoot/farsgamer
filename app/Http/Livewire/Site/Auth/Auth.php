@@ -78,7 +78,7 @@ class Auth extends BaseComponent
     public function sendSMS()
     {
         $rateKey = 'verify-attempt:' . $this->phone . '|' . request()->ip();
-        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count'))) {
+        if (RateLimiter::tooManyAttempts($rateKey, Setting::getSingleRow('dos_count') ?? 25)) {
             $this->resetInputs();
             return $this->addError('phone', 'زیادی تلاش کردید. لطفا پس از مدتی دوباره تلاش کنید.');
         }

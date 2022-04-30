@@ -80,7 +80,7 @@ class SetPermissionsAndRoles extends Command
             'city' => 'Tehran',
             'phone' => '09336332901',
             'status' => $userRepository::confirmedStatus(),
-            'pass_word' => Hash::make('admin'),
+            'password' => Hash::make('admin'),
             'ip' => 1,
         ];
         try {

@@ -220,7 +220,7 @@ class Setting extends Model
         ];
     }
 
-    public static function getSingleRow($name, $default = '')
+    public static function getSingleRow($name, $default = null)
     {
         return Setting::where('name', $name)->first()->value ?? $default;
     }

@@ -108,9 +108,9 @@ class SendMessages
 
     public function sendCode($code , $user)
     {
-        if (app()->environment('local')) {
-            return;
-        }
+//        if (app()->environment('local')) {
+//            return;
+//        }
 
         $client = new Client();
         $query = ['apikey' => $this->apiKey,
@@ -124,7 +124,6 @@ class SendMessages
             [
                 'query' => $query,
             ]);
-
         return json_decode($result->getBody(), true);
     }
 }

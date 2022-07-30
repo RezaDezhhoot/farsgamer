@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Site\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\CategoryCollection;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
-use App\Repositories\Interfaces\SettingRepositoryInterface;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use App\Http\Resources\v1\OrderCollection;
@@ -14,17 +13,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HomeController extends Controller
 {
-    private $orderRepository , $categoryRepository , $settingRepository;
+    private $orderRepository , $categoryRepository ;
 
     public function __construct(
         OrderRepositoryInterface $orderRepository ,
-        CategoryRepositoryInterface $categoryRepository ,
-        SettingRepositoryInterface $settingRepository
+        CategoryRepositoryInterface $categoryRepository
     )
     {
         $this->orderRepository = $orderRepository;
         $this->categoryRepository = $categoryRepository;
-        $this->settingRepository = $settingRepository;
     }
     /**
      * @param Request $request

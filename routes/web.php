@@ -75,7 +75,7 @@ Route::middleware(['auth','role:admin'])->namespace('App\Http\Livewire\Admin')->
     Route::get('/settings/fag/{action}/{id?}', Settings\CreateFag::class)->name('admin.setting.fag.create');
 });
 // file manager
-Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['auth','role:admin']], function () {
+Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['auth:web']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
 });
 // logout

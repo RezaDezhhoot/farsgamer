@@ -12,7 +12,7 @@
         "bavix/laravel-wallet": "^7.3",
         "calcinai/php-imagick": "^0.1.2",
         "darryldecode/cart": "^4.2",
-        "doctrine/dbal": "^3.3",
+        "doctrine/dbal": "^3.4",
         "dyrynda/laravel-cascade-soft-deletes": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.4",

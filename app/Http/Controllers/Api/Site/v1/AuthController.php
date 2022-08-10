@@ -51,12 +51,10 @@ class AuthController extends Controller
         RateLimiter::hit($rateKey, 3 * 60 * 60);
         $request['status'] = $this->userRepository->newStatus();
         $validator = Validator::make($request->all(),[
-            'name' => 'required|string|max:250',
             'phone' => 'required|size:11|unique:users,phone',
             'user_name' => 'required|string|max:250|unique:users,user_name',
             'email' => 'required|string|max:150|email|unique:users,email',
         ],[],[
-            'name' => 'نام',
             'phone' => 'شماره همراه',
             'user_name' => 'نام کاربری',
             'email' => 'ایمیل',
@@ -78,7 +76,7 @@ class AuthController extends Controller
         return response([
             'data'=> [
                 'register' => [
-                    'user' => new User(auth()->user() , $token),
+                    'user' => new User(auth()->user() , null),
                 ],
                 'message' => ['عملیات ثبت نام با موفقیت انجام شد.']
             ],

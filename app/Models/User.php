@@ -62,7 +62,7 @@ class User extends Authenticatable implements Wallet, Confirmable
     const CONFIRMED = 'confirmed';
     const WAIT_TO_CONFIRM = 'wait_for_confirm';
 
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     protected $searchAbleColumns = ['user_name','phone'];
 

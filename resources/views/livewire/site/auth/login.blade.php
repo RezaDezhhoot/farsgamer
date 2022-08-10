@@ -11,7 +11,7 @@
         <div class="mb-20">
             <h3>ورود به ادمین</h3>
         </div>
-        <form class="form" method="post" id="kt_login_signin_form">
+        <form class="form" wire:submit.prevent="login" method="post" id="kt_login_signin_form">
             <div class="form-group mb-5">
                 <input wire:model.defer="phone" style="text-align: right" class="form-control h-auto form-control-solid py-4 px-8" type="text" placeholder="موبایل" name="username" autocomplete="off" />
                 @error('phone')
@@ -35,7 +35,7 @@
                     @endif
                 </div>
             </div>
-            <button wire:click="login" type="button" id="kt_login_signin_submit" class="btn btn-primary font-weight-bold px-9 py-4 my-3 mx-4">ورود</button>
+            <button type="submit" id="kt_login_signin_submit" class="btn btn-primary font-weight-bold px-9 py-4 my-3 mx-4">ورود</button>
         </form>
     </div>
     <!--end::Login Sign in form-->

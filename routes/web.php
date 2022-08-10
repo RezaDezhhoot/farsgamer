@@ -16,9 +16,9 @@ use Spatie\Permission\Models\Permission;
 Route::get('/welcome', function (){
     return view('welcome');
 });
-Route::middleware(['auth','role:admin','schedule'])->get('/',\App\Http\Livewire\Admin\Dashboards\Dashboard::class)->name('home');
+Route::middleware(['auth','role:admin'])->get('/',\App\Http\Livewire\Admin\Dashboards\Dashboard::class)->name('home');
 // admin
-Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
+Route::middleware(['auth','role:admin'])->namespace('App\Http\Livewire\Admin')->prefix('/admin')->group(function ()
 {
     // public
     Route::get('/dashboard', Dashboards\Dashboard::class)->name('admin.dashboard');
@@ -75,7 +75,7 @@ Route::middleware(['auth','role:admin','schedule'])->namespace('App\Http\Livewir
     Route::get('/settings/fag/{action}/{id?}', Settings\CreateFag::class)->name('admin.setting.fag.create');
 });
 // file manager
-Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth','role:admin','schedule']], function () {
+Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['auth','role:admin']], function () {
     \UniSharp\LaravelFilemanager\Lfm::routes();
 });
 // logout

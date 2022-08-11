@@ -264,5 +264,5 @@
         })
     };
 </script>
-
+<script src="https://file-manager.webmai.ru/vendor/file-manager/js/file-manager.js"></script>
 @stack('scripts')

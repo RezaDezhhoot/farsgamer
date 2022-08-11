@@ -17,5 +17,6 @@
     <link rel="icon" type="image/png" href="{{ asset(\App\Models\Setting::getSingleRow('logo')) }}">
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.6.0/dist/alpine.min.js" defer></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://file-manager.webmai.ru/vendor/file-manager/css/file-manager.css">
     @livewireStyles
 </head>

@@ -21,6 +21,7 @@ class CommentCollection extends ResourceCollection
                 'score' => $item->score,
                 'created_at' => $item->created_at->diffForHumans(),
                 'author'=>[
+                    'id' => $item->user->id,
                     'user_name' => $item->user->user_name,
                     'profile_image' => asset($item->user->profile_image),
                 ]

@@ -55,6 +55,7 @@ class Order extends JsonResource
             'seoDescription' => $this->category->seo_description,
             'seoKeywords' => $this->category->seo_keywords,
             'user' => [
+                'id' => $this->user->id,
                 'user_name' => $this->user->user_name,
                 'user_profile' => asset($this->user->profile_image),
                 'phone' => $this->user->phone,

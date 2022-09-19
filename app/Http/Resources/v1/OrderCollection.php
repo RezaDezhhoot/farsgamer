@@ -34,6 +34,7 @@ class OrderCollection extends ResourceCollection
                 ],
                 'platforms' => new PlatformCollection($item->platforms),
                 'user' => [
+                    'id' => $item->user->id,
                     'user_name' => $item->user->user_name,
                     'user_profile' => asset($item->user->profile_image),
                 ],

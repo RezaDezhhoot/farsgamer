@@ -28,7 +28,7 @@
                     <p>
                         <b> نام کاربری :</b>
                         <span>
-                        <a href="{{route('user',$payment->user->user_name)}}">{{ $payment->user->user_name }}</a>
+                        <a>{{ $payment->user->user_name }}</a>
                     </span>
                     </p>
                     <p>

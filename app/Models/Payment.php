@@ -33,6 +33,7 @@ class Payment extends Model
     {
         return [
             '100' => 'موق',
+            '101' => 'پرداخت قبلا تایید شده است',
             '8' => 'به درگاه پرداخت منتقل شد',
             '10' => 'در انتظار تایید پرداخت',
         ];
@@ -40,7 +41,7 @@ class Payment extends Model
 
     public function getStatusLabelAttribute()
     {
-        return self::getStatus()[$this->status_code];
+        return in_array($this->status_code,array_keys(self::getStatus())) ? self::getStatus()[$this->status_code] : "نامشخص";
     }
 
     protected $searchAbleColumns = ['payment_token'];

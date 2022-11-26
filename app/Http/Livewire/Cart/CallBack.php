@@ -34,9 +34,9 @@ class CallBack extends BaseComponent
             } catch (InvalidPaymentException $exception) {
                 $pay = '';
                 if ($this->gateway == 'payir') {
-                    $pay = Pay::where('payment_token', $this->token)->first();
+                    $pay = Pay::where('payment_token', $this->token)->firstOrFail();
                 } else {
-                    $pay = Pay::where('payment_token', $this->Authority)->first();
+                    $pay = Pay::where('payment_token', $this->Authority)->firstOrFail();
                 }
                 $pay->update([
                     'status_code' => $exception->getCode(),
@@ -57,9 +57,9 @@ class CallBack extends BaseComponent
 
         if (!is_null($payment) && !Pay::where('payment_ref', $payment->getReferenceId())->exists()) {
             if ($this->gateway == 'payir') {
-                $pay = Pay::where('payment_token', $this->token)->first();
+                $pay = Pay::where('payment_token', $this->token)->firstOrFail();
             } else {
-                $pay = Pay::where('payment_token', $this->Authority)->first();
+                $pay = Pay::where('payment_token', $this->Authority)->firstOrFail();
             }
             $pay->update([
                 'payment_ref' => $payment->getReferenceId(),
@@ -70,9 +70,9 @@ class CallBack extends BaseComponent
 
         } else {
             if ($this->gateway == 'payir') {
-                $pay = Pay::where('payment_token', $this->token)->first();
+                $pay = Pay::where('payment_token', $this->token)->firstOrFail();
             } else {
-                $pay = Pay::where('payment_token', $this->Authority)->first();
+                $pay = Pay::where('payment_token', $this->Authority)->firstOrFail();
             }
         }
         $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message";

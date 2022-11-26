@@ -21,7 +21,7 @@ class StorePayment extends BaseComponent
         $this->json = json_decode($this->payment->json,true);
         $this->data['status'] = $paymentRepository::getStatus();
         $this->data['province'] = $settingRepository::getProvince();
-        $this->data['city'] = $settingRepository::getCity()[$this->payment->user->province];
+        $this->data['city'] = $settingRepository->getCity($this->payment->user->province);
         $this->mode = $action;
     }
 

@@ -20,7 +20,6 @@
                             <th>مبلع(تومان)</th>
                             <th>درگاه</th>
                             <th>کد پیگیری</th>
-                            <th>پیام<th>
                             <th>تاریخ</th>
                             <th>عملیات</th>
                         </tr>
@@ -31,13 +30,13 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->id }}</td>
                                 <td>{{ $item->user->fullName }}</td>
-                                <td>{{ $item->user->amount }}</td>
+                                <td>{{ $item->user->ip }}</td>
                                 <td>{{ $item->status_code }}</td>
                                 <td>{{ $item->payment_ref ? 'تایید شده' : 'تایید نشده' }}</td>
-                                <td>{{ number_format($item->price) }}</td>
+                                <td>{{ number_format($item->amount) }}</td>
                                 <td>{{ $item->payment_gateway }}</td>
-                                <td>{{ $item->payment_token }}</td>
-                                <td>{{ $item->status_message }}</td>
+                                <td>{{ $item->payment_ref }}</td>
+
                                 <td>{{ $item->date }}</td>
                                 <td>
                                     <x-admin.edit-btn href="{{ route('admin.store.payment',['edit', $item->id]) }}" />

@@ -25,7 +25,7 @@ class PaymentObserver
             'action' => Report::CREATED,
             'row_status' => $payment->status_label,
             'user_id' => $payment->user_id,
-            'actor_id' => auth()->id(),
+            'actor_id' => $payment->user_id,
             'status' => Report::NEW,
         ]);
     }
@@ -43,7 +43,7 @@ class PaymentObserver
             'action' => Report::UPDATED,
             'row_status' => $payment->status_label,
             'user_id' => $payment->user_id,
-            'actor_id' => auth()->id(),
+            'actor_id' => $payment->user_id,
             'status' => Report::NEW,
         ]);
         if ($payment->status_code == 100){

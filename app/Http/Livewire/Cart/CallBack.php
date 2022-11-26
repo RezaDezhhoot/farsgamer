@@ -10,6 +10,7 @@ use Shetabit\Payment\Facade\Payment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Models\Payment as Pay;
+use Illuminate\Support\Facades\Redirect;
 
 class CallBack extends BaseComponent
 {
@@ -21,30 +22,29 @@ class CallBack extends BaseComponent
     public function mount(PaymentRepositoryInterface $paymentRepository , $gateway)
     {
         $this->getData($paymentRepository);
-        if (!is_null($this->gateway)&&!empty($this->gateway)){
+        if (!empty($this->gateway)){
             try {
                 if ($this->gateway == 'payir') {
                     $payment = Payment::via($this->gateway)->amount($this->data->amount)->transactionId($this->token)->verify();
                 } else {
                     $payment = Payment::via($this->gateway)->amount($this->data->amount)->transactionId($this->Authority)->verify();
                 }
-                $this->success($paymentRepository,$payment);
+                return $this->success($paymentRepository,$payment);
 
             } catch (InvalidPaymentException $exception) {
                 $pay = '';
                 if ($this->gateway == 'payir') {
-                    $pay = Pay::where('payment_token', $this->token)->update([
-                        'status_code' => $exception->getCode(),
-                        'status_message' => $exception->getMessage(),
-                    ]);
+                    $pay = Pay::where('payment_token', $this->token)->first();
                 } else {
-                    $pay = Pay::where('payment_token', $this->Authority)->update([
-                        'status_code' => $exception->getCode(),
-                        'status_message' => $exception->getMessage(),
-                    ]);
+                    $pay = Pay::where('payment_token', $this->Authority)->first();
                 }
+                $pay->update([
+                    'status_code' => $exception->getCode(),
+                    'status_message' => $exception->getMessage(),
+                ]);
                 $this->isSuccessful = false;
-                $this->link = $pay->call_back_url.'?status='.(isset($pay->id) ?  $pay->id : 0);
+                $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message";
+                return Redirect::to($this->link)->with(['status_code' =>$pay->status_code,'message' => $pay->status_message]);
             }
         } abort(404);
     }
@@ -53,24 +53,30 @@ class CallBack extends BaseComponent
     {
         $this->isSuccessful = true;
         $pay = '';
-        if (!is_null($payment) && !Pay::where('payment_ref', $payment->getReferenceId())->exists()) {
 
+
+        if (!is_null($payment) && !Pay::where('payment_ref', $payment->getReferenceId())->exists()) {
             if ($this->gateway == 'payir') {
-                $pay = Pay::where('payment_token', $this->token)->update([
-                    'payment_ref' => $payment->getReferenceId(),
-                    'status_code' => '100',
-                    'status_message' => 'پرداخت با موفقیت انجام شد',
-                ]);
+                $pay = Pay::where('payment_token', $this->token)->first();
             } else {
-                $pay = Pay::where('payment_token', $this->Authority)->update([
-                    'payment_ref' => $payment->getReferenceId(),
-                    'status_code' => '100',
-                    'status_message' => 'پرداخت با موفقیت انجام شد',
-                ]);
+                $pay = Pay::where('payment_token', $this->Authority)->first();
+            }
+            $pay->update([
+                'payment_ref' => $payment->getReferenceId(),
+                'status_code' => '100',
+                'status_message' => 'پرداخت با موفقیت انجام شد',
+            ]);
+            $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
+
+        } else {
+            if ($this->gateway == 'payir') {
+                $pay = Pay::where('payment_token', $this->token)->first();
+            } else {
+                $pay = Pay::where('payment_token', $this->Authority)->first();
             }
         }
-        $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
-        $this->link = $pay->call_back_url.'?status='.(isset($pay->id) ?  $pay->id : 0);
+        $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message";
+        return Redirect::to($this->link)->with(['status_code' =>$pay->status_code,'message' => $pay->status_message]);
     }
 
 

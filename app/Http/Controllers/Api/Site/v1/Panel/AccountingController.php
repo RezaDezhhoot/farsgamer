@@ -83,10 +83,11 @@ class AccountingController extends Controller
         $validator = Validator::make($request->all(),[
             'price' => 'required|numeric|min:10000|max:999999999999999999999999.99999999999999',
             'gateway' => ['required','in:payir,zarinpal'],
-            'call_back_address' => ['nullable','string','max:255'],
+            'call_back_address' => ['required','url','max:255'],
         ],[],[
             'price' => 'مبلغ',
             'gateway' => 'درگاه',
+            'call_back_address' => 'ادرس'
         ]);
         if ($validator->fails()){
             return response([
@@ -99,7 +100,7 @@ class AccountingController extends Controller
         try {
             $payment = Payment::via($request['gateway'])->callbackUrl(env('APP_URL') . '/verify/'. $request['gateway'])
                 ->purchase((new Invoice)
-                    ->amount($request['price']), function ($driver,$transactionId) use ($request) {
+                    ->amount((int)$request['price']), function ($driver,$transactionId) use ($request) {
                     $this->store($request,$request['gateway'] ,$transactionId);
                 })->pay()->toJson();
             $payment = json_decode($payment);
@@ -133,6 +134,7 @@ class AccountingController extends Controller
                 'payment_token' => $transactionId,
                 'model_type' => 'user',
                 'model_id' => Auth::id(),
+                'user_id' => Auth::id(),
                 'status_code' => 8,
                 'call_back_url' => $request['call_back_address'],
             ]);

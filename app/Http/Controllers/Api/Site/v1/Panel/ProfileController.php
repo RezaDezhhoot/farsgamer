@@ -68,7 +68,7 @@ class ProfileController extends Controller
         ];
         $user_transactions = $this->transactionRepository->getUserTransactions($user);
 
-        if (isset($request['password'])) {
+        if (isset($request['password']) && !empty($request['password'])) {
             $fields['password'] = ['required','min:'.($this->settingRepository->getSiteFaq('password_length') ?? 5),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'];
             $message['password'] = 'گذرواژه';
         }

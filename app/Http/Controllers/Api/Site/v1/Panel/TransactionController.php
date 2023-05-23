@@ -127,7 +127,7 @@ class TransactionController extends Controller
                     if ($user_id == $transaction->seller_id)
                         $data = [
                             'fields' => [],
-                            'message' => "لطفا تا پایان زمان مقرر منتظر پرداخت وجه از طرف {$transaction->customer->user_name} باشید",
+                            'message' => "لطفا تا پایان زمان مقرر منتظر پرداخت وجه از طرف خریدار باشید",
                             'can_continue' => false,
                             'can_continue_after_countdown' => false,
                             'can_cancel' => false,
@@ -167,7 +167,7 @@ class TransactionController extends Controller
                                     'web_site'=> $item2->pursuit_web_site,
                                 ];
                             }) : [],
-                            'message' => "لطفا تا {$transaction->timer->diffForHumans()} دیگر اطلاعات محصول را وارد نمایید.",
+                            'message' => "لطفا تا قبل از اتمام زمان مقرر اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
                             'can_cancel' => true,
@@ -178,7 +178,7 @@ class TransactionController extends Controller
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
                             'fields' => [],
-                            'message' =>  "لطفا تا {$transaction->timer->diffForHumans()} دیگر منتظر ارسال اطلاعات از طرف فروشنده باشید.",
+                            'message' =>  "لطفا تا قبل از اتمام زمان مقرر منتظر ارسال اطلاعات از طرف فروشنده باشید.",
                             'can_continue' => false,
                             'can_continue_after_countdown' => false,
                             'can_cancel' => false,
@@ -218,7 +218,7 @@ class TransactionController extends Controller
                     if ($user_id == $transaction->seller_id)
                         $data = [
                             'fields' => [],
-                            'message' => "لطفا تا {$transaction->timer->diffForHumans()} دیگر منتطر تایید از طرف خریدار باشید.",
+                            'message' => "لطفا قبل از اتمام زمان مقرر منتطر تایید از طرف خریدار باشید.",
                             'can_continue' => false,
                             'can_continue_after_countdown' => true,
                             'can_cancel' => false,
@@ -264,7 +264,7 @@ class TransactionController extends Controller
                                     'file_size_unit' => 'KB',
                                 ]
                             ],
-                            'message' =>  "خریدار محترم در نظر داشته باشید که پس از مشاهده اطلاعت نسبت به صحبت و درست بودن اطلاعات تا{$transaction->timer->diffForHumans()}آینده اقدام نمایید.",
+                            'message' =>  "خریدار محترم در نظر داشته باشید که پس از مشاهده اطلاعت نسبت به صحبت و درست بودن اطلاعات تا قبل از اتمام زمان مقرر اقدام نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
                             'can_cancel' => false,
@@ -292,7 +292,7 @@ class TransactionController extends Controller
                                     'web_site'=> $item2->pursuit_web_site,
                                 ];
                             }) : [],
-                            'message' => "لطفا تا {$transaction->timer->diffForHumans()} دیگر اطلاعات محصول را مجدد وارد نمایید.",
+                            'message' => "لطفا تا قبل از اتمام زمان مقزز اطلاعات محصول را مجدد وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
                             'can_cancel' => true,
@@ -303,7 +303,7 @@ class TransactionController extends Controller
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
                             'fields' => [],
-                            'message' =>  "لطفا مجدد تا {$transaction->timer->diffForHumans()} دیگر منتظر ارسال اطلاعات از طرف فروشنده باشید.",
+                            'message' =>  "لطفا منتظر ارسال اطلاعات از طرف فروشنده باشید.",
                             'can_continue' => false,
                             'can_continue_after_countdown' => false,
                             'can_cancel' => false,

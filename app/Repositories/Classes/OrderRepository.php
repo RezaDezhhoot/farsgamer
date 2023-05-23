@@ -37,7 +37,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getUserOrders(User $user , Request $request)
     {
-        return Order::with(['category','platforms'])->when($request['status'],function ($query) use ($request) {
+        return $user->orders()->with(['category','platforms'])->when($request['status'],function ($query) use ($request) {
             return $query->where('status',$request['status']);
         })->paginate(35);
 
@@ -46,7 +46,7 @@ class OrderRepository implements OrderRepositoryInterface
 
     public function getUserOrder(User $user , $id)
     {
-        return Order::with(['category','platforms'])->findOrFail($id);
+        return $user->orders()->with(['category','platforms'])->findOrFail($id);
         // TODO: Implement getUserOrders() method.
     }
 

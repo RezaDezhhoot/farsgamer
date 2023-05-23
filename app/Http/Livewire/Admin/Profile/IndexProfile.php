@@ -52,7 +52,7 @@ class IndexProfile extends BaseComponent
         ];
         if (isset($this->pass_word))
         {
-            $fields['pass_word'] = ['required','min:'.($settingRepository->getSiteFaq('password_length') ?? 5),'regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9]).*$/'];
+            $fields['pass_word'] = ['required','min:'.($settingRepository->getSiteFaq('password_length') ?? 5)];
             $messages['pass_word'] = 'گذرواژه';
         }
         $this->validate($fields,[],$messages);

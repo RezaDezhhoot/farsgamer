@@ -46,7 +46,7 @@ class User extends JsonResource
             'wallet' => $this->balance,
             'status' => $this->status,
             'status_label' => $this->status_label,
-            'profile_image' => asset($this->profile_image),
+            'profile_image' => !empty($this->profile_image) ? asset($this->profile_image) : env('APP_URL').\App\Models\User::DEFAULT_IMAGE,
             'description' => $this->description,
             'score' => $this->score,
             'province' => $this->province_label,

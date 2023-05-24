@@ -56,6 +56,7 @@ class User extends Authenticatable implements Wallet, Confirmable
     use HasApiTokens, HasFactory, Notifiable , HasRoles , HasWallet, CanConfirm;
     use Searchable , SoftDeletes ;
 
+    const DEFAULT_IMAGE = '/defaults/pngwing.com.png';
 
     const NOT_CONFIRMED = 'not_confirmed';
     const NEW = 'new';

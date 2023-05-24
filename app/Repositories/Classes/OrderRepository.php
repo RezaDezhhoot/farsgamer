@@ -16,8 +16,7 @@ class OrderRepository implements OrderRepositoryInterface
 {
     public function getHomeOrders(Request $request)
     {
-        $orders = Order::active(true)->with(['category','platforms','parameters']);
-        $orders = $orders->when($request['q'],function ($query) use ($request){
+        return Order::with(['category','platforms','parameters'])->when($request['q'],function ($query) use ($request){
             return $query->whereHas('category',function ($query) use ($request) {
                 return $query->where('slug','LIKE','%'.$request['q'].'%')->orWhere('title','LIKE','%'.$request['q'].'%');
             })->orWhereHas('platforms',function ($query)use ($request){
@@ -30,9 +29,7 @@ class OrderRepository implements OrderRepositoryInterface
             return $query->whereHas('platforms',function ($query) use ($request) {
                 return $query->where('slug',$request['platform']);
             });
-        })->orderBy($request['view'] == 1 ? 'view_count' : 'id' , 'desc')->paginate(35);
-
-        return $orders;
+        })->active(true)->orderBy($request['view'] == 1 ? 'view_count' : 'id' , 'desc')->paginate(35);
     }
 
     public function getUserOrders(User $user , Request $request)

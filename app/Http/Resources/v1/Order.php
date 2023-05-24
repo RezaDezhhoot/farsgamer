@@ -41,11 +41,7 @@ class Order extends JsonResource
             'price' => $this->price,
             'price_unit' => 'toman',
             'image' => asset($this->image),
-            'gallery' => !empty($this->gallery_asset) ? collect(explode(',',$this->gallery_asset))->map(function($item) {
-                if (!empty($item)) {
-                    return asset($item);
-                }
-            }) : [],
+            'gallery' => $this->gallery_asset,
             'status_label' => $this->status_label,
             'view_count' => $this->view_count,
             'province' => isset($this->province) ? $this->province_label : null,

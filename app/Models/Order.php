@@ -72,13 +72,19 @@ class Order extends Model
         $this->attributes['gallery'] = implode(',',$gallery);
     }
 
-    public function getGalleryAssetAttribute()
+    public function getGalleryAssetAttribute(): ?array
     {
         $gallery = [];
-        foreach (explode(',',$this->gallery) as $item)
-            $gallery[] = asset($item);
 
-        return implode(',',$gallery);
+        if (!empty($this->gallery)) {
+            $exp = explode(',',$this->gallery);
+            foreach ($exp as $item)
+                $gallery[] = asset($item);
+
+            return $gallery;
+        }
+
+        return null;
     }
 
 

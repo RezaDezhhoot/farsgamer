@@ -33,7 +33,7 @@
                 @if(!is_null($file))
                     <img style="max-width: 150px;border-radius: 5px" src="{{ $file->temporaryUrl() }}">
                 @elseif($user->profile_image)
-                    <img style="max-width: 150px;border-radius: 5px" src="{{asset($user->profile_image)}}" alt="">
+                    <img style="max-width: 150px;border-radius: 5px" src="{{($user->profile_image)}}" alt="">
                 @endif
             </div>
             <x-admin.form-section label="نقش های من">

@@ -28,7 +28,7 @@ class ArticleCollection extends ResourceCollection
                 'author' => [
                     'name' => $item->author->name,
                     'user_name' => $item->author->user_name,
-                    'profile_image' => asset($item->author->profile_image),
+                    'profile_image' => $item->author->profile_image,
                 ]
             ];
         });

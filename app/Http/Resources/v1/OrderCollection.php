@@ -36,7 +36,7 @@ class OrderCollection extends ResourceCollection
                 'user' => [
                     'id' => $item->user->id,
                     'user_name' => $item->user->user_name,
-                    'user_profile' => asset($item->user->profile_image),
+                    'user_profile' => $item->user->profile_image,
                 ],
             ];
         });

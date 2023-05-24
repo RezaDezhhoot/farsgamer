@@ -51,7 +51,7 @@ class Article extends JsonResource
             'author' => [
                 'name' => $this->author->name,
                 'user_name' => $this->author->user_name,
-                'profile_image' => asset($this->author->profile_image),
+                'profile_image' => $this->author->profile_image,
             ]
         ];
     }

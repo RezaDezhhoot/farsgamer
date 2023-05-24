@@ -57,7 +57,7 @@ class Order extends JsonResource
             'user' => [
                 'id' => $this->user->id,
                 'user_name' => $this->user->user_name,
-                'user_profile' => asset($this->user->profile_image),
+                'user_profile' => $this->user->profile_image,
                 'phone' => $this->user->phone,
             ],
         ];

@@ -182,6 +182,11 @@ class User extends Authenticatable implements Wallet, Confirmable
         $this->attributes['profile_image'] = str_replace(env('APP_URL'), '', $value);
     }
 
+    public function getProfileImageAttribute($value): string
+    {
+        return empty($value) ? env('APP_URL').self::DEFAULT_IMAGE : asset($value);
+    }
+
     public function setAuthImageAttribute($value)
     {
         $this->attributes['auth_image'] = str_replace(env('APP_URL'), '', $value);
@@ -199,6 +204,8 @@ class User extends Authenticatable implements Wallet, Confirmable
             return $query->where('seller_id',auth()->id())->orWhere('customer_id',auth()->id());
         })->withSum('order','price')->get()->sum('order_sum_price');
     }
+
+
 
     public function getOrdersHasTransactionAttribute()
     {

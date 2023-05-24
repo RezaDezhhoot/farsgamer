@@ -23,7 +23,7 @@ class CommentCollection extends ResourceCollection
                 'author'=>[
                     'id' => $item->user->id,
                     'user_name' => $item->user->user_name,
-                    'profile_image' => asset($item->user->profile_image),
+                    'profile_image' => $item->user->profile_image,
                 ]
             ];
         });

@@ -21,11 +21,11 @@
                                     <div class="symbol-group symbol-hover justify-content-center">
                                         @if($group->user1 != auth()->id())
                                             <div class="symbol symbol-35 symbol-circle" data-toggle="tooltip" title="{{ $group->user_one->user_name }}">
-                                                <img alt="Pic" src="{{ asset($group->user_one->profile_image) }}" />
+                                                <img alt="Pic" src="{{ ($group->user_one->profile_image) }}" />
                                             </div>
                                         @else
                                             <div class="symbol symbol-35 symbol-circle" data-toggle="tooltip" title="{{ $group->user_two->user_name }}">
-                                                <img alt="Pic" src="{{ asset($group->user_two->profile_image) }}" />
+                                                <img alt="Pic" src="{{ ($group->user_two->profile_image) }}" />
                                             </div>
                                         @endif
                                     </div>
@@ -75,10 +75,10 @@
                         <div class="symbol-group symbol-hover">
                             @if(!is_null($chatList) && !empty($chatList))
                                 <div class="symbol symbol-35 symbol-circle" data-toggle="tooltip" title="{{ $chatList->user_one->user_name }}">
-                                    <img alt="Pic" src="{{ asset($chatList->user_one->profile_image) }}" />
+                                    <img alt="Pic" src="{{ ($chatList->user_one->profile_image) }}" />
                                 </div>
                                 <div class="symbol symbol-35 symbol-circle" data-toggle="tooltip" title="{{ $chatList->user_two->user_name }}">
-                                    <img alt="Pic" src="{{ asset($chatList->user_two->profile_image) }}" />
+                                    <img alt="Pic" src="{{ ($chatList->user_two->profile_image) }}" />
                                 </div>
                             @endif
                         </div>
@@ -119,7 +119,7 @@
                                         <div class="d-flex flex-column mb-5 align-items-start">
                                             <div class="d-flex align-items-center">
                                                 <div class="symbol symbol-circle symbol-35 mr-3">
-                                                    <img alt="Pic" src="{{ asset(auth()->user()->profile_image) }}" />
+                                                    <img alt="Pic" src="{{ (auth()->user()->profile_image) }}" />
                                                 </div>
                                                 <div>
                                                     <a href="#" class="text-dark-75 text-hover-primary font-weight-bold font-size-h6">شما</a>

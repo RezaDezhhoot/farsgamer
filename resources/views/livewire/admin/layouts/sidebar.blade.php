@@ -134,7 +134,8 @@
                 @endcan
                 @can('show_settings')
                     <x-admin.menu-group icon="flaticon2-settings" :active="request()->routeIs(
-                    ['admin.setting.base','admin.setting.home','admin.setting.aboutUs','admin.setting.contactUs','admin.setting.law',
+                    ['admin.setting.base','admin.setting.home','admin.setting.aboutUs','admin.setting.contactUs','admin.setting.law','admin.phone.law','admin.phone.law.create',
+                    'admin.transaction.law','admin.transaction.law.create',
                     'admin.setting.chatLaw','admin.setting.fag','admin.setting.fag.create','admin.setting.chatLaw.create','admin.setting.law.create'])" label="تنظیمات" >
                         @can('show_settings_base')
                             <x-admin.menu-item href="{{route('admin.setting.base')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs('admin.setting.base')" label="پایه " />
@@ -150,6 +151,8 @@
                         @endcan
                         @can('show_settings_law')
                             <x-admin.menu-item href="{{route('admin.setting.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.law','admin.setting.law.create'])" label="قوانین " />
+                            <x-admin.menu-item href="{{route('admin.phone.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.phone.law','admin.phone.law.create'])" label="قوانین قبل مشاهده شماره تماس " />
+                            <x-admin.menu-item href="{{route('admin.transaction.law')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.transaction.law','admin.transaction.law.create'])" label="قوانین شروع مغامله " />
                         @endcan
                         @can('show_settings_chatLaw')
                             <x-admin.menu-item href="{{route('admin.setting.chatLaw')}}" icon="menu-bullet menu-bullet-dot" :active="request()->routeIs(['admin.setting.chatLaw','admin.setting.chatLaw.create'])" label="قوانین چت " />

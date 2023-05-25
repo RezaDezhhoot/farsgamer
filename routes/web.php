@@ -73,6 +73,12 @@ Route::middleware(['auth','role:admin'])->namespace('App\Http\Livewire\Admin')->
     Route::get('/settings/chatLaw/{action}/{id?}', Settings\CreateChatLaw::class)->name('admin.setting.chatLaw.create');
     Route::get('/settings/fag', Settings\QuestionSetting::class)->name('admin.setting.fag');
     Route::get('/settings/fag/{action}/{id?}', Settings\CreateFag::class)->name('admin.setting.fag.create');
+
+    Route::get('/settings/phone-law', PhoneLaw\IndexPHoneLaw::class)->name('admin.phone.law');
+    Route::get('/settings/phone-law/{action}/{id?}', PhoneLaw\StorePHoneLaw::class)->name('admin.phone.law.create');
+
+    Route::get('/settings/transaction-law', TransactionLaw\IndexTransactionLaw::class)->name('admin.transaction.law');
+    Route::get('/settings/transaction-law/{action}/{id?}', TransactionLaw\StoreTransactionLaw::class)->name('admin.transaction.law.create');
 });
 // file manager
 Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['role:admin']], function () {

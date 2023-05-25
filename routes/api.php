@@ -55,6 +55,7 @@ Route::prefix('v1')->group(function (){
     Route::get('/contact-us',[App\Http\Controllers\Api\Site\v1\FagController::class,'contact']);
 
     Route::get('/laws',[App\Http\Controllers\Api\Site\v1\FagController::class,'law']);
+    Route::get('/chat-laws',[App\Http\Controllers\Api\Site\v1\FagController::class,'chatLaw']);
 
     Route::get('/fag',[App\Http\Controllers\Api\Site\v1\FagController::class,'fag']);
 

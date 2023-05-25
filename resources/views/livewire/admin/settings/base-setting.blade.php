@@ -21,7 +21,8 @@
             <x-admin.forms.input type="text" id="address" label="ادرس*" wire:model.defer="address"/>
             <x-admin.forms.input type="number" id="categoryHomeCount" label="تعداد دسته بندی های قابل نمایش صفحه اصلی" wire:model.defer="categoryHomeCount"/>
             <x-admin.button class="primary" content="افزودن لینک ارتباطی" wire:click="addLink()" />
-            @foreach($contact as $key => $item)
+            <x-admin.forms.text-area label="توضیخحات قوانین *"  id="description_law" wire:model.defer="description_law" />
+        @foreach($contact as $key => $item)
                 <div class="form-group" style="display: flex;align-items: center">
                     <div style="padding: 5px">
                         <input class="form-control" id="{{ $key }}image" type="text" placeholder="تصویر" wire:model.defer="contact.{{$key}}.img">

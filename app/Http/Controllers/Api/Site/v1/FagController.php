@@ -65,7 +65,43 @@ class FagController extends Controller
             'data' => [
                 'laws' => [
                     'laws' => $this->settingRepository->getSiteLaw('law'),
+                    'description' =>  $this->settingRepository->getSiteLaw('description_law'),
+                ]
+            ],
+            'status' => 'success'
+        ],Response::HTTP_OK);
+    }
+
+    public function chatLaw()
+    {
+        return response([
+            'data' => [
+                'laws' => [
                     'chat_laws' => $this->settingRepository->getSiteLaw('chatLaw'),
+                ]
+            ],
+            'status' => 'success'
+        ],Response::HTTP_OK);
+    }
+
+    public function phoneLaw()
+    {
+        return response([
+            'data' => [
+                'laws' => [
+                    'phone_laws' => $this->settingRepository->getSiteLaw('phoneLaw'),
+                ]
+            ],
+            'status' => 'success'
+        ],Response::HTTP_OK);
+    }
+
+    public function transactionLaw()
+    {
+        return response([
+            'data' => [
+                'laws' => [
+                    'transaction_laws' => $this->settingRepository->getSiteLaw('transactionLaw'),
                 ]
             ],
             'status' => 'success'

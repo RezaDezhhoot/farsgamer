@@ -11,6 +11,8 @@ class BaseSetting extends BaseComponent
     public $header , $name , $logo , $status , $title  , $copyRight , $subject = [],$offends = [] ,$logInImage , $contact = [] , $waterMark;
     public  $data = [] , $i = 1 , $registerGift , $notification  , $tel , $email, $address, $seoDescription , $seoKeyword ,$categoryHomeCount;
 
+    public $description_law;
+
     public function mount(SettingRepositoryInterface $settingRepository)
     {
         $this->authorizing('show_settings_base');
@@ -34,6 +36,7 @@ class BaseSetting extends BaseComponent
         $this->seoKeyword = $settingRepository->getSiteFaq('seoKeyword');
         $this->logInImage = $settingRepository->getSiteFaq('logInImage');
         $this->categoryHomeCount = $settingRepository->getSiteFaq('categoryHomeCount');
+        $this->description_law = $settingRepository->getSiteFaq('description_law');
     }
 
     public function render()
@@ -80,6 +83,7 @@ class BaseSetting extends BaseComponent
                 'contact.*.img' => ['required','string',"max:70"],
                 'contact.*.link' => ['required','url',"max:400"],
                 'categoryHomeCount' => ['nullable','integer','between:1,10000'],
+                'description_law' => ['nullable','string','max:15000']
             ] , [] , [
                 'name' => 'نام سایت',
                 'title' => 'عنوان سایت',
@@ -100,6 +104,7 @@ class BaseSetting extends BaseComponent
                 'logInImage' => 'تصویر صفحه ورود',
                 'contact' => 'لینک های ارتباطی',
                 'categoryHomeCount' => 'تعداد دسته بندی های قابل نمایش صفحه اصلی',
+                'description_law' => 'توضیحات قوانین'
             ]
         );
         $settingRepository::updateOrCreate(['name' => 'subject'], ['value' => json_encode($this->subject)]);
@@ -117,6 +122,7 @@ class BaseSetting extends BaseComponent
         $settingRepository::updateOrCreate(['name' => 'seoKeyword'], ['value' => $this->seoKeyword]);
         $settingRepository::updateOrCreate(['name' => 'logInImage'], ['value' => $this->logInImage]);
         $settingRepository::updateOrCreate(['name' => 'registerGift'], ['value' => $this->registerGift]);
+        $settingRepository::updateOrCreate(['name' => 'description_law'], ['value' => $this->description_law]);
         $settingRepository::updateOrCreate(['name' => 'contact'], ['value' => json_encode($this->contact)]);
         $settingRepository::updateOrCreate(['name' => 'categoryHomeCount'], ['value' => $this->categoryHomeCount]);
         $settingRepository::updateOrCreate(['name' => 'offends'], ['value' => json_encode($this->offends)]);

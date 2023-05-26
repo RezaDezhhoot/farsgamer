@@ -81,6 +81,8 @@ Route::prefix('v1')->group(function (){
                 Route::post('/new',[App\Http\Controllers\Api\Site\v1\Panel\ChatController::class,'startChat']);
             });
 
+            Route::apiResource('bookmarks',\App\Http\Controllers\Api\Site\v1\Panel\BookmarkController::class)->only(['index','store','destroy']);
+
             Route::prefix('accounting')->group(function (){
                 Route::get('',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'index']);
                 Route::post('',[App\Http\Controllers\Api\Site\v1\Panel\AccountingController::class,'request']);

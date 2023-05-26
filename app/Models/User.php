@@ -218,6 +218,10 @@ class User extends Authenticatable implements Wallet, Confirmable
         ])->count();
     }
 
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
 }
 
 

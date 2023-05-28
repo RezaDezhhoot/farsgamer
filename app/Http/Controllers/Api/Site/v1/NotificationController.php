@@ -14,7 +14,7 @@ class NotificationController extends Controller
             ->latest()->where('type',Notification::PUBLIC)
             ->paginate(\request('per_page',10));
 
-        return \App\Http\Resources\V1\Notification::collection($items);
+        return \App\Http\Resources\v1\Notification::collection($items);
     }
 
     public function userNotification(Request $request)
@@ -22,6 +22,6 @@ class NotificationController extends Controller
         $items = auth()->user()->alerts()
             ->latest()->paginate(\request('per_page',10));
 
-        return \App\Http\Resources\V1\Notification::collection($items);
+        return \App\Http\Resources\v1\Notification::collection($items);
     }
 }

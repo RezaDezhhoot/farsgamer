@@ -823,9 +823,11 @@ class TransactionController extends Controller
                                 $transaction->id
                             );
                         }
-                        $this->orderTransactionRepository->update([],
-                            ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
-                            $transaction);
+                        $transaction->timer = $timer;
+                        $transaction->status = $status;
+                        $transaction->received_status = 0;
+                        $transaction->received_result = null;
+                        $transaction = $this->orderTransactionRepository->save($transaction);
                         return response([
                             'data' => [
                                 'message' => [
@@ -989,9 +991,11 @@ class TransactionController extends Controller
                                 $transaction->id
                             );
                         }
-                        $this->orderTransactionRepository->update([],
-                            ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
-                            $transaction);
+                        $transaction->timer = $timer;
+                        $transaction->status = $status;
+                        $transaction->received_status = 0;
+                        $transaction->received_result = null;
+                        $transaction = $this->orderTransactionRepository->save($transaction);
                         return response([
                             'data' => [
                                 'message' => [
@@ -1191,9 +1195,12 @@ class TransactionController extends Controller
                                         (float)$transaction->data->send->send_time_outer_city
                                     );
                             }
-                            $this->orderTransactionRepository->update([],
-                                ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
-                                $transaction);
+                            $transaction->timer = $timer;
+                            $transaction->status = $status;
+                            $transaction->received_status = 0;
+                            $transaction->received_result = null;
+                            $transaction = $this->orderTransactionRepository->save($transaction);
+
                             $sms->sends(
                                 $this->createText('returned_receive_transaction',$transaction),
                                 $transaction->seller,
@@ -1344,9 +1351,11 @@ class TransactionController extends Controller
                                         (float)$transaction->data->send->send_time_outer_city
                                     );
                             }
-                            $this->orderTransactionRepository->update([],
-                                ['timer' => $timer,'status'=>$status,'received_status' => 0,'received_result' => null],
-                                $transaction);
+                            $transaction->timer = $timer;
+                            $transaction->status = $status;
+                            $transaction->received_status = 0;
+                            $transaction->received_result = null;
+                            $transaction = $this->orderTransactionRepository->save($transaction);
                             $sms->sends(
                                 $this->createText('returned_receive_transaction',$transaction),
                                 $transaction->customer,
@@ -1718,7 +1727,10 @@ class TransactionController extends Controller
                     ], 'status' => 'error'
                 ],Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-            $this->orderTransactionRepository->update([['status',$this->orderTransactionRepository::receive()]],[
+            $this->orderTransactionRepository->update([
+                ['status',$this->orderTransactionRepository::receive()],
+                ['id',$transaction->id]
+            ],[
                 'received_result' => $request['received_result'],
                 'received_status' => 2,
             ],$transaction);
@@ -1790,7 +1802,10 @@ class TransactionController extends Controller
                     $gallery[] = $files;
                 }
             }
-            $this->orderTransactionRepository->update([['status',$this->orderTransactionRepository::receive()]],[
+            $this->orderTransactionRepository->update([
+                ['status',$this->orderTransactionRepository::receive()],
+                ['id',$transaction->id]
+            ],[
                 'return_cause' => $request['refunded_cause'],
                 'return_images' => implode(',',$gallery),
                 'status' => $this->orderTransactionRepository::isReturned(),

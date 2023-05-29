@@ -599,7 +599,10 @@ class TransactionController extends Controller
                             $this->orderRepository->update($transaction->order,[
                                 'status' => $this->orderRepository::isRequestedStatus()
                             ]);
-                            $this->orderTransactionRepository->update([['id','!=',$transaction->id]],['status' => $this->orderTransactionRepository::cancel()]);
+                            $this->orderTransactionRepository->update([
+                                ['id','!=',$transaction->id],
+                                ['order_id',$transaction->order_id],
+                            ],['status' => $this->orderTransactionRepository::cancel()]);
                             $sms->sends(
                                 $this->createText('pay_transaction',$transaction),
                                 $transaction->customer,
@@ -690,7 +693,7 @@ class TransactionController extends Controller
                                 ]);
                                 $transaction->timer = $timer;
                                 $transaction->status = $this->orderTransactionRepository::send();
-                                $transaction = $this->orderTransactionRepository->save($transaction);
+                                $transaction->save();
                                 DB::commit();
                             } catch (Exception $e) {
                                 DB::rollBack();
@@ -789,11 +792,12 @@ class TransactionController extends Controller
                             }
                         }
 
-                        $transaction->data = $this->orderTransactionRepository->updateData($transaction,[
+                        $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
                             'send_id' => $request['send_id'],
                             'transfer_result' => $request['transfer_result']
                         ]);
+                        $transaction->refresh();
                         if ($transaction->category->control){
                             $status = $this->orderTransactionRepository::control();
                             $timer = null;
@@ -1171,9 +1175,10 @@ class TransactionController extends Controller
                                 ],Response::HTTP_UNPROCESSABLE_ENTITY);
                             }
                         }
-                        $transaction->data = $this->orderTransactionRepository->updateData($transaction,[
+                        $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
                         ]);
+                        $transaction->refresh();
                         $timer = null;
                         if ($transaction->category->control){
                             $status = $this->orderTransactionRepository::control();
@@ -1326,9 +1331,11 @@ class TransactionController extends Controller
                                 ],Response::HTTP_UNPROCESSABLE_ENTITY);
                             }
                         }
-                        $transaction->data = $this->orderTransactionRepository->updateData($transaction,[
+                        $this->orderTransactionRepository->updateData($transaction,[
                             'value' => json_encode($old_data),
                         ]);
+                        $transaction->refresh();
+
                         $timer = null;
                         if ($transaction->category->control){
                             $status = $this->orderTransactionRepository::control();

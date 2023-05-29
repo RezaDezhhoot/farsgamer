@@ -22,7 +22,7 @@ Route::prefix('v1')->group(function (){
 
     Route::prefix('/notifications')->group(function (){
         Route::get('/public',[\App\Http\Controllers\Api\Site\v1\NotificationController::class,'siteNotification']);
-        Route::middleware('auth')->get('/user',[\App\Http\Controllers\Api\Site\v1\NotificationController::class,'userNotification']);
+        Route::middleware('auth:sanctum')->get('/user',[\App\Http\Controllers\Api\Site\v1\NotificationController::class,'userNotification']);
     });
 
     Route::prefix('/orders')->group(function (){

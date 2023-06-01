@@ -36,6 +36,7 @@ class Ticket extends JsonResource
             'files' => collect(explode(',',$this->file))->map(function ($item){
                 return asset($item);
             }),
+            'user_id' => $this->user_id,
             'sender' => new User($this->sender),
             'priority' => $this->priority,
             'priority_label' => $this->priority_label,

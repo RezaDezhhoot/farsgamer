@@ -17,6 +17,9 @@ class TicketCollection extends ResourceCollection
     {
         return $this->collection->map(function ($item){
             return [
+                'id' => $this->id,
+                'user_id' => $this->user_id,
+                'sender_id' => $this->sender_id,
                 'subject' => $item->subject,
                 'priority_label' => $item->priority_label,
                 'status_label' => $item->status_label,

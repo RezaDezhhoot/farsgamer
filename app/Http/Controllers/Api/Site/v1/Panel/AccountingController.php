@@ -44,9 +44,9 @@ class AccountingController extends Controller
         return response([
             'data' => [
                 'details' => [
-                    'total_inventory' => Auth::user()->inventory_being_traded + Auth::user()->balance,
-                    'inventory_being_traded' => Auth::user()->inventory_being_traded,
-                    'removable_inventory' => Auth::user()->balance,
+                    'total_inventory' => number_format(Auth::user()->inventory_being_traded + Auth::user()->balance),
+                    'inventory_being_traded' => number_format(Auth::user()->inventory_being_traded),
+                    'removable_inventory' => number_format(Auth::user()->balance),
                     'gateways' => [
                         'payir' => 'پی',
                         'zarinpal' => 'زرین پال'

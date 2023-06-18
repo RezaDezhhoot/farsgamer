@@ -27,7 +27,7 @@ class Request extends JsonResource
     {
         return [
             'id' => $this->id,
-            'price' => $this->price,
+            'price' => number_format($this->price),
             'status_label' => $this->status_label,
             'link' => $this->link,
             'files' => collect(explode(',',$this->file))->map(fn ($item2) => asset($item2)),

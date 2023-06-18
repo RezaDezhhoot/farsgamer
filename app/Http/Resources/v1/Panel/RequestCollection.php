@@ -27,7 +27,7 @@ class RequestCollection extends ResourceCollection
         return $this->collection->map(function ($item){
             return [
                 'id' => $item->id,
-                'price' => $item->price,
+                'price' => number_format($item->price),
                 'status_label' => $item->status_label,
                 'link' => $item->link,
                 'files' => collect(explode(',',$item->file))->map(fn ($item2) => asset($item2)),

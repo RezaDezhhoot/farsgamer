@@ -19,7 +19,12 @@ class Controller extends BaseController
         if (!is_null(Setting::getSingleRow('waterMark')) && !empty(Setting::getSingleRow('waterMark')))
         {
             $img = Image::make(public_path($image));
+
+
             $logo = $this->resize_image(public_path(Setting::getSingleRow('waterMark')),1000,100);
+
+
+
             $img->insert($logo, $position, 20, 20);
 
             $img->save(public_path($image));

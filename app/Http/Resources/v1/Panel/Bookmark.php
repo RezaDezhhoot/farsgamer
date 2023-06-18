@@ -16,7 +16,8 @@ class Bookmark extends JsonResource
     public function toArray($request)
     {
         return [
-            'order' => Order::make($this->order)
+            'order' => Order::make($this->order),
+            'id' => $this->id
         ];
     }
 }

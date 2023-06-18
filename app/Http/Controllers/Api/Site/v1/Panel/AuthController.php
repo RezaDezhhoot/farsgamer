@@ -50,8 +50,8 @@ class AuthController extends Controller
                     'user' => [
                         'auth_image' => asset($user->auth_image),
                         'code_id' => $user->code_id,
-                        'province' => $user->province,
-                        'city' => $user->city,
+                        'province' => $user->province ?? 'Tehran',
+                        'city' => $user->city ?? 'Tehran',
                         'card'=> $this->cardRepository->getFirst($user),
                     ]
                 ],'status' => 'success'

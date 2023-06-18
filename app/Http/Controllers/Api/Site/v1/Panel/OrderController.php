@@ -343,7 +343,7 @@ class OrderController extends Controller
             return response([
                 'data' => [
                     'message' => [
-                        'order' => ['برای این اگهی امکان حذف وجود ندارد.']
+                        'order' => ['برای این اگهی امکان ویرایش وجود ندارد.']
                     ]
                 ],'status' => 'error'
             ],Response::HTTP_NOT_ACCEPTABLE);
@@ -365,8 +365,8 @@ class OrderController extends Controller
             'content' => ['required','string','max:4200'],
             'price' => ['required','numeric', 'between:0,9999999999999999999999999999.99999'],
             'image' => ['required'],
-            'gallery' => ['array'],
-            'gallery.*' => ['required','min:0'],
+            'gallery' => ['array','nullable'],
+            'gallery.*' => ['required','mimes:'.$this->settingRepository->getSiteFaq('valid_order_images'),'max:'.$this->settingRepository->getSiteFaq('max_order_image_size')],
             'platforms' => ['array'],
             'platforms.*' => ['required','in:'.implode(',',$platforms)],
             'parameters' => ['array','size:'.count($parameters->pluck('id')->toArray())],

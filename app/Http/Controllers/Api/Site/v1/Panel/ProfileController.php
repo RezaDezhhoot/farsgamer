@@ -114,8 +114,9 @@ class ProfileController extends Controller
             $user->city = $request['city'];
         }
         if (!empty($request->file('profile_image'))){
-            if (!is_null($user->profile_image))
+            if (!empty($user->profile_image))
                 @unlink($user->profile_image);
+
 
             $file = $request->file('profile_image');
 
@@ -124,8 +125,10 @@ class ProfileController extends Controller
             $fileName = Carbon::now()->timestamp.'-'.$fileName;
 
             $file->move(storage_path($imagePath),$fileName);
-            $user->profile_image = "storage/profiles/{$fileName}";
-            $this->imageWatermark($user->profile_image);
+            $newFile = "storage/profiles/{$fileName}";
+            $user->profile_image = $newFile ;
+
+            $this->imageWatermark($newFile);
         }
 
         $user->name = $request['name'];

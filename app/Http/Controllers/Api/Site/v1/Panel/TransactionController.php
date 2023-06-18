@@ -156,17 +156,17 @@ class TransactionController extends Controller
                                 ->where('for','seller'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
-                                return [
-                                    'name'=> $item2->id,
-                                    'type'=> 'radio',
-                                    'label'=> $item2->slug,
-                                    'logo'=> asset($item2->logo),
-                                    'send_time_inner_city'=> $item2->send_time_inner_city,
-                                    'send_time_outer_city'=> $item2->send_time_outer_city,
-                                    'description'=> $item2->note,
-                                    'web_site'=> $item2->pursuit_web_site,
-                                ];
-                            }) : [],
+                                    return [
+                                        'name'=> $item2->id,
+                                        'type'=> 'radio',
+                                        'label'=> $item2->slug,
+                                        'logo'=> asset($item2->logo),
+                                        'send_time_inner_city'=> $item2->send_time_inner_city,
+                                        'send_time_outer_city'=> $item2->send_time_outer_city,
+                                        'description'=> $item2->note,
+                                        'web_site'=> $item2->pursuit_web_site,
+                                    ];
+                                }) : [],
                             'message' => "لطفا تا قبل از اتمام زمان مقرر اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -281,17 +281,17 @@ class TransactionController extends Controller
                                 ->where('for','seller'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
-                                return [
-                                    'name'=> $item2->id,
-                                    'type'=> 'radio',
-                                    'label'=> $item2->slug,
-                                    'logo'=> asset($item2->logo),
-                                    'send_time_inner_city'=> $item2->send_time_inner_city,
-                                    'send_time_outer_city'=> $item2->send_time_outer_city,
-                                    'description'=> $item2->note,
-                                    'web_site'=> $item2->pursuit_web_site,
-                                ];
-                            }) : [],
+                                    return [
+                                        'name'=> $item2->id,
+                                        'type'=> 'radio',
+                                        'label'=> $item2->slug,
+                                        'logo'=> asset($item2->logo),
+                                        'send_time_inner_city'=> $item2->send_time_inner_city,
+                                        'send_time_outer_city'=> $item2->send_time_outer_city,
+                                        'description'=> $item2->note,
+                                        'web_site'=> $item2->pursuit_web_site,
+                                    ];
+                                }) : [],
                             'message' => "لطفا تا قبل از اتمام زمان مقزز اطلاعات محصول را مجدد وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -408,17 +408,17 @@ class TransactionController extends Controller
                                 ->where('for','seller'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
-                                return [
-                                    'name'=> $item2->id,
-                                    'type'=> 'radio',
-                                    'label'=> $item2->slug,
-                                    'logo'=> asset($item2->logo),
-                                    'send_time_inner_city'=> $item2->send_time_inner_city,
-                                    'send_time_outer_city'=> $item2->send_time_outer_city,
-                                    'description'=> $item2->note,
-                                    'web_site'=> $item2->pursuit_web_site,
-                                ];
-                            }) : [],
+                                    return [
+                                        'name'=> $item2->id,
+                                        'type'=> 'radio',
+                                        'label'=> $item2->slug,
+                                        'logo'=> asset($item2->logo),
+                                        'send_time_inner_city'=> $item2->send_time_inner_city,
+                                        'send_time_outer_city'=> $item2->send_time_outer_city,
+                                        'description'=> $item2->note,
+                                        'web_site'=> $item2->pursuit_web_site,
+                                    ];
+                                }) : [],
                             'message' => "لطفا تا{$transaction->timer->diffForHumans()} دیگر اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -483,17 +483,17 @@ class TransactionController extends Controller
                                 ->where('for','seller'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
-                                return [
-                                    'name'=> $item2->id,
-                                    'type'=> 'radio',
-                                    'label'=> $item2->slug,
-                                    'logo'=> asset($item2->logo),
-                                    'send_time_inner_city'=> $item2->send_time_inner_city,
-                                    'send_time_outer_city'=> $item2->send_time_outer_city,
-                                    'description'=> $item2->note,
-                                    'web_site'=> $item2->pursuit_web_site,
-                                ];
-                            }) : [],
+                                    return [
+                                        'name'=> $item2->id,
+                                        'type'=> 'radio',
+                                        'label'=> $item2->slug,
+                                        'logo'=> asset($item2->logo),
+                                        'send_time_inner_city'=> $item2->send_time_inner_city,
+                                        'send_time_outer_city'=> $item2->send_time_outer_city,
+                                        'description'=> $item2->note,
+                                        'web_site'=> $item2->pursuit_web_site,
+                                    ];
+                                }) : [],
                             'message' => "لطفا تا{$transaction->timer->diffForHumans()} دیگر مجدد اطلاعات محصول را وارد نمایید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -748,7 +748,7 @@ class TransactionController extends Controller
                     if ((auth()->id() == $transaction->seller_id)) {
                         $forms = collect(json_decode($transaction->category->forms))->where('status','normal')
                             ->where('for','seller');
-                        $old_data = json_decode($data->value);
+                        $old_data = json_decode($data->value,true) ?? [];
                         if (!empty($forms) && !is_null($forms)){
                             foreach ($forms as $key => $item) {
                                 if ($item->required && (!$request->has($item->name))) {
@@ -771,7 +771,7 @@ class TransactionController extends Controller
                                     ],Response::HTTP_UNPROCESSABLE_ENTITY);
                                 }
 
-                                $old_data->{$item->name} = $request[$item->name];
+                                $old_data[$item->name] = $request[$item->name];
                             }
                         }
                         if ($transaction->order->category->type == $this->categoryRepository::physical()) {

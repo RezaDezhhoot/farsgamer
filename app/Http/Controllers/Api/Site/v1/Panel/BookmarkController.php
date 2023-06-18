@@ -41,6 +41,12 @@ class BookmarkController extends Controller
             ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        if (auth()->user()->bookmarks()->where('order_id',$request->post('order_id'))->exists() ) {
+            return response([
+                'status' => 'error'
+            ],Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         return Bookmark::make(auth()->user()->bookmarks()->create($validator->validated()));
     }
 

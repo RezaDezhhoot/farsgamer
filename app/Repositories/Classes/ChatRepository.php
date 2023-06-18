@@ -136,7 +136,7 @@ class ChatRepository implements ChatRepositoryInterface
 
     public function seen(ChatGroup $group)
     {
-        $group->chats()->update(['is_read' => true]);
+        $group->chats()->where('sender_id','!=',auth()->id())->update(['is_read' => true]);
     }
 
     public static function isOpen(ChatGroup $group)

@@ -92,7 +92,7 @@ trait FormBuilder
         $this->formOptions = $this->form[$this->formKey]['options'];
         $this->formFor = $this->form[$this->formKey]['for'];
         $this->formStatus = $this->form[$this->formKey]['status'];
-        $this->formView = $this->form[$this->formKey]['view'];
+        $this->formView = $this->form[$this->formKey]['view'] ?? 0;
 
         $this->resetErrorBag();
         if (in_array($this->form[$this->formKey]['type'], ['text', 'textArea'])) {

@@ -20,8 +20,9 @@ class OrderCollection extends ResourceCollection
             return [
                 'id' => $item->id,
                 'name' => $item->slug,
-                'price' => $item->price,
+                'price' => number_format($item->price),
                 'status_label' => $item->status_label,
+                'content' => $item->content,
                 'image' => asset($item->image),
                 'province' => isset($item->province) ? Setting::getProvince()[$item->province] : null,
                 'city' => (isset($item->province) && isset($item->city)) ? Setting::getCity()[$item->province][$item->city] : null,

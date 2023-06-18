@@ -8,6 +8,7 @@ trait FormBuilder
     public $formKey = 0;
 
     public $formName;
+    public $formView = 0;
     public $formRequired = '0';
     public $formWidth = '2';
     public $formLabel;
@@ -31,7 +32,8 @@ trait FormBuilder
             'options' => [],
             'conditions' => [],
             'for' => 'seller',
-            'status' => 'normal'
+            'status' => 'normal',
+            'view' => 0
         ];
         return $input;
     }
@@ -47,6 +49,7 @@ trait FormBuilder
         $this->validate([
             'formRequired' => ['required', 'boolean'],
             'formWidth' => ['required', 'in:6,12'],
+            'formView' => ['required', 'integer'],
             'formLabel' => ['required', 'string', 'max:6500'],
             'formPlaceholder' => ['present', 'string', 'max:250'],
             'formFor' => ['required', 'string', 'in:seller,customer'],
@@ -58,6 +61,7 @@ trait FormBuilder
         ]);
 
         $this->form[$this->formKey]['required'] = $this->formRequired;
+        $this->form[$this->formKey]['view'] = $this->formView;
         $this->form[$this->formKey]['width'] = $this->formWidth;
         $this->form[$this->formKey]['label'] = $this->formLabel;
         $this->form[$this->formKey]['placeholder'] = $this->formPlaceholder;
@@ -88,6 +92,7 @@ trait FormBuilder
         $this->formOptions = $this->form[$this->formKey]['options'];
         $this->formFor = $this->form[$this->formKey]['for'];
         $this->formStatus = $this->form[$this->formKey]['status'];
+        $this->formView = $this->form[$this->formKey]['view'];
 
         $this->resetErrorBag();
         if (in_array($this->form[$this->formKey]['type'], ['text', 'textArea'])) {

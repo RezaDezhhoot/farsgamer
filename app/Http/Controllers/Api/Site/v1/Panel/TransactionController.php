@@ -138,7 +138,7 @@ class TransactionController extends Controller
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
-                                ->where('for','customer'),
+                                ->where('for','customer')->sortBy('view'),
                             'message' => 'لطفا جهت ادامه معامله مبلغ  معیین شده را  زمان مقرر پرداخت کنید',
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -153,7 +153,7 @@ class TransactionController extends Controller
                     if ($user_id == $transaction->seller_id)
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
-                                ->where('for','seller'),
+                                ->where('for','seller')->sortBy('view'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
                                     return [
@@ -278,7 +278,7 @@ class TransactionController extends Controller
                     if ($user_id == $transaction->seller_id)
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
-                                ->where('for','seller'),
+                                ->where('for','seller')->sortBy('view'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
                                     return [
@@ -368,7 +368,7 @@ class TransactionController extends Controller
                     if ($user_id == $transaction->seller_id)
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','return')
-                                ->where('for','seller'),
+                                ->where('for','seller')->sortBy('view'),
                             'message' => "لطفا تا {$transaction->timer->diffForHumans()} دیگر اطلاعات مورد نظر را وارد نمایید یا در غیر این صورت ادامه دهید.",
                             'can_continue' => true,
                             'can_continue_after_countdown' => true,
@@ -405,7 +405,7 @@ class TransactionController extends Controller
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
-                                ->where('for','seller'),
+                                ->where('for','seller')->sortBy('view'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
                                     return [
@@ -480,7 +480,7 @@ class TransactionController extends Controller
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
                             'fields' => collect(json_decode($transaction->category->forms))->where('status','normal')
-                                ->where('for','seller'),
+                                ->where('for','seller')->sortBy('view'),
                             'transfer_methods' => $transaction->order->category->type == $this->categoryRepository::physical() ?
                                 $transaction->category->sends->map(function ($item2){
                                     return [

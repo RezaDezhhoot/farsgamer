@@ -105,6 +105,7 @@
                     <tr>
                         <th>#</th>
                         <th>عنوان</th>
+                        <th>نمایش</th>
                         <th>عملیات</th>
                     </tr>
                     </thead>
@@ -113,6 +114,7 @@
                         <tr wire:sortable.item="{{ $item['name'] }}" wire:key="{{ $item['name'] }}">
                             <td>{{ $loop->iteration }}</td>
                             <td>{!! $item['label'] ?? ''!!}</td>
+                            <td>{{ $item['view'] ?? 0 }}</td>
                             <td>
                                 <button type="button" wire:click="editForm({{$key}})" class="btn btn-sm btn-default btn-text-primary btn-hover-primary btn-icon mr-2">
                                     <span class="svg-icon svg-icon-md">
@@ -141,6 +143,7 @@
             <x-admin.modal-page id="text" title="text" wire:click="setFormData()">
                 <x-admin.forms.validation-errors/>
                 <x-admin.forms.input type="text" id="text-name" label="نام*" wire:model.defer="formName" disabled/>
+                <x-admin.forms.input type="text" id="text-view" label="نمایش*" wire:model.defer="formView" />
                 <x-admin.forms.dropdown id="text-required" label="اجباری*" :data="['0' => 'خیر', '1' => 'بله']" wire:model.defer="formRequired"/>
                 <x-admin.forms.dropdown id="text-width" label="عرض*" :data="['6' => '50 درصد', '12' => '100 درصد']"  wire:model.defer="formWidth"/>
                 <x-admin.forms.dropdown id="text-for" label="مخاطب*" :data="['seller'=>'فروشنده','customer'=>'خریدار']"  wire:model.defer="formFor"/>
@@ -152,6 +155,7 @@
             <x-admin.modal-page id="select" title="select" wire:click="setFormData()">
                 <x-admin.forms.validation-errors/>
                 <x-admin.forms.input type="text" id="select-name" label="نام*" wire:model.defer="formName" disabled/>
+                <x-admin.forms.input type="text" id="text-view" label="نمایش*" wire:model.defer="formView" />
                 <x-admin.forms.dropdown id="select-required" label="اجباری*" :data="['0' => 'خیر', '1' => 'بله']" wire:model.defer="formRequired"/>
                 <x-admin.forms.dropdown id="select-width" label="عرض*" :data="['6' => '50 درصد', '12' => '100 درصد']"  wire:model.defer="formWidth"/>
                 <x-admin.forms.dropdown id="select-for" label="مخاطب*" :data="$data['for']"  wire:model.defer="formFor"/>

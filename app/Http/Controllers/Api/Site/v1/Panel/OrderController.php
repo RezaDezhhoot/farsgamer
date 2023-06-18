@@ -391,25 +391,28 @@ class OrderController extends Controller
             'text' => 'string',
         ];
         $params = [];
-        foreach ($request['parameters'] as $key => $value) {
-            if (!isset($value['value']) || !isset($value['id']))
-                return response([
-                    'data' => [
-                        'message' => [
-                            'parameters.'.$key.'.value' => ['فیلد پارامتر معتبر نمی باشد'],
-                        ]
-                    ], 'status' => 'error'
-                ],Response::HTTP_UNPROCESSABLE_ENTITY);
-            $param = $this->parameterRepository->find($value['id']);
-            $max = $param->max;
-            $min = $param->min;
-            $type = $param->type;
-            $fields['parameters.'.$key.'.value'] = ['required','min:'.(empty($min) ? 0 : $min),'max:'.(empty($max) ? 255 : $max),$types[$type]];
-            $params[] = [
-                'parameter_id' => $value['id'],
-                'value' => $value['value'],
-            ];
+        if ($request->has('parameters') && is_array($request->input('parameters'))) {
+            foreach ($request['parameters'] as $key => $value) {
+                if (!isset($value['value']) || !isset($value['id']))
+                    return response([
+                        'data' => [
+                            'message' => [
+                                'parameters.'.$key.'.value' => ['فیلد پارامتر معتبر نمی باشد'],
+                            ]
+                        ], 'status' => 'error'
+                    ],Response::HTTP_UNPROCESSABLE_ENTITY);
+                $param = $this->parameterRepository->find($value['id']);
+                $max = $param->max;
+                $min = $param->min;
+                $type = $param->type;
+                $fields['parameters.'.$key.'.value'] = ['required','min:'.(empty($min) ? 0 : $min),'max:'.(empty($max) ? 255 : $max),$types[$type]];
+                $params[] = [
+                    'parameter_id' => $value['id'],
+                    'value' => $value['value'],
+                ];
+            }
         }
+
         if ($category->type == $this->categoryRepository::physical()){
             if (!isset($request['province']) || empty($request['province']) || !in_array($request['province']
                     ,array_keys($this->settingRepository::getProvince()))) {

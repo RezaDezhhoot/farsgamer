@@ -38,7 +38,7 @@ class Order extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->slug,
-            'price' => $this->price,
+            'price' => number_format($this->price),
             'price_unit' => 'toman',
             'image' => asset($this->image),
             'gallery' => $this->gallery_asset,

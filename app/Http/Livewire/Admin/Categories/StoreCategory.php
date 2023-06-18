@@ -44,7 +44,7 @@ class StoreCategory extends BaseComponent
             $this->no_receive_time = $this->category->no_receive_time;
             $this->sending_data_time = $this->category->sending_data_time;
             $this->parent_id = $this->category->parent_id;
-            $this->form = json_decode($this->category->forms,true) ?? [];
+            $this->form = array_values(collect(json_decode($this->category->forms,true) ?? [])->sortBy('view')->toArray());
             $this->status = $this->category->status;
             $this->is_available = $this->category->is_available;
             $this->type = $this->category->type;

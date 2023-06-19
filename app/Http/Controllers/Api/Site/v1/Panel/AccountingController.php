@@ -137,6 +137,7 @@ class AccountingController extends Controller
                 'user_id' => Auth::id(),
                 'status_code' => 8,
                 'call_back_url' => $request['call_back_address'],
+                'orders_transaction_id' => $request->has('transaction_id') ? $request->input('transaction_id') : null
             ]);
             return $pay->id;
         });

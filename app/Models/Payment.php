@@ -55,4 +55,9 @@ class Payment extends Model
     {
         return Jalalian::forge($this->created_at)->format('%A, %d %B %Y');
     }
+
+    public function transaction()
+    {
+        return $this->belongsTo(OrderTransaction::class,'orders_transactions_id');
+    }
 }

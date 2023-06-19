@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Cart;
 
 use App\Http\Livewire\BaseComponent;
+use App\Models\OrderTransactionPayment;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use Shetabit\Multipay\Exceptions\InvalidPaymentException;
 use Shetabit\Multipay\Invoice;
@@ -66,7 +67,22 @@ class CallBack extends BaseComponent
                 'status_code' => '100',
                 'status_message' => 'پرداخت با موفقیت انجام شد',
             ]);
-            $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
+            if ($pay->transaction) {
+                $transaction = $pay->transaction;
+                $transaction->straight_payment = $pay->amount;
+                $transaction->is_paid = true;
+                $transaction->save();
+                OrderTransactionPayment::query()->create([
+                    'orders_transactions_id' => $transaction->id,
+                    'user_id' => $pay->user_id,
+                    'price' => $pay->amount,
+                    'status' => OrderTransactionPayment::SUCCESS,
+                    'gateway' => $pay->payment_gateway,
+                ]);
+            } else {
+                $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
+
+            }
 
         } else {
             if ($this->gateway == 'payir') {

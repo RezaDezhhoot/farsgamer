@@ -81,7 +81,7 @@ class AccountingController extends Controller
     public function charge(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'price' => 'required|numeric|min:10000|max:999999999999999999999999.99999999999999',
+            'price' => 'required|numeric|min:1000|max:999999999999999999999999.99999999999999',
             'gateway' => ['required','in:payir,zarinpal'],
             'call_back_address' => ['required','url','max:255'],
         ],[],[

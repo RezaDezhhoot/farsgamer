@@ -339,7 +339,7 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         $order = $this->orderRepository->getUserOrder(Auth::user(),$id);
-        if (!in_array($order->status,[$this->orderRepository::isNewStatus(),$this->orderRepository::isConfirmedStatus()])){
+        if (!in_array($order->status,[$this->orderRepository::isNewStatus(),\App\Models\Order::IS_REJECTED,\App\Models\Order::IS_UNCONFIRMED,$this->orderRepository::is,$this->orderRepository::isConfirmedStatus()])){
             return response([
                 'data' => [
                     'message' => [
@@ -537,7 +537,7 @@ class OrderController extends Controller
     public function destroy($id)
     {
         $order = $this->orderRepository->getUserOrder(Auth::user(),$id);
-        if (in_array($order->status,[$this->orderRepository::isNewStatus(),$this->orderRepository::isConfirmedStatus()])){
+        if (in_array($order->status,[$this->orderRepository::isNewStatus(),\App\Models\Order::IS_REJECTED,\App\Models\Order::IS_UNCONFIRMED,$this->orderRepository::isConfirmedStatus()])){
             $this->orderRepository->delete($order);
             return response([
                 'data' => [

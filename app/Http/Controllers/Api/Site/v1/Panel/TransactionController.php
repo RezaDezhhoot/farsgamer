@@ -681,7 +681,7 @@ class TransactionController extends Controller
                             }
                         }
                         $this->orderTransactionRepository->updateData($transaction,['value' => json_encode($old_data)]);
-                        if ($price <= $transaction->customer->balance){
+                        if ($price <= $transaction->customer->balance || $transaction->straight_payment > 0){
                             try {
                                 DB::beginTransaction();
                                 $this->orderTransactionRepository->newPayment([
@@ -706,6 +706,9 @@ class TransactionController extends Controller
                                     'status' => 'error'
                                 ],Response::HTTP_INTERNAL_SERVER_ERROR);
                             }
+                            if (is_null($transaction->straight_payment) || $transaction->straight_payment == 0) {
+                                $transaction->customer->forceWithdraw((float)$price, ['description' => $transaction->order->slug.'بابت معامله', 'from_admin'=> true]);
+                            }
 
                             $sms->sends(
                                 $this->createText('send_transaction',$transaction),
@@ -713,7 +716,6 @@ class TransactionController extends Controller
                                 "$subject",
                                 $transaction->id
                             );
-                            $transaction->customer->forceWithdraw((float)$price, ['description' => $transaction->order->slug.'بابت معامله', 'from_admin'=> true]);
                             return response([
                                 'data' => [
                                     'message' => [

@@ -109,6 +109,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -120,6 +121,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -134,6 +136,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -146,6 +149,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -174,6 +178,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -185,6 +190,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -198,6 +204,7 @@ class TransactionController extends Controller
                         'can_cancel_after_countdown' => false,
                         'can_refund_request' => false,
                         'can_comment' => false,
+                        'is_paid' => $transaction->is_paid
                     ];
                     break;
                 }
@@ -211,6 +218,7 @@ class TransactionController extends Controller
                         'can_cancel_after_countdown' => false,
                         'can_refund_request' => false,
                         'can_comment' => false,
+                        'is_paid' => $transaction->is_paid
                     ];
                     break;
                 }
@@ -225,6 +233,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -271,6 +280,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => true,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -299,6 +309,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -310,6 +321,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -324,6 +336,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -358,6 +371,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => (is_null($transaction->comment) || empty($transaction->comment)),
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -376,6 +390,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -387,6 +402,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -401,6 +417,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -426,6 +443,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -451,6 +469,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -462,6 +481,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -476,6 +496,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -501,6 +522,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => true,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -515,6 +537,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -526,6 +549,7 @@ class TransactionController extends Controller
                             'can_cancel_after_countdown' => false,
                             'can_refund_request' => false,
                             'can_comment' => false,
+                            'is_paid' => $transaction->is_paid
                         ];
                     break;
                 }
@@ -693,6 +717,7 @@ class TransactionController extends Controller
                                 ]);
                                 $transaction->timer = $timer;
                                 $transaction->status = $this->orderTransactionRepository::send();
+                                $transaction->is_paid = true;
                                 $transaction->save();
                                 DB::commit();
                             } catch (Exception $e) {

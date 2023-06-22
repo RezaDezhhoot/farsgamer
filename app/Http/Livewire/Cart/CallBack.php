@@ -73,19 +73,13 @@ class CallBack extends BaseComponent
             ]);
             if ($pay->transaction) {
                 $transaction = $pay->transaction;
-                $transaction->straight_payment = $pay->amount;
+                $amount = $pay->amount;
+                $transaction->straight_payment = $amount;
                 $transaction->is_paid = true;
+                $transaction->gateway = $pay->payment_gateway;
                 $transaction->save();
-                OrderTransactionPayment::query()->create([
-                    'orders_transactions_id' => $transaction->id,
-                    'user_id' => $pay->user_id,
-                    'price' => $pay->amount,
-                    'status' => OrderTransactionPayment::SUCCESS,
-                    'gateway' => $pay->payment_gateway,
-                ]);
             } else {
                 $this->data->user->deposit($pay->amount, ['description' =>  'پرداخت وجه' , 'from_admin'=> true]);
-
             }
 
         } else {

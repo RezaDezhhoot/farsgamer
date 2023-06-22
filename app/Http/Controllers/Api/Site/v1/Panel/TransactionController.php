@@ -728,21 +728,18 @@ class TransactionController extends Controller
                             }
                         }
                         $this->orderTransactionRepository->updateData($transaction,['value' => json_encode($old_data)]);
-                        if ($price <= $transaction->customer->balance || $transaction->straight_payment > 0){
+                        if ($price <= ( $amount =  $transaction->customer->balance + $transaction->straight_payment ) ){
                             try {
                                 DB::beginTransaction();
-                                if (is_null($transaction->straight_payment) || $transaction->straight_payment == 0) {
-                                    $this->orderTransactionRepository->newPayment([
-                                        'orders_transactions_id' => $transaction->id,
-                                        'user_id' => auth()->id(),
-                                        'price' => $price,
-                                        'status' => $this->orderTransactionRepository::successPayment(),
-                                        'gateway' => 'wallet',
-                                    ]);
-                                }
+                                $this->orderTransactionRepository->newPayment([
+                                    'orders_transactions_id' => $transaction->id,
+                                    'user_id' => auth()->id(),
+                                    'price' => $price,
+                                    'status' => $this->orderTransactionRepository::successPayment(),
+                                    'gateway' => 'wallet',
+                                ]);
                                 $transaction->timer = $timer;
                                 $transaction->status = $this->orderTransactionRepository::send();
-                                $transaction->is_paid = true;
                                 $transaction->save();
                                 DB::commit();
                             } catch (Exception $e) {
@@ -756,8 +753,8 @@ class TransactionController extends Controller
                                     'status' => 'error'
                                 ],Response::HTTP_INTERNAL_SERVER_ERROR);
                             }
-                            if (is_null($transaction->straight_payment) || $transaction->straight_payment == 0) {
-                                $transaction->customer->forceWithdraw((float)$price, ['description' => $transaction->order->slug.'بابت معامله', 'from_admin'=> true]);
+                            if ( ($wallet_payment =  $price - $transaction->straight_payment) > 0  ) {
+                                $transaction->customer->forceWithdraw((float)$wallet_payment, ['description' => $transaction->order->slug.'بابت معامله', 'from_admin'=> true]);
                             }
 
                             $sms->sends(

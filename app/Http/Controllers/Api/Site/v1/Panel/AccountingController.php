@@ -83,7 +83,7 @@ class AccountingController extends Controller
     {
         $transaction = $request->has('orders_transaction_id') ? OrderTransaction::query()->where('status',OrderTransaction::WAIT_FOR_PAY)->findOrFail( $request->input('orders_transaction_id')) : null;
         $validator = Validator::make($request->all(),[
-            'price' => $transaction ? 'required|numeric|size:'.$transaction->price : 'required|numeric|min:1000|max:999999999999999999999999.99999999999999',
+            'price' => $transaction ? 'nullable' : 'required|numeric|min:1000|max:999999999999999999999999.99999999999999',
             'gateway' => ['required','in:payir,zarinpal'],
             'call_back_address' => ['required','url','max:255'],
         ],[],[
@@ -99,11 +99,27 @@ class AccountingController extends Controller
                 'status' => 'error'
             ],Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+        $price = 0;
+        if ($transaction) {
+            $user = $transaction->customer;
+            if ($transaction->price > $user->balance) {
+                $price = max($transaction->price - $user->balance , 1000);
+            } else {
+                return response([
+                    'data' => [
+                        'message' => 'مبلغ با کیف پول ثابل پرداخت است'
+                    ],
+                    'status' => 'error'
+                ],Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+        } else {
+            $price = $request['price'];
+        }
         try {
             $payment = Payment::via($request['gateway'])->callbackUrl(env('APP_URL') . '/verify/'. $request['gateway'])
                 ->purchase((new Invoice)
-                    ->amount((int)$request['price']), function ($driver,$transactionId) use ($request) {
-                    $this->store($request,$request['gateway'] ,$transactionId);
+                    ->amount((int)$price), function ($driver,$transactionId) use ($request,$price) {
+                    $this->store($request,$request['gateway'],$price ,$transactionId);
                 })->pay()->toJson();
             $payment = json_decode($payment);
 
@@ -127,11 +143,11 @@ class AccountingController extends Controller
         }
     }
 
-    private function store($request,$gateway, $transactionId = null)
+    private function store($request,$gateway , $amount, $transactionId = null)
     {
-        return  DB::transaction(function () use ($gateway, $transactionId , $request) {
+        return  DB::transaction(function () use ($gateway, $transactionId , $amount, $request) {
             $pay = $this->paymentRepository->create(Auth::user(),[
-                'amount' => $request['price'],
+                'amount' => $amount,
                 'payment_gateway' => $gateway,
                 'payment_token' => $transactionId,
                 'model_type' => 'user',

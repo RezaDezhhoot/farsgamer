@@ -81,7 +81,7 @@ class AccountingController extends Controller
 
     public function charge(Request $request)
     {
-        $transaction = $request->has('orders_transaction_id') ? OrderTransaction::query()->findOrFail( $request->input('orders_transaction_id')) : null;
+        $transaction = $request->has('orders_transaction_id') ? OrderTransaction::query()->where('status',OrderTransaction::WAIT_FOR_PAY)->findOrFail( $request->input('orders_transaction_id')) : null;
         $validator = Validator::make($request->all(),[
             'price' => $transaction ? 'required|numeric|size:'.$transaction->price : 'required|numeric|min:1000|max:999999999999999999999999.99999999999999',
             'gateway' => ['required','in:payir,zarinpal'],

@@ -234,4 +234,13 @@ class OrderTransaction extends Model
     {
         return $this->hasOne(Comment::class,'order_transaction_id');
     }
+
+    public function getPriceAttribute()
+    {
+        $commission = $this->commission;
+        $intermediary = $this->intermediary;
+        $price = $this->order->price + $commission/2 + $intermediary/2;
+
+        return $price;
+    }
 }

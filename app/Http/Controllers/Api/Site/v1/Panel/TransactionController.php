@@ -669,12 +669,11 @@ class TransactionController extends Controller
                 }
                 case $this->orderTransactionRepository::pay():{
                     if ((auth()->id() == $transaction->customer_id)) {
-                        $commission = $transaction->commission;
-                        $intermediary = $transaction->intermediary;
+
                         $timer = Carbon::make(now())->addMinutes(
                             (float)$transaction->category->send_time
                         );
-                        $price = $transaction->order->price + $commission/2 + $intermediary/2;
+                        $price = $transaction->price;
                         $forms = collect(json_decode($transaction->category->forms))->where('status','normal')
                             ->where('for','customer');
 
@@ -708,13 +707,15 @@ class TransactionController extends Controller
                         if ($price <= $transaction->customer->balance || $transaction->straight_payment > 0){
                             try {
                                 DB::beginTransaction();
-                                $this->orderTransactionRepository->newPayment([
-                                    'orders_transactions_id' => $transaction->id,
-                                    'user_id' => auth()->id(),
-                                    'price' => $price,
-                                    'status' => $this->orderTransactionRepository::successPayment(),
-                                    'gateway' => 'wallet',
-                                ]);
+                                if (is_null($transaction->straight_payment) || $transaction->straight_payment == 0) {
+                                    $this->orderTransactionRepository->newPayment([
+                                        'orders_transactions_id' => $transaction->id,
+                                        'user_id' => auth()->id(),
+                                        'price' => $price,
+                                        'status' => $this->orderTransactionRepository::successPayment(),
+                                        'gateway' => 'wallet',
+                                    ]);
+                                }
                                 $transaction->timer = $timer;
                                 $transaction->status = $this->orderTransactionRepository::send();
                                 $transaction->is_paid = true;

@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Cart;
 use App\Http\Livewire\BaseComponent;
 use App\Models\OrderTransactionPayment;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
+use Illuminate\Support\Str;
 use Shetabit\Multipay\Exceptions\InvalidPaymentException;
 use Shetabit\Multipay\Invoice;
 use Shetabit\Payment\Facade\Payment;
@@ -43,9 +44,11 @@ class CallBack extends BaseComponent
                     'status_code' => $exception->getCode(),
                     'status_message' => $exception->getMessage(),
                 ]);
+
+
                 $this->isSuccessful = false;
-                $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message";
-                return Redirect::to($this->link)->with(['status_code' =>$pay->status_code,'message' => $pay->status_message]);
+                $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message&error=1";
+                return Redirect::to($this->link)->with(['status_code' =>$pay->status_code,'message' => $pay->status_message,'error' => 1]);
             }
         } abort(404);
     }
@@ -56,14 +59,15 @@ class CallBack extends BaseComponent
         $pay = '';
 
 
-        if (!is_null($payment) && !Pay::where('payment_ref', $payment->getReferenceId())->exists()) {
+        if (!is_null($payment) && (!Pay::where('payment_ref', $payment->getReferenceId())->exists() || app()->environment('local')) ) {
             if ($this->gateway == 'payir') {
                 $pay = Pay::where('payment_token', $this->token)->firstOrFail();
             } else {
                 $pay = Pay::where('payment_token', $this->Authority)->firstOrFail();
             }
+
             $pay->update([
-                'payment_ref' => $payment->getReferenceId(),
+                'payment_ref' => app()->environment('local') ? Str::uuid() :$payment->getReferenceId(),
                 'status_code' => '100',
                 'status_message' => 'پرداخت با موفقیت انجام شد',
             ]);
@@ -91,7 +95,7 @@ class CallBack extends BaseComponent
                 $pay = Pay::where('payment_token', $this->Authority)->firstOrFail();
             }
         }
-        $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message";
+        $this->link = $pay->call_back_url."?status_code=$pay->status_code&message=$pay->status_message&error=0";
         return Redirect::to($this->link)->with(['status_code' =>$pay->status_code,'message' => $pay->status_message]);
     }
 

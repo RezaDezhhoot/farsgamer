@@ -58,6 +58,6 @@ class Payment extends Model
 
     public function transaction()
     {
-        return $this->belongsTo(OrderTransaction::class,'orders_transactions_id');
+        return $this->belongsTo(OrderTransaction::class,'orders_transaction_id');
     }
 }

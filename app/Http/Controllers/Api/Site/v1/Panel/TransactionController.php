@@ -736,7 +736,7 @@ class TransactionController extends Controller
                                     'user_id' => auth()->id(),
                                     'price' => $price,
                                     'status' => $this->orderTransactionRepository::successPayment(),
-                                    'gateway' => 'wallet',
+                                    'gateway' => $transaction->gateway ?? 'wallet',
                                 ]);
                                 $transaction->timer = $timer;
                                 $transaction->status = $this->orderTransactionRepository::send();
@@ -1901,7 +1901,7 @@ class TransactionController extends Controller
     private function sendMoney($transaction)
     {
         if (!empty($transaction->payment) && $transaction->payment->status == $this->orderTransactionRepository::successPayment()){
-            $price = $transaction->payment->price;
+            $price = $transaction->price;
             $commission = $transaction->commission;
             $intermediary = $transaction->intermediary;
             $final_price = ($price - ($commission) - ($intermediary));

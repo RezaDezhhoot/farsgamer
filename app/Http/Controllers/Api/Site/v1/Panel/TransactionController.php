@@ -111,6 +111,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -124,6 +126,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -140,6 +144,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -154,6 +160,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -184,6 +192,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -197,6 +207,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -212,6 +224,8 @@ class TransactionController extends Controller
                         'can_comment' => false,
                         'is_paid' => $transaction->is_paid,
                         'price' => $transaction->price,
+                        'commission' => $transaction->commission,
+                        'intermediary' => $transaction->intermediary,
                     ];
                     break;
                 }
@@ -227,6 +241,8 @@ class TransactionController extends Controller
                         'can_comment' => false,
                         'is_paid' => $transaction->is_paid,
                         'price' => $transaction->price,
+                        'commission' => $transaction->commission,
+                        'intermediary' => $transaction->intermediary,
                     ];
                     break;
                 }
@@ -243,6 +259,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -291,6 +309,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -321,6 +341,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -334,6 +356,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -350,6 +374,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -386,6 +412,8 @@ class TransactionController extends Controller
                             'can_comment' => (is_null($transaction->comment) || empty($transaction->comment)),
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -406,6 +434,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -419,6 +449,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -435,6 +467,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -462,6 +496,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -489,6 +525,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -502,6 +540,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -518,6 +558,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -545,6 +587,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }
@@ -561,6 +605,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     elseif ($user_id == $transaction->customer_id)
                         $data = [
@@ -574,6 +620,8 @@ class TransactionController extends Controller
                             'can_comment' => false,
                             'is_paid' => $transaction->is_paid,
                             'price' => $transaction->price,
+                            'commission' => $transaction->commission,
+                            'intermediary' => $transaction->intermediary,
                         ];
                     break;
                 }

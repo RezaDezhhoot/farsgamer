@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (){
     Route::prefix('/basic')->group(function (){
         Route::get('/base',[App\Http\Controllers\Api\Site\v1\BasicController::class,'base']);
+        Route::get('/loginImage',[App\Http\Controllers\Api\Site\v1\BasicController::class,'loginImage']);
         Route::get('/sidebar',[App\Http\Controllers\Api\Site\v1\BasicController::class,'sidebar']);
         Route::middleware('auth:sanctum')->get('/user',[App\Http\Controllers\Api\Site\v1\BasicController::class,'user']);
     });

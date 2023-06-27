@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\CategoryCollection;
 use App\Http\Resources\v1\NotificationCollection;
 use App\Http\Resources\v1\User;
+use App\Models\Setting;
 use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\PlatformRepositoryInterface;
 use App\Repositories\Interfaces\SettingRepositoryInterface;
@@ -83,5 +84,14 @@ class BasicController extends Controller
                 ]
             ],'status' => 'success'
         ],Response::HTTP_OK);
+    }
+
+    public function loginImage()
+    {
+        return \response([
+            'data' => [
+                'loginImage' => Setting::getSingleRow('logInImage')
+            ]
+        ]);
     }
 }

@@ -90,7 +90,7 @@ class BasicController extends Controller
     {
         return \response([
             'data' => [
-                'loginImage' => Setting::getSingleRow('logInImage')
+                'loginImage' => asset(Setting::getSingleRow('logInImage'))
             ]
         ]);
     }
